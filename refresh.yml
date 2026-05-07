@@ -36,7 +36,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           # Optional: change to claude-opus-4-7 for deeper reasoning (more cost)
           # or claude-haiku-4-5-20251001 for cheapest light updates
-          HERITAGE_MODEL: "claude-haiku-4-5-20251001"
+          HERITAGE_MODEL: "claude-sonnet-4-6"
         run: python refresh.py
 
       - name: Commit and push if data.json changed
