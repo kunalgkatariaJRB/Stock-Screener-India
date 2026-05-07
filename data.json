@@ -1,0 +1,355 @@
+{
+  "edition": "May 2026 — Initial Edition",
+  "lastUpdated": "2026-05-07T07:00:00+05:30",
+  "macroNarrative": "Indian equities are caught between a constructive domestic story and a noisy external one. Inflation at multi-year lows, a rate-cutting cycle largely complete, healthy corporate balance sheets, and rural demand finally turning all support a long view. The crosswinds — INR at record lows around 94–95/USD, Brent above $100 on West Asia tension, an FII flow picture that has been net-negative for many months, and small/mid-cap valuations roughly 40% above their 10-year average — argue for selectivity, not absence.",
+  "stocks": {
+    "conviction": [
+      {
+        "symbol": "HDFCBANK.NS", "ticker": "HDFCBANK", "name": "HDFC Bank",
+        "sector": "Private Banking",
+        "thesis": "India's largest private-sector bank, finally past its post-merger digestion. Asset quality is at a multi-year best, the governance review is clearing, and the franchise's deposit-gathering machine is unmatched. The valuation has stopped being demanding.",
+        "catalysts": [
+          "Governance review clearing path for CEO reappointment",
+          "NIM stabilisation post HDFC Ltd merger absorption",
+          "Branch-led deposit growth re-accelerating",
+          "Retail credit cycle turning supportive in FY27"
+        ],
+        "risks": [
+          "Net interest margin pressure if RBI eases further",
+          "Credit costs in unsecured retail",
+          "Heavy index weight invites foreign-flow volatility"
+        ],
+        "fundamentals": { "pe": 18.6, "pb": 2.7, "roe": 17.0, "div": 1.1, "mcap": "13.7L Cr" },
+        "horizon": "3–5 yrs", "conviction": "High"
+      },
+      {
+        "symbol": "ICICIBANK.NS", "ticker": "ICICIBANK", "name": "ICICI Bank",
+        "sector": "Private Banking",
+        "thesis": "The best-run large bank in India by almost any operating metric — consistent ROA above 2%, conservative provisioning, a digital stack peers are still trying to replicate. We pay a premium happily.",
+        "catalysts": ["Industry-leading return on assets >2%", "Cleaner book than every private peer", "Fee income compounding at double digits"],
+        "risks": ["Valuation premium leaves less room for error", "Slowing retail unsecured credit growth", "Macroprudential tightening overhang"],
+        "fundamentals": { "pe": 18.1, "pb": 3.1, "roe": 18.5, "div": 0.8, "mcap": "9.2L Cr" },
+        "horizon": "3–5 yrs", "conviction": "High"
+      },
+      {
+        "symbol": "SBIN.NS", "ticker": "SBIN", "name": "State Bank of India",
+        "sector": "PSU Banking",
+        "thesis": "The flagship PSU. Asset quality is at its cleanest in a decade, ROE has migrated above 16%, and it trades at roughly 1.5× book — versus 2.5–3× for private peers with similar returns. Government backing is a feature, not a bug, for the patient.",
+        "catalysts": ["Cleanest GNPA/NNPA ratios in 10+ years", "Subsidiary value (SBI Cards, SBI Life, AMC) under-counted in price", "Beneficiary of credit growth + lower bond yields"],
+        "risks": ["Government cross-currents (PSL targets, minority stake sales)", "Treasury volatility in rate cycle turns", "Slower fee-income growth than private peers"],
+        "fundamentals": { "pe": 9.4, "pb": 1.5, "roe": 16.5, "div": 1.6, "mcap": "7.1L Cr" },
+        "horizon": "3–5 yrs", "conviction": "High"
+      },
+      {
+        "symbol": "ITC.NS", "ticker": "ITC", "name": "ITC",
+        "sector": "Diversified · FMCG",
+        "thesis": "A cash-printing cigarette monopoly funding a steadily compounding FMCG business, plus hotels, paperboards, and agri. Near-zero debt, a 3.5%+ dividend yield, and a hotels demerger that should unlock value the consolidated structure has long obscured.",
+        "catalysts": ["Hotels demerger value unlock crystallising", "FMCG margins continuing to expand toward HUL's", "Cigarette taxation cycle relatively benign"],
+        "risks": ["Cigarette regulation / taxation surprises", "FMCG rural demand recovery has been uneven", "Tobacco-related ESG screens limit some institutional buying"],
+        "fundamentals": { "pe": 26.0, "pb": 7.2, "roe": 28.0, "div": 3.6, "mcap": "5.4L Cr" },
+        "horizon": "3–7 yrs", "conviction": "High"
+      },
+      {
+        "symbol": "BEL.NS", "ticker": "BEL", "name": "Bharat Electronics",
+        "sector": "Defence",
+        "thesis": "The crown jewel of Indian defence indigenisation. Order book over ₹75,000 Cr giving multi-year revenue visibility, ROCE above 25%, debt-free balance sheet, and a customer (Government of India) that is structurally increasing capex on home-built systems.",
+        "catalysts": ["Defence capex growing at low-double digits in FY27 budget", "Export orders compounding from a small base", "Order book : revenue ratio above 3×"],
+        "risks": ["Valuation multiple is the highest in its history", "Order timing inherently lumpy", "Margin pressure from competitive bidding"],
+        "fundamentals": { "pe": 47.0, "pb": 12.5, "roe": 27.5, "div": 0.7, "mcap": "2.4L Cr" },
+        "horizon": "3–7 yrs", "conviction": "Medium-High"
+      },
+      {
+        "symbol": "PFC.NS", "ticker": "PFC", "name": "Power Finance Corp",
+        "sector": "PSU · Power Financing",
+        "thesis": "Government-backed NBFC at the centre of India's power and renewables financing build-out. Trades at a single-digit P/E with a ~4% dividend yield, ROE in the high teens, and a loan book with vastly improved asset quality after the Discom clean-up.",
+        "catalysts": ["Renewable energy financing the dominant growth driver", "Asset quality at cyclical best", "Re-rating potential as discom risk is repriced"],
+        "risks": ["Concentration in power sector / discom credit risk", "Tariff / regulatory interventions", "Bond market volatility on long-dated lending book"],
+        "fundamentals": { "pe": 6.5, "pb": 1.2, "roe": 19.0, "div": 4.2, "mcap": "1.3L Cr" },
+        "horizon": "3–5 yrs", "conviction": "Medium-High"
+      },
+      {
+        "symbol": "ONGC.NS", "ticker": "ONGC", "name": "Oil & Natural Gas Corp",
+        "sector": "Oil & Gas · Upstream",
+        "thesis": "The classic deep-value PSU: P/E around 7–8×, P/B near 1×, dividend yield over 4%, and a direct beneficiary of crude staying elevated on West Asia tensions. The market continues to price in disasters that have not happened.",
+        "catalysts": ["Brent persistently above $100 lifts realisations", "Subsidy / windfall tax regime stabilising", "Gas price reform supporting earnings floor"],
+        "risks": ["Sharp crude correction if geopolitical risk eases", "Government windfall taxes can re-emerge", "Capex cycle pressure on free cash flow"],
+        "fundamentals": { "pe": 7.5, "pb": 1.0, "roe": 14.5, "div": 4.4, "mcap": "3.4L Cr" },
+        "horizon": "2–4 yrs", "conviction": "Medium"
+      },
+      {
+        "symbol": "COFORGE.NS", "ticker": "COFORGE", "name": "Coforge",
+        "sector": "IT · Mid-cap",
+        "thesis": "The bright spot in a battered IT sector. Q4 net profit grew 145% YoY, deal wins are accelerating, and the AI / cloud positioning is pulling clients from the giants. One of the few IT names where the 12-month set-up looks better than the 12-month rear-view.",
+        "catalysts": ["Deal wins outpacing Tier-1 IT in the same quarter", "AI services book gaining real revenue traction", "Cigniti acquisition synergies still ahead"],
+        "risks": ["IT sector sentiment remains poor — multiple compression risk", "Concentration in BFSI vertical", "Higher beta than large-cap IT in any global slowdown"],
+        "fundamentals": { "pe": 32.0, "pb": 9.5, "roe": 26.0, "div": 1.3, "mcap": "0.55L Cr" },
+        "horizon": "2–4 yrs", "conviction": "Medium"
+      },
+      {
+        "symbol": "BAJAJ-AUTO.NS", "ticker": "BAJAJ-AUTO", "name": "Bajaj Auto",
+        "sector": "Auto · Two-Wheelers",
+        "thesis": "April sales were a blockbuster — exports up 83% YoY, CV growth strong, EV ramp underway. A two-wheeler franchise with global reach, a clean balance sheet, healthy buybacks, and a serious EV bet through Chetak.",
+        "catalysts": ["Export tailwind back after a multi-year drought", "EV (Chetak) reaching meaningful volumes", "CNG + 3W commercial cycle underway"],
+        "risks": ["Two-wheeler demand cyclicality", "EV margin profile still being established", "Africa/LatAm currency exposure on exports"],
+        "fundamentals": { "pe": 29.0, "pb": 7.8, "roe": 28.0, "div": 2.4, "mcap": "2.3L Cr" },
+        "horizon": "3–5 yrs", "conviction": "Medium-High"
+      },
+      {
+        "symbol": "RELIANCE.NS", "ticker": "RELIANCE", "name": "Reliance Industries",
+        "sector": "Diversified Conglomerate",
+        "thesis": "The default India mega-cap, with three engines now visible: Jio (telecom + monetisation), Reliance Retail (largest retailer in the country), and a maturing oil-to-chemicals business funding a serious new-energy platform. Multiple value-unlock paths over a decade.",
+        "catalysts": ["Jio tariff hike cycle still has runway", "Reliance Retail IPO talk persists as latent catalyst", "New energy capex starting to produce revenue"],
+        "risks": ["Capital intensity remains very high", "Quick-commerce competition pressuring retail margins", "Conglomerate discount may persist longer than expected"],
+        "fundamentals": { "pe": 24.0, "pb": 2.1, "roe": 9.0, "div": 0.4, "mcap": "17.2L Cr" },
+        "horizon": "5–10 yrs", "conviction": "High"
+      }
+    ],
+    "highPromise": [
+      {
+        "symbol": "CAMS.NS", "ticker": "CAMS", "name": "Computer Age Management Services",
+        "sector": "Financial Infrastructure",
+        "thesis": "A duopoly providing the picks-and-shovels for India's mutual fund industry. Q4 EBITDA margin expanded to 46.3%, profit grew 11%. As MF AUM compounds at 15%+ annually, CAMS rides that wave with operating leverage.",
+        "catalysts": ["MF industry AUM growth structural at 15%+", "New product wins (alt fund servicing, AIFs)", "Best-in-class operating margins"],
+        "risks": ["Pricing pressure from large MFs", "Regulatory caps on RTA fees", "Concentration in top-5 AMC clients"],
+        "fundamentals": { "pe": 41.0, "pb": 12.0, "roe": 31.0, "div": 1.5, "mcap": "0.21L Cr" },
+        "horizon": "3–5 yrs", "conviction": "Watch"
+      },
+      {
+        "symbol": "WOCKPHARMA.NS", "ticker": "WOCKPHARMA", "name": "Wockhardt",
+        "sector": "Pharma · Specialty",
+        "thesis": "Posted a turnaround Q4 — ₹164 Cr profit versus a ₹45 Cr loss a year ago. The novel antibiotic pipeline (Zaynich, others) is reaching commercial inflection. Speculative but asymmetric.",
+        "catalysts": ["Zaynich US launch progress", "Specialty antibiotic pipeline maturing", "Operating leverage as losses recede"],
+        "risks": ["History of inconsistent execution", "Balance sheet still recovering", "Regulatory / FDA process risk"],
+        "fundamentals": { "pe": "NM", "pb": 8.5, "roe": "recovering", "div": 0.0, "mcap": "0.40L Cr" },
+        "horizon": "2–4 yrs", "conviction": "Watch · Speculative"
+      },
+      {
+        "symbol": "HFCL.NS", "ticker": "HFCL", "name": "Himachal Futuristic",
+        "sector": "Telecom Equipment · Optical",
+        "thesis": "Optical fibre cable, 5G transmission gear, and a small but growing defence electronics order book. India's 5G + BharatNet + defence comms theme captured in one mid-cap name.",
+        "catalysts": ["BharatNet phase 3 ramp", "5G private network orders", "Defence segment scaling from a small base"],
+        "risks": ["Working-capital intensive", "Order timing volatile", "Margin pressure from raw material moves"],
+        "fundamentals": { "pe": 41.0, "pb": 3.6, "roe": 9.5, "div": 0.2, "mcap": "0.16L Cr" },
+        "horizon": "2–4 yrs", "conviction": "Watch · Speculative"
+      },
+      {
+        "symbol": "SUZLON.NS", "ticker": "SUZLON", "name": "Suzlon Energy",
+        "sector": "Renewables · Wind",
+        "thesis": "A fully restructured balance sheet, the largest order book in its history, and a wind capacity addition cycle just starting after years of dormancy. High beta — sized accordingly, not avoided.",
+        "catalysts": ["Order book at multi-year highs", "Net-debt-free for the first time in a decade", "Wind add-back cycle in FY27–28"],
+        "risks": ["Single-product, single-geography concentration", "Execution risk on large orders", "Investor base still partly speculative"],
+        "fundamentals": { "pe": 75.0, "pb": 16.0, "roe": 22.0, "div": 0.0, "mcap": "0.85L Cr" },
+        "horizon": "2–4 yrs", "conviction": "Watch · Speculative"
+      },
+      {
+        "symbol": "IDEAFORGE.NS", "ticker": "IDEAFORGE", "name": "IdeaForge Technology",
+        "sector": "Defence · Drones",
+        "thesis": "Recently jumped ~30% on a 7× YoY revenue surge and a return to profit. Pure-play on Indian military and homeland-security drone procurement, an area where indigenisation policy is accelerating. Lottery-ticket sized, not core.",
+        "catalysts": ["Defence drone orders multi-year visible", "Revenue inflection just confirmed", "Limited domestic competition"],
+        "risks": ["Lumpy order cycle", "Tiny float, very volatile", "Margin sustainability unproven at scale"],
+        "fundamentals": { "pe": "NM", "pb": 7.0, "roe": "recovering", "div": 0.0, "mcap": "0.07L Cr" },
+        "horizon": "2–4 yrs", "conviction": "Watch · Speculative"
+      }
+    ],
+    "watchClose": [
+      {
+        "symbol": "TCS.NS", "ticker": "TCS", "name": "Tata Consultancy Services",
+        "sector": "IT · Large-cap",
+        "thesis": "The bluest of blue chips, but caught in a sector-wide air pocket. Quality of business is unchanged; what has changed is the cyclical demand picture from US BFSI clients. We hold; we do not chase.",
+        "catalysts": ["Buyback / dividend yield supports floor", "AI services adoption with marquee clients", "Currency weakness aids reported earnings"],
+        "risks": ["US client spending caution lingers", "Wage inflation if attrition climbs again", "Premium multiple vs. growth trajectory"],
+        "fundamentals": { "pe": 25.5, "pb": 13.0, "roe": 51.0, "div": 3.4, "mcap": "13.0L Cr" },
+        "horizon": "3–5 yrs", "conviction": "Hold"
+      },
+      {
+        "symbol": "INFY.NS", "ticker": "INFY", "name": "Infosys",
+        "sector": "IT · Large-cap",
+        "thesis": "Same story as TCS, slightly cheaper. Operating margins are pinched, but the franchise, balance sheet and capital return habit are intact. Not a sell, just not yet a buy.",
+        "catalysts": ["AI / cloud deal momentum", "Margin recovery as discretionary spend returns", "Steady buyback cadence"],
+        "risks": ["Global IT budget compression continues", "Onsite cost pressure", "Sector de-rating not yet over"],
+        "fundamentals": { "pe": 23.5, "pb": 7.2, "roe": 31.0, "div": 2.7, "mcap": "6.0L Cr" },
+        "horizon": "3–5 yrs", "conviction": "Hold"
+      },
+      {
+        "symbol": "HINDUNILVR.NS", "ticker": "HINDUNILVR", "name": "Hindustan Unilever",
+        "sector": "FMCG",
+        "thesis": "Volume growth has finally returned (~6% recently) and the FY27 outlook is brighter — but at ~55× earnings, you are paying for a perfect recovery. Trim, don't add. A correction is the friend, not the enemy.",
+        "catalysts": ["Rural demand recovery gathering pace", "Premiumisation across categories", "Margin recovery once palm oil cools"],
+        "risks": ["Valuation leaves no room for misses", "Quick-commerce reshaping distribution economics", "Private label encroachment"],
+        "fundamentals": { "pe": 55.0, "pb": 11.0, "roe": 20.5, "div": 1.8, "mcap": "5.7L Cr" },
+        "horizon": "3–5 yrs", "conviction": "Hold"
+      },
+      {
+        "symbol": "ASIANPAINT.NS", "ticker": "ASIANPAINT", "name": "Asian Paints",
+        "sector": "Consumer Discretionary",
+        "thesis": "The franchise is real, the brand is real — but Birla Opus from the Aditya Birla group is the most credible threat to the moat in twenty years. Until we see how share-loss settles, holding is the right answer; adding is not.",
+        "catalysts": ["Decorative volume growth recovery", "Industrial paints scaling", "Margin defence playbook intact"],
+        "risks": ["Birla Opus competitive intensity", "Multi-quarter market share concession likely", "Multiple still rich for the new growth profile"],
+        "fundamentals": { "pe": 51.0, "pb": 13.5, "roe": 23.0, "div": 1.4, "mcap": "2.2L Cr" },
+        "horizon": "3–5 yrs", "conviction": "Hold"
+      },
+      {
+        "symbol": "LT.NS", "ticker": "LT", "name": "Larsen & Toubro",
+        "sector": "Capital Goods · Infra",
+        "thesis": "Just guided FY27 revenue growth lower on Middle East disruptions. The long-cycle infra story is unchanged, but the next 2–3 quarters look choppier than the consensus had assumed. Hold; let the dust settle.",
+        "catalysts": ["Domestic infra & defence order pipeline intact", "Hyderabad campus / IT services value", "Middle East order book recovery once tensions ease"],
+        "risks": ["West Asia exposure to conflict risk", "Margin guidance has been reset down", "Capex slowdown if elections shift policy"],
+        "fundamentals": { "pe": 32.0, "pb": 5.5, "roe": 17.0, "div": 1.2, "mcap": "4.6L Cr" },
+        "horizon": "3–7 yrs", "conviction": "Hold"
+      },
+      {
+        "symbol": "BHARTIARTL.NS", "ticker": "BHARTIARTL", "name": "Bharti Airtel",
+        "sector": "Telecom",
+        "thesis": "Best-positioned in a duopoly, with strong ARPU momentum and Africa optionality. But the stock has already priced much of the next two years of tariff hikes. We hold what we have; we don't add aggressively here.",
+        "catalysts": ["ARPU compounding into ₹240+", "5G monetisation begins", "Africa cash flow turning material"],
+        "risks": ["Capex demands remain heavy", "Regulatory / spectrum costs", "Premium valuation vs. global telecom peers"],
+        "fundamentals": { "pe": 56.0, "pb": 11.5, "roe": 17.5, "div": 0.5, "mcap": "10.8L Cr" },
+        "horizon": "3–5 yrs", "conviction": "Hold"
+      }
+    ],
+    "trimAvoid": [
+      {
+        "symbol": "TRENT.NS", "ticker": "TRENT", "name": "Trent",
+        "sector": "Retail · Apparel",
+        "thesis": "Zudio is a brilliant business; Trent at this price is a brilliant business priced as if it cannot stumble. Single-month drawdowns of 22% in such names are reminders that valuation matters. Trim into strength.",
+        "catalysts": ["Store rollout still aggressive", "Brand strength in value fashion"],
+        "risks": ["P/E above 100× is structurally hard to defend", "Saturation in Tier-1 cities arriving", "Any same-store-sales miss is asymmetrically punished"],
+        "fundamentals": { "pe": 145.0, "pb": 38.0, "roe": 30.0, "div": 0.1, "mcap": "1.9L Cr" },
+        "horizon": "Reduce", "conviction": "Trim"
+      },
+      {
+        "symbol": "DMART.NS", "ticker": "DMART", "name": "Avenue Supermarts",
+        "sector": "Retail · Grocery",
+        "thesis": "A great business with a slowing growth equation. Quick-commerce is reshaping the urban grocery basket faster than DMart's store-led model can respond. The valuation still assumes the old growth trajectory; the new one is materially lower.",
+        "catalysts": ["Steady store additions", "Best-in-class working capital"],
+        "risks": ["Quick-commerce eating high-frequency baskets", "Same-store-sales-growth slowing", "Multiple still 80–90× earnings"],
+        "fundamentals": { "pe": 88.0, "pb": 11.0, "roe": 14.0, "div": 0.0, "mcap": "2.7L Cr" },
+        "horizon": "Reduce", "conviction": "Trim"
+      },
+      {
+        "symbol": "NESTLEIND.NS", "ticker": "NESTLEIND", "name": "Nestle India",
+        "sector": "FMCG",
+        "thesis": "An exceptional brand portfolio at a price that demands exceptional growth — which has not been delivered. Volume growth has been mid-single-digit; the multiple is double that of global staples. Hold a small position at most.",
+        "catalysts": ["Pricing power intact", "Distribution expansion in smaller towns"],
+        "risks": ["Valuation vs. growth gap is the largest in years", "Royalty hike overhang reappears periodically", "Premium FMCG demand softening"],
+        "fundamentals": { "pe": 70.0, "pb": 53.0, "roe": 78.0, "div": 1.1, "mcap": "2.3L Cr" },
+        "horizon": "Reduce", "conviction": "Trim"
+      },
+      {
+        "symbol": "ZOMATO.NS", "ticker": "ZOMATO", "name": "Eternal (Zomato)",
+        "sector": "Internet · Food & Q-Comm",
+        "thesis": "Blinkit is genuinely interesting; the valuation prices in it being interesting forever. With Swiggy and Reliance escalating quick-commerce capex, the path to durable profitability is narrower than the share price suggests.",
+        "catalysts": ["Blinkit GMV scaling rapidly", "Going-out / events business optionality"],
+        "risks": ["Quick-commerce profitability still unproven at scale", "Capex war intensifying", "Loss-making segments still subsidised"],
+        "fundamentals": { "pe": 380.0, "pb": 12.5, "roe": 4.0, "div": 0.0, "mcap": "2.1L Cr" },
+        "horizon": "Avoid", "conviction": "Avoid"
+      }
+    ],
+    "longBets": [
+      {
+        "symbol": "SYRMA.NS", "ticker": "SYRMA", "name": "Syrma SGS Technology",
+        "sector": "Small-cap · EMS / China+1",
+        "thesis": "Top brokerage pick in Indian Electronics Manufacturing Services. The sector grew 24% CAGR FY19-24 and is forecast at 27% to FY29 on the back of PLI schemes, China+1 supply-chain shifts, and rising domestic electronics demand. Margin expansion is structural as backward integration deepens. India's EMS market share is under 5% globally — it is heading higher.",
+        "catalysts": ["FY26-28E revenue CAGR estimated at 29%, profit CAGR 44% by HDFC Sec", "PLI scheme extension expected; budget tailwinds", "Aerospace/defence/healthcare mix shift improving margins by 130bps", "OSAT (semiconductor packaging) optionality being scoped"],
+        "risks": ["Dependence on imported components remains", "Cost competitiveness vs. China & Vietnam", "Single-quarter margin volatility on input costs", "Sector valuations have run hard"],
+        "fundamentals": { "pe": 65.0, "pb": 6.5, "roe": 11.0, "div": 0.1, "mcap": "0.16L Cr" },
+        "horizon": "5–10 yrs", "conviction": "Long Bet · Speculative"
+      },
+      {
+        "symbol": "PRAJIND.NS", "ticker": "PRAJIND", "name": "Praj Industries",
+        "sector": "Small-cap · Bioenergy / Capital Goods",
+        "thesis": "India's largest biofuel technology company — ethanol, bio-CNG, sustainable aviation fuel (SAF), water treatment. The stock is down ~30% over 12 months on a temporary order pause and a Q3 loss; but the structural opportunity in ethanol blending (E20 mandate), 2G ethanol, and SAF is intact. A textbook 'Mr. Market' moment.",
+        "catalysts": ["E20 ethanol blending program scaling", "SAF commercialisation underway globally", "Order book recovering after temporary pause", "Stock at 52-week low region offers valuation comfort"],
+        "risks": ["Lumpy project order cycle", "Recent quarterly loss reflects execution slippage", "Crude price collapse would dampen biofuel economics"],
+        "fundamentals": { "pe": 50.8, "pb": 4.1, "roe": 8.0, "div": 1.8, "mcap": "0.07L Cr" },
+        "horizon": "5–10 yrs", "conviction": "Long Bet · Contrarian"
+      },
+      {
+        "symbol": "DATAPATTNS.NS", "ticker": "DATAPATTNS", "name": "Data Patterns (India)",
+        "sector": "Small-cap · Defence Electronics",
+        "thesis": "The pure-play on Indian indigenous radar, electronic warfare, and avionics — supplying BEL, HAL, ISRO, DRDO. FY25 revenue grew 36% YoY, EBITDA margins around 39% (rare for defence). Order momentum strong. The franchise quality is exceptional; the entry price will always feel uncomfortable.",
+        "catalysts": ["FY27 budget targeting 'Force Multipliers' (electronic warfare, drone swarms)", "Confirmed orders ~₹900 Cr with more in the pipeline", "Margin guidance 35-40% structurally", "Tejas Mk1A and indigenous platform build-out"],
+        "risks": ["Valuation at 60×+ leaves zero margin for error", "Lumpy quarterly revenue (project-based)", "Higher beta — 40%+ annualised volatility"],
+        "fundamentals": { "pe": 62.0, "pb": 10.3, "roe": 13.0, "div": 0.3, "mcap": "0.24L Cr" },
+        "horizon": "5–10 yrs", "conviction": "Long Bet"
+      },
+      {
+        "symbol": "MTARTECH.NS", "ticker": "MTARTECH", "name": "MTAR Technologies",
+        "sector": "Small-cap · Precision Engineering",
+        "thesis": "High-precision component supplier to defence, aerospace, civilian nuclear, and clean energy (fuel cells, electrolysers). Niche, hard-to-replicate manufacturing capabilities. Recently won a $3.78m order in data-centre infrastructure, opening a new vertical.",
+        "catalysts": ["Defence indigenisation orders compounding", "Clean energy fuel-cell components scaling globally", "Order book healthy across multiple verticals", "Data-centre vertical opens new TAM"],
+        "risks": ["Valuation at 165× P/E is the most stretched among peers", "Margin profile choppy (10% ROE)", "Single new-vertical bets carry execution risk"],
+        "fundamentals": { "pe": 165.0, "pb": 14.8, "roe": 10.3, "div": 0.0, "mcap": "0.12L Cr" },
+        "horizon": "5–10 yrs", "conviction": "Long Bet · Speculative"
+      },
+      {
+        "symbol": "ASTRAMICRO.NS", "ticker": "ASTRAMICRO", "name": "Astra Microwave Products",
+        "sector": "Small-cap · Defence / RF Systems",
+        "thesis": "RF and microwave subsystems for radars, electronic warfare, and satellite payloads. Q3 FY26 profit jumped 96% QoQ; operating margins expanded to 31.7%. Trades cheaper than peers (P/E 53 vs DataPatterns 62, MTAR 165). Government's indigenous AESA radar push is a multi-year tailwind.",
+        "catalysts": ["12.4% rise in DRDO R&D funding for indigenous AESA radars", "Q3 margins jumped to 31.7% on better mix", "5-year stock return 660%+ vs Sensex 62%, but pulled back recently — entry window"],
+        "risks": ["Stock recently in technical downtrend", "ROE at 10.5% lags Garden Reach (20%) and Data Patterns (13%)", "Beta of 1.35 means sharper drawdowns in selloffs"],
+        "fundamentals": { "pe": 53.6, "pb": 7.4, "roe": 10.5, "div": 0.4, "mcap": "0.08L Cr" },
+        "horizon": "5–10 yrs", "conviction": "Long Bet"
+      },
+      {
+        "symbol": "KNRCON.NS", "ticker": "KNRCON", "name": "KNR Constructions",
+        "sector": "Small-cap · Roads / Infrastructure",
+        "thesis": "Roads and highways EPC contractor with one of the cleanest balance sheets in the construction space — rare for the sector. Government's NHAI awards remain a reliable pipeline, and KNR has consistently delivered above-industry execution.",
+        "catalysts": ["NHAI award pipeline remains strong", "Debt-free working capital management", "Margin profile better than larger peers"],
+        "risks": ["Asset monetisation pace slower than hoped", "Order inflows concentrated in NHAI", "Construction cycle exposure to monsoon delays"],
+        "fundamentals": { "pe": 13.5, "pb": 1.8, "roe": 14.0, "div": 0.5, "mcap": "0.07L Cr" },
+        "horizon": "5–10 yrs", "conviction": "Long Bet"
+      },
+      {
+        "symbol": "MAHSEAMLES.NS", "ticker": "MAHSEAMLES", "name": "Maharashtra Seamless",
+        "sector": "Small-cap · Steel Pipes",
+        "thesis": "India's largest seamless pipe manufacturer for oil & gas, power, and infrastructure. Debt-free, 19.6% operating margins, 3-year profit CAGR ~69%. A cyclical play with structural tailwinds from domestic oil & gas capex and energy transition.",
+        "catalysts": ["Domestic oil & gas capex ramping", "Export market widening", "Debt-free balance sheet allows organic capex"],
+        "risks": ["Steel price volatility", "Cyclical demand patterns", "Concentration in oil & gas customer base"],
+        "fundamentals": { "pe": 14.0, "pb": 1.9, "roe": 16.0, "div": 1.5, "mcap": "0.10L Cr" },
+        "horizon": "3–7 yrs", "conviction": "Long Bet"
+      },
+      {
+        "symbol": "IONEXCHANG.NS", "ticker": "IONEXCHANG", "name": "Ion Exchange (India)",
+        "sector": "Small-cap · Water Treatment",
+        "thesis": "Pioneer in water and wastewater treatment in India. ROCE of 27.5%, debt-equity 0.2, operating across municipal, industrial, and household water. Direct beneficiary of Jal Jeevan Mission and increasingly stringent industrial effluent norms.",
+        "catalysts": ["Jal Jeevan Mission and similar government water programs", "Industrial effluent compliance becoming mandatory", "Premium consumer water purifier brand (Zero B)"],
+        "risks": ["Project execution timing", "Working capital intensity in EPC contracts", "Smaller order sizes vs MNC competitors"],
+        "fundamentals": { "pe": 30.0, "pb": 6.5, "roe": 22.0, "div": 0.4, "mcap": "0.07L Cr" },
+        "horizon": "5–10 yrs", "conviction": "Long Bet"
+      }
+    ]
+  },
+  "sectors": [
+    { "name": "Private Banking", "stance": "pos", "note": "Asset quality at a decadal best; rate-cut cycle is essentially done. Reasonable valuations on the leaders." },
+    { "name": "PSU Banking", "stance": "pos", "note": "Cleanest books in years, single-digit P/Es on the largest names. The discount to private peers is closing." },
+    { "name": "Information Technology", "stance": "neu", "note": "Global headwinds linger; large-caps look full. We are selective on mid-cap names with AI traction." },
+    { "name": "FMCG", "stance": "neu", "note": "Recovery underway but priced into most names. Demand defensiveness has been rewarded — perhaps too much." },
+    { "name": "Auto", "stance": "pos", "note": "Two-wheelers re-accelerating, exports rebounding, EV transition creating winners and losers in equal measure." },
+    { "name": "Pharma", "stance": "pos", "note": "US generics cycle stable, domestic chronic therapy compounding. A quietly good place to be." },
+    { "name": "Real Estate", "stance": "pos", "note": "Rate cuts behind us are still flowing through; inventory cycle remains supportive in top-7 cities." },
+    { "name": "Capital Goods / Infra", "stance": "neu", "note": "Order books healthy, but execution and margins under pressure — wait for better entry on the leaders." },
+    { "name": "Energy / Oil & Gas", "stance": "pos", "note": "Upstream benefits from elevated crude; OMCs will lag if marketing margins remain regulated." },
+    { "name": "Defence", "stance": "pos", "note": "Multi-year visibility on indigenisation orders. The valuation is the only question, not the demand." },
+    { "name": "Renewables", "stance": "pos", "note": "Capacity addition pipeline finally translating into revenue. Selectivity matters — execution track records are mixed." },
+    { "name": "Quick-Commerce / Internet", "stance": "neg", "note": "Reflexive valuations; the capex war is intensifying, not resolving. Path to profit is narrowing, not widening." }
+  ],
+  "earnings": [
+    { "date": "7 May",  "name": "Hero MotoCorp",       "watch": "EV traction (Vida), rural demand colour" },
+    { "date": "8 May",  "name": "Kalyan Jewellers",    "watch": "Same-store growth post wedding season" },
+    { "date": "8 May",  "name": "ABB India",           "watch": "Order inflows, FY27 capex commentary" },
+    { "date": "8 May",  "name": "Mahindra & Mahindra", "watch": "SUV margins, farm equipment recovery" },
+    { "date": "9 May",  "name": "Cipla",               "watch": "US Lanreotide ramp, India branded" },
+    { "date": "9 May",  "name": "Tata Motors",         "watch": "JLR margins, India CV outlook" },
+    { "date": "9 May",  "name": "Urban Company",       "watch": "First post-IPO read on contribution margins" },
+    { "date": "12 May", "name": "M&M Financial",       "watch": "Rural credit cost, NIM trajectory" }
+  ],
+  "whispers": [
+    { "tag": "Capital Markets", "text": "IPO pipeline rebuilds after a record 2025 — eyes on consumer-tech and renewables filings.", "src": "Mainboard issuance trackers" },
+    { "tag": "Defence",         "text": "FY27 defence capex expected at the high end of the 13–15% range; BEL, HAL and shipyards are the obvious vehicles.", "src": "Budget previews" },
+    { "tag": "Geopolitics",     "text": "US–Iran negotiation chatter drives oil-sensitive sectors both ways. Upstream is the cleanest hedge.", "src": "Wire reports" },
+    { "tag": "Currency",        "text": "INR at record lows around 94–95/USD pressures import-heavy sectors; favours IT & pharma exporters at the margin.", "src": "FX desks" },
+    { "tag": "Consumer",        "text": "Rural recovery genuinely improving on a strong-monsoon read; FMCG volumes the cleanest signal to track.", "src": "Channel checks" },
+    { "tag": "Capex",           "text": "Private capex announcements broadening — cement, metals, autos. Capital-goods order pipeline still building.", "src": "Project tracker data" }
+  ]
+}

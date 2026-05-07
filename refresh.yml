@@ -1,0 +1,53 @@
+name: Refresh Heritage Ledger
+
+on:
+  schedule:
+    # 02:00 UTC = 07:30 IST — runs every morning before markets open
+    - cron: "0 2 * * *"
+  workflow_dispatch:   # allows you to trigger it manually from the Actions tab
+
+permissions:
+  contents: write     # so the bot can commit data.json back to the repo
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install --upgrade anthropic
+
+      - name: Run the refresh script
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Optional: change to claude-opus-4-7 for deeper reasoning (more cost)
+          # or claude-haiku-4-5-20251001 for cheapest light updates
+          HERITAGE_MODEL: "claude-sonnet-4-6"
+        run: python refresh.py
+
+      - name: Commit and push if data.json changed
+        run: |
+          git config --local user.name  "Heritage Ledger Bot"
+          git config --local user.email "bot@heritageledger.local"
+          git add data.json
+          if git diff --quiet --staged; then
+            echo "No editorial changes to commit today."
+          else
+            git commit -m "🤖 Daily refresh: $(date -u +%Y-%m-%d) [skip ci]"
+            git push
+            echo "Pushed updated data.json"
+          fi
