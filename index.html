@@ -1603,9 +1603,9 @@ function buildCardHTML(stock, verdict) {
       <button class="expand-toggle" onclick="toggleDeep('${stock.symbol}')">Show the full thinking →</button>
       <div class="deep-dive" id="dd-${stock.symbol}">
         <h4>What could go right</h4>
-        <ul>${(stock.catalysts || []).map(c => \`<li>\${c}</li>\`).join('')}</ul>
+        <ul>${(stock.catalysts || []).map(c => `<li>${c}</li>`).join('')}</ul>
         <h4>What could go wrong</h4>
-        <ul>${(stock.risks || []).map(r => \`<li>\${r}</li>\`).join('')}</ul>
+        <ul>${(stock.risks || []).map(r => `<li>${r}</li>`).join('')}</ul>
       </div>
     </article>
   `;
