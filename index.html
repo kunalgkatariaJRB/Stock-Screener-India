@@ -272,6 +272,21 @@
     margin-top: 22px;
   }
   .signature::before { content: '— '; }
+  .creator-credit {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    font-style: italic;
+    color: var(--ink-mute);
+    letter-spacing: 0.02em;
+  }
+  .creator-credit strong {
+    color: var(--gold);
+    font-style: normal;
+    font-weight: 500;
+  }
   .macro-narrative {
     font-family: 'Fraunces', serif;
     font-size: 17px; line-height: 1.55;
@@ -497,6 +512,100 @@
 
   /* ============== SECTOR COMPASS ============== */
   .compass { padding: 64px 0; border-bottom: 1px solid var(--rule); }
+  .compass-summary {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+  .compass-stat {
+    text-align: right;
+    padding-left: 18px;
+    border-left: 1px solid var(--rule);
+  }
+  .compass-stat:first-child { border-left: none; padding-left: 0; }
+  .compass-stat .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .compass-stat .lbl {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-top: 4px;
+  }
+  .compass-stat.pos .num { color: var(--buy); }
+  .compass-stat.neu .num { color: var(--hold); }
+  .compass-stat.neg .num { color: var(--sell); }
+
+  .compass-rose {
+    margin: 32px 0 36px;
+    padding: 24px 0;
+    background: linear-gradient(180deg, transparent 0%, rgba(212, 175, 55, 0.03) 50%, transparent 100%);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+  }
+  .rose-track {
+    display: flex;
+    gap: 4px;
+    align-items: flex-end;
+    height: 80px;
+    padding: 0 24px;
+  }
+  .rose-bar {
+    flex: 1;
+    min-width: 0;
+    border-radius: 2px 2px 0 0;
+    position: relative;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  .rose-bar:hover { transform: translateY(-3px); filter: brightness(1.2); }
+  .rose-bar.pos { background: linear-gradient(180deg, var(--buy) 0%, rgba(74, 168, 119, 0.4) 100%); }
+  .rose-bar.neu { background: linear-gradient(180deg, var(--hold) 0%, rgba(212, 175, 55, 0.3) 100%); }
+  .rose-bar.neg { background: linear-gradient(180deg, var(--sell) 0%, rgba(212, 92, 75, 0.3) 100%); }
+  .rose-bar-label {
+    position: absolute;
+    bottom: -22px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-15deg);
+    transform-origin: top left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .rose-bar:hover .rose-bar-label { opacity: 1; }
+  .rose-legend {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+  }
+  .rose-legend-item {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .rose-legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .rose-legend-dot.pos { background: var(--buy); }
+  .rose-legend-dot.neu { background: var(--hold); }
+  .rose-legend-dot.neg { background: var(--sell); }
+
   .compass-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
   .sector-cell { background: var(--paper); padding: 24px 24px; position: relative; }
   .sector-name {
@@ -579,37 +688,261 @@
   .princ-grid > div h2 em { color: var(--gold); font-style: italic; }
   .princ-list { list-style: none; padding: 0; margin: 0; }
   .princ-list li {
-    padding: 24px 0;
+    padding: 14px 0;
     border-top: 1px solid var(--rule);
     display: grid;
-    grid-template-columns: 64px 1fr;
-    gap: 26px;
+    grid-template-columns: 44px 1fr auto;
+    gap: 18px;
+    align-items: start;
+    cursor: pointer;
+    transition: background 0.2s;
   }
+  .princ-list li:hover { background: rgba(212, 175, 55, 0.03); }
   .princ-list li:last-child { border-bottom: 1px solid var(--rule); }
   .princ-num {
     font-family: 'Fraunces', serif; font-style: italic;
-    font-weight: 300; font-size: 38px;
-    color: var(--gold); line-height: 1;
+    font-weight: 300; font-size: 26px;
+    color: var(--gold); line-height: 1.2;
   }
   .princ-body h4 {
     font-family: 'Fraunces', serif;
-    font-weight: 500; font-size: 19px;
-    margin: 0 0 8px;
+    font-weight: 500; font-size: 16px;
+    margin: 0 0 4px;
     color: var(--ink);
+    line-height: 1.4;
   }
   .princ-body p {
-    font-size: 15px; line-height: 1.6;
+    font-size: 13px; line-height: 1.55;
     color: var(--ink-soft); margin: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, margin 0.3s ease;
+  }
+  .princ-list li.expanded .princ-body p {
+    max-height: 200px;
+    margin-top: 8px;
   }
   .princ-attrib {
     display: inline-block;
-    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--gold-deep); margin-top: 8px;
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--gold-deep); margin-top: 4px;
     font-family: 'JetBrains Mono', monospace; font-weight: 500;
+    opacity: 0.7;
+  }
+  .princ-toggle {
+    color: var(--ink-mute);
+    font-size: 16px;
+    line-height: 1;
+    padding-top: 4px;
+    transition: transform 0.3s;
+  }
+  .princ-list li.expanded .princ-toggle {
+    transform: rotate(45deg);
+    color: var(--gold);
   }
 
   /* ============== FOOTER ============== */
   footer { padding: 60px 0 80px; }
+
+  /* ============== STOCK MODAL ============== */
+  .stock-modal {
+    position: fixed; inset: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: flex-end;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .modal-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(3px);
+    cursor: pointer;
+  }
+  .modal-drawer {
+    position: relative;
+    width: min(620px, 95vw);
+    height: 100%;
+    background: var(--paper);
+    border-left: 1px solid var(--rule);
+    overflow-y: auto;
+    box-shadow: -20px 0 60px rgba(0,0,0,0.5);
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  .modal-header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    z-index: 10;
+  }
+  .modal-title-block { flex: 1; min-width: 0; }
+  .modal-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 28px;
+    margin: 4px 0 4px;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  #modal-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 28px;
+    margin: 4px 0 4px;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .modal-ticker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+  .modal-close {
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--ink-mute);
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .modal-close:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .modal-content { padding: 28px 32px 60px; }
+  .modal-section { margin-bottom: 28px; }
+  .modal-section h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 0 0 12px;
+  }
+  .modal-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 24px;
+  }
+  .modal-price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .modal-delta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+  }
+  .modal-delta.up { color: var(--up); }
+  .modal-delta.down { color: var(--down); }
+  .modal-delta.flat { color: var(--ink-mute); }
+  .modal-verdict-box {
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 22px 24px;
+    margin-bottom: 24px;
+    background: var(--paper-2);
+  }
+  .modal-verdict-tag {
+    display: inline-block;
+    padding: 5px 11px;
+    border-radius: 3px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .modal-verdict-tag.tag-buy { background: rgba(74, 168, 119, 0.15); color: #6ed09b; border: 1px solid rgba(74, 168, 119, 0.3); }
+  .modal-verdict-tag.tag-long { background: rgba(160, 126, 168, 0.15); color: #c5a4ce; border: 1px solid rgba(160, 126, 168, 0.3); }
+  .modal-verdict-tag.tag-watch { background: rgba(212, 175, 55, 0.12); color: var(--gold); border: 1px solid rgba(212, 175, 55, 0.3); }
+  .modal-verdict-tag.tag-hold { background: rgba(130, 148, 196, 0.12); color: #a3b5d6; border: 1px solid rgba(130, 148, 196, 0.3); }
+  .modal-verdict-tag.tag-sell { background: rgba(212, 92, 75, 0.12); color: #e08877; border: 1px solid rgba(212, 92, 75, 0.3); }
+  .modal-verdict-tag.tag-neutral { background: rgba(150, 141, 122, 0.12); color: var(--ink-mute); border: 1px solid var(--rule); }
+  .modal-thesis {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .modal-fund-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .modal-fund-cell {
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 12px 14px;
+  }
+  .modal-fund-cell .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-bottom: 4px;
+  }
+  .modal-fund-cell .v {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .modal-list { margin: 0; padding-left: 22px; }
+  .modal-list li {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .modal-not-in-ledger {
+    border: 1px dashed var(--rule);
+    border-radius: 4px;
+    padding: 24px;
+    text-align: center;
+    color: var(--ink-mute);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .modal-not-in-ledger strong { color: var(--gold); font-style: normal; }
+  @media (max-width: 760px) {
+    .modal-fund-grid { grid-template-columns: repeat(2, 1fr); }
+    .modal-header { padding: 22px 20px 16px; }
+    .modal-content { padding: 22px 20px 40px; }
+  }
   .disclaim {
     border: 1px solid var(--rule);
     padding: 32px 36px;
@@ -757,22 +1090,6 @@
   </div>
 </div>
 
-<!-- ============================ HERO ============================ -->
-<section class="hero">
-  <div class="wrap hero-grid">
-    <div>
-      <div class="kicker">A Considered View · Indian Equities</div>
-      <h1>For the long <em>haul</em>,<br/>not the long <em>headline</em>.</h1>
-      <p class="lede">A curated, fundamentals-first dashboard for high-conviction decisions on Indian equities. Live prices. Stated reasoning. Honest verdicts. Refreshed daily by an automation that re-reads the market — not your moods.</p>
-    </div>
-    <aside class="hero-side">
-      <div class="kicker">From the editor's desk</div>
-      <p class="macro-narrative" id="macro-narrative">—</p>
-      <p class="signature">A long view, refreshed daily.</p>
-    </aside>
-  </div>
-</section>
-
 <!-- ============================ MACRO PULSE ============================ -->
 <section class="macro" id="macro">
   <div class="wrap">
@@ -810,7 +1127,9 @@
         <h2>The Sector Compass</h2>
         <div class="h2-sub">Where we lean — and where we wait.</div>
       </div>
+      <div class="compass-summary" id="compass-summary"></div>
     </div>
+    <div class="compass-rose" id="compass-rose"></div>
     <div class="compass-grid" id="compass-grid"></div>
   </div>
 </section>
@@ -848,9 +1167,10 @@
     <div>
       <div class="kicker" style="color: var(--gold);">House Doctrine</div>
       <h2>The principles<br/>that govern <em>this ledger</em>.</h2>
-      <p style="font-family: 'Fraunces', serif; font-style: italic; color: var(--ink-soft); font-size: 17px; line-height: 1.55;">
-        We do not trade. We allocate. The list above is rebuilt around these principles, drawn from those who have actually compounded capital across decades — Graham, Buffett, Munger, and Naval Ravikant.
+      <p style="font-family: 'Fraunces', serif; font-style: italic; color: var(--ink-soft); font-size: 15px; line-height: 1.55;">
+        Drawn from Graham, Buffett, Munger, and Naval Ravikant.
       </p>
+      <p style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-mute); margin-top: 12px;">Click any to read more</p>
     </div>
     <div>
       <ol class="princ-list">
@@ -939,7 +1259,42 @@
   </div>
 </section>
 
+<!-- ============================ ABOUT (was Hero) ============================ -->
+<section class="hero" id="about">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="kicker">A Considered View · Indian Equities</div>
+      <h1>For the long <em>haul</em>,<br/>not the long <em>headline</em>.</h1>
+      <p class="lede">A curated, fundamentals-first dashboard for high-conviction decisions on Indian equities. Live prices. Stated reasoning. Honest verdicts. Refreshed daily by an automation that re-reads the market — not your moods.</p>
+      <p class="creator-credit">Created by <strong>Kunal Kataria</strong> using AI.</p>
+    </div>
+    <aside class="hero-side">
+      <div class="kicker">From the editor's desk</div>
+      <p class="macro-narrative" id="macro-narrative">—</p>
+      <p class="signature">A long view, refreshed daily.</p>
+    </aside>
+  </div>
+</section>
+
 <!-- ============================ FOOTER ============================ -->
+<!-- ============================ STOCK MODAL ============================ -->
+<div id="stock-modal" class="stock-modal" style="display:none;">
+  <div class="modal-overlay" id="modal-overlay"></div>
+  <div class="modal-drawer">
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <div class="kicker" id="modal-status">Loading...</div>
+        <h2 id="modal-name">—</h2>
+        <div class="modal-ticker" id="modal-ticker">—</div>
+      </div>
+      <button class="modal-close" id="modal-close" aria-label="Close">×</button>
+    </div>
+    <div class="modal-content" id="modal-content">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</div>
+
 <footer>
   <div class="wrap">
     <div class="disclaim">
@@ -1167,11 +1522,14 @@ function renderSearchResults(results, queryStr) {
       dl.className = 'sr-dlt ' + toneClass(q.change);
     }
   });
-  // Click handler — open Yahoo Finance for now (could expand to in-app drawer later)
+  // Click handler — open in-page modal with stock details
   searchResults.querySelectorAll('.search-result').forEach(el => {
     el.addEventListener('click', () => {
       const sym = el.dataset.symbol;
-      window.open(`https://finance.yahoo.com/quote/${encodeURIComponent(sym)}`, '_blank');
+      const name = el.dataset.name;
+      openStockModal(sym, name);
+      searchResults.style.display = 'none';
+      searchInput.value = '';
     });
   });
 }
@@ -1338,8 +1696,44 @@ async function refreshStockPrices() {
    RENDER : SECTOR COMPASS, EARNINGS, WHISPERS
    ========================================================= */
 function renderSectors() {
+  const sectors = DATA?.sectors || [];
+
+  // Render the summary stats
+  const summary = document.getElementById('compass-summary');
+  if (summary) {
+    const pos = sectors.filter(s => s.stance === 'pos').length;
+    const neu = sectors.filter(s => s.stance === 'neu').length;
+    const neg = sectors.filter(s => s.stance === 'neg').length;
+    summary.innerHTML = [
+      '<div class="compass-stat pos"><div class="num">' + pos + '</div><div class="lbl">Constructive</div></div>',
+      '<div class="compass-stat neu"><div class="num">' + neu + '</div><div class="lbl">Selective</div></div>',
+      '<div class="compass-stat neg"><div class="num">' + neg + '</div><div class="lbl">Cautious</div></div>'
+    ].join('');
+  }
+
+  // Render the rose visualization (bars graph)
+  const rose = document.getElementById('compass-rose');
+  if (rose) {
+    const heightMap = { pos: 78, neu: 50, neg: 28 };
+    const bars = sectors.map(s => {
+      const h = heightMap[s.stance] || 50;
+      return '<div class="rose-bar ' + s.stance + '" style="height:' + h + '%;" title="' + s.name + '">' +
+             '<span class="rose-bar-label">' + s.name + '</span>' +
+             '</div>';
+    }).join('');
+    rose.innerHTML = [
+      '<div class="rose-track">' + bars + '</div>',
+      '<div class="rose-legend">',
+      '  <div class="rose-legend-item"><span class="rose-legend-dot pos"></span>Constructive</div>',
+      '  <div class="rose-legend-item"><span class="rose-legend-dot neu"></span>Selective</div>',
+      '  <div class="rose-legend-item"><span class="rose-legend-dot neg"></span>Cautious</div>',
+      '</div>'
+    ].join('');
+  }
+
+  // Render the detailed grid (existing)
   const grid = document.getElementById('compass-grid');
-  grid.innerHTML = (DATA?.sectors || []).map(s => `
+  grid.innerHTML = sectors.map(s => `
     <div class="sector-cell" data-stance="${s.stance}">
       <div class="sector-name">${s.name}</div>
       <div class="sector-stance stance-${s.stance==='pos'?'pos':s.stance==='neu'?'neu':'neg'}">
@@ -1412,6 +1806,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderEarnings();
   stamp();
   refreshAll();
+  initPrinciplesToggle();
+  initStockModal();
   // Auto-refresh every 5 minutes when document is visible
   setInterval(() => {
     if (document.visibilityState === 'visible') refreshAll();
@@ -1421,6 +1817,165 @@ document.addEventListener('DOMContentLoaded', async () => {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') refreshAll();
 });
+
+/* =========================================================
+   PRINCIPLES — Click to Expand
+   ========================================================= */
+function initPrinciplesToggle() {
+  const items = document.querySelectorAll('.princ-list li');
+  items.forEach(li => {
+    // Add toggle indicator if not present
+    if (!li.querySelector('.princ-toggle')) {
+      const toggle = document.createElement('span');
+      toggle.className = 'princ-toggle';
+      toggle.textContent = '+';
+      li.appendChild(toggle);
+    }
+    li.addEventListener('click', () => {
+      li.classList.toggle('expanded');
+    });
+  });
+}
+
+/* =========================================================
+   STOCK MODAL — Open in-page with verdict
+   ========================================================= */
+function initStockModal() {
+  const modal = document.getElementById('stock-modal');
+  const overlay = document.getElementById('modal-overlay');
+  const closeBtn = document.getElementById('modal-close');
+
+  function close() {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  overlay.addEventListener('click', close);
+  closeBtn.addEventListener('click', close);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display !== 'none') close();
+  });
+}
+
+function findStockInUniverse(symbol) {
+  if (!DATA || !DATA.stocks) return null;
+  const buckets = ['conviction', 'longBets', 'highPromise', 'watchClose', 'trimAvoid'];
+  for (const bucket of buckets) {
+    const list = DATA.stocks[bucket] || [];
+    const found = list.find(s => s.symbol === symbol);
+    if (found) {
+      const tabDef = TAB_DEFS.find(t => t.id === bucket);
+      return { stock: found, bucket, tabDef };
+    }
+  }
+  return null;
+}
+
+function escHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+async function openStockModal(symbol, displayName) {
+  const modal = document.getElementById('stock-modal');
+  const statusEl = document.getElementById('modal-status');
+  const nameEl = document.getElementById('modal-name');
+  const tickerEl = document.getElementById('modal-ticker');
+  const contentEl = document.getElementById('modal-content');
+
+  // Show modal immediately
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  const found = findStockInUniverse(symbol);
+
+  if (found) {
+    // Stock IS in the ledger
+    const s = found.stock;
+    const td = found.tabDef;
+
+    statusEl.textContent = 'In the Ledger · ' + td.label;
+    statusEl.style.color = 'var(--gold)';
+    nameEl.textContent = s.name;
+    tickerEl.textContent = s.ticker + ' · NSE';
+
+    const f = s.fundamentals || {};
+    const catalysts = (s.catalysts || []).map(c => '<li>' + escHtml(c) + '</li>').join('');
+    const risks = (s.risks || []).map(r => '<li>' + escHtml(r) + '</li>').join('');
+
+    contentEl.innerHTML = [
+      '<div class="modal-price-row">',
+      '  <div class="modal-price" id="modal-px">—</div>',
+      '  <div class="modal-delta flat" id="modal-dlt">—</div>',
+      '</div>',
+      '<div class="modal-verdict-box">',
+      '  <span class="modal-verdict-tag ' + td.tag + '">' + td.verdictWord + ' · ' + escHtml(s.conviction || '') + '</span>',
+      '  <p class="modal-thesis">' + escHtml(s.thesis || '') + '</p>',
+      '</div>',
+      '<div class="modal-section">',
+      '  <h4>Fundamentals</h4>',
+      '  <div class="modal-fund-grid">',
+      '    <div class="modal-fund-cell"><div class="lbl">P/E</div><div class="v">' + (f.pe || '—') + '</div></div>',
+      '    <div class="modal-fund-cell"><div class="lbl">P/B</div><div class="v">' + (f.pb || '—') + '</div></div>',
+      '    <div class="modal-fund-cell"><div class="lbl">ROE</div><div class="v">' + (f.roe || '—') + '</div></div>',
+      '    <div class="modal-fund-cell"><div class="lbl">Div Yld</div><div class="v">' + (f.divYield || '—') + '</div></div>',
+      '  </div>',
+      '</div>',
+      catalysts ? '<div class="modal-section"><h4>What Could Go Right</h4><ul class="modal-list">' + catalysts + '</ul></div>' : '',
+      risks ? '<div class="modal-section"><h4>What Could Go Wrong</h4><ul class="modal-list">' + risks + '</ul></div>' : '',
+      s.horizon ? '<div class="modal-section"><h4>Horizon</h4><p class="modal-thesis" style="font-size:14px;">' + escHtml(s.horizon) + '</p></div>' : ''
+    ].join('');
+
+    // Fetch live price
+    fetchQuote(s.symbol).then(q => {
+      if (!q) return;
+      const px = document.getElementById('modal-px');
+      const dl = document.getElementById('modal-dlt');
+      if (px) px.textContent = '₹ ' + fmtN(q.price);
+      if (dl) {
+        dl.textContent = fmtChange(q.change, q.changePct);
+        dl.className = 'modal-delta ' + toneClass(q.change);
+      }
+    });
+
+  } else {
+    // Stock is NOT in the ledger
+    statusEl.textContent = 'Outside the Ledger';
+    statusEl.style.color = 'var(--ink-mute)';
+    nameEl.textContent = displayName || symbol;
+    tickerEl.textContent = symbol + ' · NSE';
+
+    contentEl.innerHTML = [
+      '<div class="modal-price-row">',
+      '  <div class="modal-price" id="modal-px">—</div>',
+      '  <div class="modal-delta flat" id="modal-dlt">—</div>',
+      '</div>',
+      '<div class="modal-not-in-ledger">',
+      '  This stock is not currently in <strong>The Heritage Ledger</strong>.',
+      '  <br/><br/>',
+      '  We only issue verdicts on names where we have a strong fundamentals-first view, after deliberation.',
+      '  <br/><br/>',
+      '  Live price is shown above for reference. To consider this stock for the ledger, mention it during the next refresh cycle.',
+      '</div>',
+      '<div class="modal-section">',
+      '  <h4>Why we are silent</h4>',
+      '  <p class="modal-thesis" style="font-size:14px;">A no-verdict is a verdict. We do not have a thesis on every listed company — and we believe pretending otherwise is dishonest. The ledger covers names where the fundamentals, valuation, and timeline give us conviction. Everything else is noise until proven otherwise.</p>',
+      '</div>'
+    ].join('');
+
+    // Still fetch live price for context
+    fetchQuote(symbol).then(q => {
+      if (!q) return;
+      const px = document.getElementById('modal-px');
+      const dl = document.getElementById('modal-dlt');
+      if (px) px.textContent = '₹ ' + fmtN(q.price);
+      if (dl) {
+        dl.textContent = fmtChange(q.change, q.changePct);
+        dl.className = 'modal-delta ' + toneClass(q.change);
+      }
+    });
+  }
+}
 </script>
 </body>
 </html>
