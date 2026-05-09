@@ -952,6 +952,129 @@
     margin-bottom: 24px;
   }
   .modal-not-in-ledger strong { color: var(--gold); font-style: normal; }
+
+  /* ============== AI ANALYSIS SECTION ============== */
+  .ai-section {
+    border: 1px solid var(--rule);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.04) 0%, rgba(160, 126, 168, 0.04) 100%);
+    border-radius: 6px;
+    padding: 28px 24px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  .ai-section-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+    opacity: 0.7;
+  }
+  .ai-section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+  .ai-section-desc {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin-bottom: 18px;
+    max-width: 460px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .ai-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 28px;
+    background: linear-gradient(135deg, var(--gold) 0%, #c8a951 100%);
+    color: var(--paper);
+    border: none;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 12px rgba(212, 175, 55, 0.2);
+  }
+  .ai-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 18px rgba(212, 175, 55, 0.35);
+    filter: brightness(1.05);
+  }
+  .ai-button:active {
+    transform: translateY(0);
+  }
+  .ai-button-icon { font-size: 14px; }
+  .ai-section-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+  }
+  .ai-usage-counter {
+    color: var(--gold-deep);
+    font-weight: 600;
+  }
+  .ai-section-loading {
+    background: var(--paper-2);
+    border-color: var(--gold);
+  }
+  .ai-section-blocked {
+    border-color: rgba(212, 92, 75, 0.3);
+    background: rgba(212, 92, 75, 0.04);
+  }
+  .ai-section-error {
+    border-color: rgba(212, 92, 75, 0.3);
+    background: rgba(212, 92, 75, 0.04);
+  }
+  .ai-loader {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .ai-loader-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: aiPulse 1.4s ease-in-out infinite;
+  }
+  .ai-loader-dot:nth-child(2) { animation-delay: 0.2s; }
+  .ai-loader-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes aiPulse {
+    0%, 100% { transform: scale(0.6); opacity: 0.4; }
+    50% { transform: scale(1.0); opacity: 1.0; }
+  }
+  .ai-verdict-box {
+    border-left: 3px solid var(--gold);
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, var(--paper-2) 100%);
+  }
+  .ai-badge {
+    display: inline-block;
+    margin-bottom: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
   .modal-algo-note {
     margin-top: 12px;
     padding-top: 12px;
@@ -2259,8 +2382,6 @@ function renderInLedgerModal(contentEl, s, td, q) {
 }
 
 function renderOutsideLedgerModal(contentEl, symbol, displayName, q) {
-  const verdict = computeAlgoVerdict(q, null);
-
   // Build 52-week range bar
   let rangeBar = '';
   if (q && q.fiftyTwoWeekHigh != null && q.fiftyTwoWeekLow != null && q.fiftyTwoWeekHigh > q.fiftyTwoWeekLow) {
@@ -2280,9 +2401,6 @@ function renderOutsideLedgerModal(contentEl, symbol, displayName, q) {
       '</div>'
     ].join('');
   }
-
-  // Build observations list
-  const obs = (verdict.observations || []).map(o => '<li>' + escHtml(o) + '</li>').join('');
 
   // Build day stats grid
   let dayStats = '';
@@ -2304,24 +2422,242 @@ function renderOutsideLedgerModal(contentEl, symbol, displayName, q) {
   const deltaLine = q ? fmtChange(q.change, q.changePct) : '';
   const deltaClass = q ? toneClass(q.change) : 'flat';
 
+  // Check rate limit and cache
+  const rateInfo = checkAIRateLimit();
+  const cached = getAICacheEntry(symbol);
+
+  // AI button section — depends on cache and rate limit
+  let aiSection;
+  if (cached) {
+    // Already analyzed within 24 hours — show cached result immediately
+    aiSection = renderAIVerdictHtml(cached);
+  } else if (!rateInfo.allowed) {
+    // Rate limit hit
+    aiSection = [
+      '<div class="ai-section ai-section-blocked">',
+      '  <div class="ai-section-icon">⏸</div>',
+      '  <div class="ai-section-title">Daily limit reached</div>',
+      '  <div class="ai-section-desc">You\'ve used all 20 AI analyses for today. Limit resets at midnight IST. <br/><span style="font-family:\'JetBrains Mono\', monospace; font-size:11px; color:var(--ink-mute); letter-spacing:0.1em; margin-top:8px; display:inline-block;">USAGE: ' + rateInfo.used + ' / ' + rateInfo.limit + '</span></div>',
+      '</div>'
+    ].join('');
+  } else {
+    // Show the "Get Kunal's AI to analyse" button
+    aiSection = [
+      '<div class="ai-section">',
+      '  <div class="ai-section-title">' + escHtml(displayName || symbol) + ' is outside the curated ledger</div>',
+      '  <div class="ai-section-desc">No thesis, no balance-sheet review, no management quality check has been done. But you can have Claude take a fundamentals-first look right now.</div>',
+      '  <button class="ai-button" onclick="requestAIAnalysis(\'' + escHtml(symbol) + '\', \'' + escHtml(displayName || symbol) + '\')">',
+      '    <span class="ai-button-icon">⚡</span>',
+      '    Get Kunal\'s AI to analyse',
+      '  </button>',
+      '  <div class="ai-section-meta">',
+      '    <span>~30 seconds · uses 1 of your daily 20</span>',
+      '    <span class="ai-usage-counter">USAGE: ' + rateInfo.used + ' / ' + rateInfo.limit + '</span>',
+      '  </div>',
+      '</div>'
+    ].join('');
+  }
+
   contentEl.innerHTML = [
     '<div class="modal-price-row">',
     '  <div class="modal-price">' + priceLine + '</div>',
     '  <div class="modal-delta ' + deltaClass + '">' + deltaLine + '</div>',
     '</div>',
-    '<div class="modal-verdict-box">',
-    '  <span class="modal-verdict-tag ' + verdict.tag + '">' + verdict.label + '</span>',
-    '  <p class="modal-thesis">' + escHtml(verdict.summary) + '</p>',
-    '  <p class="modal-algo-note">An algorithmic read based on price action and 52-week range. Not a substitute for fundamental analysis.</p>',
-    '</div>',
+    '<div id="ai-verdict-slot">' + aiSection + '</div>',
     rangeBar,
-    dayStats,
-    obs ? '<div class="modal-section"><h4>What the Tape Shows</h4><ul class="modal-list">' + obs + '</ul></div>' : '',
-    '<div class="modal-section">',
-    '  <h4>Why a fuller verdict isn\'t shown</h4>',
-    '  <p class="modal-thesis" style="font-size:14px;">' + escHtml(displayName || symbol) + ' is not in the Heritage Ledger\'s curated coverage. The reading above is purely from market data — no thesis, no balance-sheet review, no management quality check. To get a full editorial verdict, this stock would need to be added to the daily refresh universe.</p>',
+    dayStats
+  ].join('');
+}
+
+/* =========================================================
+   LIVE AI ANALYSIS — Kunal's AI on demand
+   ========================================================= */
+
+const AI_WORKER_URL = 'https://twilight-feather-cee8.kunalgkataria.workers.dev';
+const AI_RATE_LIMIT_PER_DAY = 20;
+const AI_CACHE_HOURS = 24;
+
+// Get today's date string in IST (YYYY-MM-DD)
+function todayISTString() {
+  const now = new Date();
+  // Convert to IST (UTC+5:30)
+  const istOffset = 5.5 * 60 * 60 * 1000;
+  const istTime = new Date(now.getTime() + istOffset);
+  return istTime.toISOString().split('T')[0];
+}
+
+// Check if user can make another AI request today
+function checkAIRateLimit() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('aiUsage') || '{}');
+    const today = todayISTString();
+    const used = (stored.date === today) ? (stored.count || 0) : 0;
+    return {
+      allowed: used < AI_RATE_LIMIT_PER_DAY,
+      used,
+      limit: AI_RATE_LIMIT_PER_DAY,
+      remaining: AI_RATE_LIMIT_PER_DAY - used
+    };
+  } catch (e) {
+    return { allowed: true, used: 0, limit: AI_RATE_LIMIT_PER_DAY, remaining: AI_RATE_LIMIT_PER_DAY };
+  }
+}
+
+// Increment usage counter
+function incrementAIUsage() {
+  try {
+    const today = todayISTString();
+    const stored = JSON.parse(localStorage.getItem('aiUsage') || '{}');
+    const newCount = (stored.date === today) ? (stored.count || 0) + 1 : 1;
+    localStorage.setItem('aiUsage', JSON.stringify({ date: today, count: newCount }));
+    return newCount;
+  } catch (e) {
+    return 0;
+  }
+}
+
+// Get cached AI analysis for a symbol (if within 24h)
+function getAICacheEntry(symbol) {
+  try {
+    const cache = JSON.parse(localStorage.getItem('aiCache') || '{}');
+    const entry = cache[symbol];
+    if (!entry) return null;
+    const ageHours = (Date.now() - entry.timestamp) / (1000 * 60 * 60);
+    if (ageHours > AI_CACHE_HOURS) return null;
+    return entry;
+  } catch (e) {
+    return null;
+  }
+}
+
+// Cache an AI analysis result
+function setAICacheEntry(symbol, name, analysis) {
+  try {
+    const cache = JSON.parse(localStorage.getItem('aiCache') || '{}');
+    cache[symbol] = {
+      symbol,
+      name,
+      analysis,
+      timestamp: Date.now()
+    };
+    // Keep cache size reasonable — drop entries older than 7 days
+    const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    Object.keys(cache).forEach(k => {
+      if (cache[k].timestamp < sevenDaysAgo) delete cache[k];
+    });
+    localStorage.setItem('aiCache', JSON.stringify(cache));
+  } catch (e) {
+    console.warn('Cache write failed', e);
+  }
+}
+
+// Render the AI verdict HTML (used both for fresh and cached results)
+function renderAIVerdictHtml(entry) {
+  const a = entry.analysis || {};
+  const stanceMap = { 'pos': 'tag-buy', 'neu': 'tag-hold', 'neg': 'tag-sell' };
+  const tagClass = stanceMap[a.stance] || 'tag-hold';
+  const ageHours = (Date.now() - entry.timestamp) / (1000 * 60 * 60);
+  const ageStr = ageHours < 1 ?
+    Math.round(ageHours * 60) + ' min ago' :
+    Math.round(ageHours) + 'h ago';
+
+  return [
+    '<div class="modal-verdict-box ai-verdict-box">',
+    '  <div class="ai-badge">⚡ KUNAL\'S AI · ANALYSED ' + ageStr + '</div>',
+    '  <span class="modal-verdict-tag ' + tagClass + '">' + escHtml(a.conviction || 'Watching') + '</span>',
+    '  <p class="modal-thesis">' + escHtml(a.thesis || '') + '</p>',
+    '  <p class="modal-algo-note">' + escHtml(a.confidence_note || 'Live AI analysis based on Yahoo Finance data and Claude\'s knowledge.') + '</p>',
+    '</div>',
+    a.catalyst ? '<div class="modal-section"><h4>What Could Go Right</h4><ul class="modal-list"><li>' + escHtml(a.catalyst) + '</li></ul></div>' : '',
+    a.risk ? '<div class="modal-section"><h4>What Could Go Wrong</h4><ul class="modal-list"><li>' + escHtml(a.risk) + '</li></ul></div>' : '',
+    a.horizon ? '<div class="modal-section"><h4>Horizon</h4><p class="modal-thesis" style="font-size:14px;">' + escHtml(a.horizon) + '</p></div>' : ''
+  ].join('');
+}
+
+// Main function — called when "Get Kunal's AI to analyse" button clicked
+async function requestAIAnalysis(symbol, name) {
+  const slot = document.getElementById('ai-verdict-slot');
+  if (!slot) return;
+
+  // Check rate limit one more time (in case it changed)
+  const rateInfo = checkAIRateLimit();
+  if (!rateInfo.allowed) {
+    slot.innerHTML = [
+      '<div class="ai-section ai-section-blocked">',
+      '  <div class="ai-section-icon">⏸</div>',
+      '  <div class="ai-section-title">Daily limit reached</div>',
+      '  <div class="ai-section-desc">You\'ve used all ' + rateInfo.limit + ' AI analyses for today. Limit resets at midnight IST.</div>',
+      '</div>'
+    ].join('');
+    return;
+  }
+
+  // Show loading state
+  slot.innerHTML = [
+    '<div class="ai-section ai-section-loading">',
+    '  <div class="ai-loader">',
+    '    <div class="ai-loader-dot"></div>',
+    '    <div class="ai-loader-dot"></div>',
+    '    <div class="ai-loader-dot"></div>',
+    '  </div>',
+    '  <div class="ai-section-title">Kunal is working...</div>',
+    '  <div class="ai-section-desc">Reading the tape, checking the fundamentals, applying the principles. ~20 seconds.</div>',
     '</div>'
   ].join('');
+
+  // Get the latest quote data for richer context
+  const q = await fetchQuote(symbol);
+
+  // Build the request payload
+  const payload = {
+    symbol,
+    name: name || symbol,
+    sector: q && q.exchangeName ? q.exchangeName : 'Indian equity',
+    price: q ? q.price : null,
+    change_pct: q ? q.changePct : null,
+    fifty_two_w_high: q ? q.fiftyTwoWeekHigh : null,
+    fifty_two_w_low: q ? q.fiftyTwoWeekLow : null
+  };
+
+  try {
+    const res = await fetch(AI_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error('Worker returned ' + res.status + ': ' + errText);
+    }
+
+    const data = await res.json();
+    if (!data.success || !data.analysis) {
+      throw new Error(data.error || 'Invalid response from AI');
+    }
+
+    // Increment usage and cache
+    incrementAIUsage();
+    setAICacheEntry(symbol, name, data.analysis);
+
+    // Render the verdict
+    const cached = getAICacheEntry(symbol);
+    slot.innerHTML = renderAIVerdictHtml(cached);
+
+  } catch (err) {
+    console.error('AI analysis failed:', err);
+    slot.innerHTML = [
+      '<div class="ai-section ai-section-error">',
+      '  <div class="ai-section-icon">⚠</div>',
+      '  <div class="ai-section-title">Could not reach Kunal\'s AI</div>',
+      '  <div class="ai-section-desc">Try again in a moment. <br/><span style="font-family:\'JetBrains Mono\', monospace; font-size:11px; color:var(--ink-mute);">' + escHtml(err.message || 'Unknown error') + '</span></div>',
+      '  <button class="ai-button" onclick="requestAIAnalysis(\'' + escHtml(symbol) + '\', \'' + escHtml(name) + '\')" style="margin-top:14px;">',
+      '    <span class="ai-button-icon">↻</span>',
+      '    Try again',
+      '  </button>',
+      '</div>'
+    ].join('');
+  }
 }
 
 // Format volume in Indian style (lakhs/crores)
