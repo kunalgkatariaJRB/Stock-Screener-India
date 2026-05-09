@@ -24,6 +24,7 @@ import urllib.request
 import xml.etree.ElementTree as ET
 
 import anthropic
+from extended_universe import EXTENDED_UNIVERSE_STOCKS
 
 # ----------------------------------------------------------------------
 # CONFIG
@@ -204,6 +205,99 @@ Your task: produce the updated data.json for today. Apply the principles in the 
 
 
 # ----------------------------------------------------------------------
+# EXTENDED UNIVERSE — Top 100 small/mid-cap analysis
+# ----------------------------------------------------------------------
+
+EXTENDED_SYSTEM_PROMPT = """You are the editor of "The Heritage Ledger", writing a brief read on a list of small/mid-cap Indian stocks NOT in the main ledger.
+
+For each stock, you produce a brief, fundamentals-aware verdict — lighter than the main ledger but still grounded in what you know about the company, its sector, and the macro setup.
+
+You apply Graham, Buffett, Munger, Naval principles. You are honest: if a stock is rich, say so. If it's worth watching, say so. If you genuinely don't have enough conviction either way, say "neutral" with a one-line reason.
+
+You output ONE JSON object: {"extendedUniverse": [...]}. No prose, no code fences.
+
+Each stock entry must have exactly these fields:
+  symbol (string, with .NS suffix exactly as given)
+  ticker (string, exactly as given)
+  name (string, exactly as given)
+  sector (string, exactly as given)
+  stance (string: "pos" | "neu" | "neg")
+  conviction (string, e.g. "Constructive · medium", "Cautious · low", "Watching · medium")
+  thesis (string: 2-3 sentences, fundamentals-first, applying our principles)
+  catalyst (string: one short sentence — the most important thing that would make this work)
+  risk (string: one short sentence — the most important thing that would break it)
+  horizon (string: e.g. "12-24 months", "2-3 yrs", "long-term")
+
+Be brief but substantive. No filler. No generic advice. Each thesis must be specific to that company and its current setup."""
+
+
+def build_extended_user_message(today_pretty: str, macro_block: str, stocks: list[dict], price_lookup: dict) -> str:
+    """Build the user message for the extended universe call."""
+    stock_lines = []
+    for s in stocks:
+        q = price_lookup.get(s["symbol"])
+        if q:
+            stock_lines.append(
+                f"  • {s['name']} ({s['ticker']}, {s['symbol']}) — {s['sector']} — "
+                f"₹{q['price']:.2f} ({q['change_pct']:+.2f}%), 52w {q.get('fifty_two_w_low', '?')}–{q.get('fifty_two_w_high', '?')}"
+            )
+        else:
+            stock_lines.append(f"  • {s['name']} ({s['ticker']}, {s['symbol']}) — {s['sector']} — price unavailable")
+    stock_block = "\n".join(stock_lines)
+
+    return f"""Today is {today_pretty} IST.
+
+== CURRENT MACRO SNAPSHOT ==
+{macro_block}
+
+== EXTENDED UNIVERSE (small/mid-cap NSE names beyond the main ledger) ==
+{stock_block}
+
+Your task: produce {{"extendedUniverse": [...]}} with one entry per stock above, in the same order. Apply our editorial principles and write a brief, specific, fundamentals-aware verdict for each. Output ONLY the JSON object."""
+
+
+def analyze_extended_universe(client, macro_block: str, today_pretty: str, price_lookup: dict) -> list[dict]:
+    """Call Claude to analyze the extended universe stocks. Returns a list of entries."""
+    print(f"  → analyzing extended universe ({len(EXTENDED_UNIVERSE_STOCKS)} stocks)...")
+    user_msg = build_extended_user_message(today_pretty, macro_block, EXTENDED_UNIVERSE_STOCKS, price_lookup)
+    resp = client.messages.create(
+        model=MODEL,
+        max_tokens=MAX_OUTPUT_TOKENS,
+        system=EXTENDED_SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": user_msg}],
+    )
+    text = "".join(b.text for b in resp.content if hasattr(b, "text"))
+    print(f"  ✓ extended response received ({len(text)} chars)")
+    print(f"    extended usage: input {resp.usage.input_tokens}, output {resp.usage.output_tokens}")
+
+    try:
+        parsed = extract_json_block(text)
+    except Exception as e:
+        print(f"  ✗ extended universe JSON parse failed: {e}", file=sys.stderr)
+        return []
+
+    items = parsed.get("extendedUniverse")
+    if not isinstance(items, list):
+        print(f"  ✗ extendedUniverse missing or wrong type", file=sys.stderr)
+        return []
+
+    # Light validation per item
+    valid = []
+    required_fields = {"symbol", "ticker", "name", "sector", "stance", "conviction", "thesis", "catalyst", "risk"}
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        missing = required_fields - set(it.keys())
+        if missing:
+            print(f"  ! extended item missing fields {missing}: {it.get('ticker', '?')}", file=sys.stderr)
+            continue
+        valid.append(it)
+
+    print(f"  ✓ extended universe parsed ({len(valid)}/{len(items)} valid entries)")
+    return valid
+
+
+# ----------------------------------------------------------------------
 # MAIN
 # ----------------------------------------------------------------------
 
@@ -240,24 +334,27 @@ def main():
     prev_json = json.dumps(prev, indent=2)
     print(f"  ✓ prior data loaded ({len(prev_json)} chars)")
 
-    # 4. Build the user message
+    # 4. Build the user message for main ledger refresh
     today = dt.datetime.now(dt.timezone(dt.timedelta(hours=5, minutes=30)))  # IST
+    today_pretty = today.strftime("%A, %d %B %Y, %H:%M")
     user_msg = USER_TEMPLATE.format(
         today_iso=today.isoformat(),
-        today_pretty=today.strftime("%A, %d %B %Y, %H:%M"),
+        today_pretty=today_pretty,
         macro_block=macro_block,
         news_block=news_block,
         prev_json=prev_json,
     )
 
-    # 5. Call Claude
+    # 5. Validate API key and create client
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         print("  ✗ ANTHROPIC_API_KEY not set — cannot proceed.", file=sys.stderr)
         sys.exit(1)
 
     client = anthropic.Anthropic(api_key=api_key)
-    print(f"  → calling Claude ({MODEL})...")
+
+    # 6. CALL 1: Main ledger refresh
+    print(f"  → calling Claude for main ledger ({MODEL})...")
     resp = client.messages.create(
         model=MODEL,
         max_tokens=MAX_OUTPUT_TOKENS,
@@ -265,14 +362,14 @@ def main():
         messages=[{"role": "user", "content": user_msg}],
     )
     text = "".join(b.text for b in resp.content if hasattr(b, "text"))
-    print(f"  ✓ response received ({len(text)} chars)")
-    print(f"    usage: input {resp.usage.input_tokens}, output {resp.usage.output_tokens}")
+    print(f"  ✓ main response received ({len(text)} chars)")
+    print(f"    main usage: input {resp.usage.input_tokens}, output {resp.usage.output_tokens}")
 
-    # 6. Parse and validate
+    # 7. Parse and validate main ledger response
     try:
         new_data = extract_json_block(text)
     except Exception as e:
-        print(f"  ✗ JSON parse failed: {e}", file=sys.stderr)
+        print(f"  ✗ main JSON parse failed: {e}", file=sys.stderr)
         print("  ✗ keeping previous data.json", file=sys.stderr)
         sys.exit(1)
 
@@ -289,15 +386,41 @@ def main():
         print(f"  ✗ missing stock lists: {missing_lists} — keeping previous data.json", file=sys.stderr)
         sys.exit(1)
 
+    # 8. CALL 2: Extended universe analysis
+    # First, fetch live prices for the extended universe (so Claude can see current valuations)
+    print(f"  → fetching prices for extended universe ({len(EXTENDED_UNIVERSE_STOCKS)} stocks)...")
+    price_lookup = {}
+    for s in EXTENDED_UNIVERSE_STOCKS:
+        q = yahoo_quote(s["symbol"])
+        if q:
+            price_lookup[s["symbol"]] = q
+        time.sleep(0.15)  # be polite to Yahoo
+    print(f"  ✓ prices fetched ({len(price_lookup)}/{len(EXTENDED_UNIVERSE_STOCKS)} successful)")
+
+    try:
+        extended = analyze_extended_universe(client, macro_block, today_pretty, price_lookup)
+    except Exception as e:
+        print(f"  ! extended universe call failed: {e}", file=sys.stderr)
+        print(f"  ! falling back to previous extendedUniverse if available", file=sys.stderr)
+        extended = (prev.get("stocks") or {}).get("extendedUniverse", [])
+
+    # Always carry over the previous extended universe if the new one is empty
+    if not extended:
+        extended = (prev.get("stocks") or {}).get("extendedUniverse", [])
+
+    # Merge extended universe into main data
+    new_data["stocks"]["extendedUniverse"] = extended
+
     # Force lastUpdated to now
     new_data["lastUpdated"] = today.isoformat()
 
-    # 7. Write
+    # 9. Write
     with open(DATA_PATH, "w", encoding="utf-8") as f:
         json.dump(new_data, f, indent=2, ensure_ascii=False)
     print(f"  ✓ wrote {DATA_PATH}")
     print(f"    edition: {new_data.get('edition')}")
     counts = {k: len(new_data['stocks'][k]) for k in required_stock_lists}
+    counts["extendedUniverse"] = len(extended)
     print(f"    counts: {counts}")
     print(f"[done] Heritage Ledger refresh complete.")
 

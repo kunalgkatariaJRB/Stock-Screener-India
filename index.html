@@ -1579,12 +1579,22 @@ function renderSearchResults(results, queryStr) {
     searchResults.style.display = 'block';
     return;
   }
-  // Find any of these symbols in our universe to show our verdict
-  const allUniverse = ['conviction','longBets','highPromise','watchClose','trimAvoid'].flatMap(k => DATA?.stocks?.[k] || []);
-  const universeMap = new Map(allUniverse.map(s => [s.symbol, s]));
+  // Find any of these symbols in our universe (ledger or extended) to show our verdict tag
+  const allLedger = ['conviction','longBets','highPromise','watchClose','trimAvoid'].flatMap(k => DATA?.stocks?.[k] || []);
+  const ledgerMap = new Map(allLedger.map(s => [s.symbol, s]));
+  const extendedMap = new Map((DATA?.stocks?.extendedUniverse || []).map(s => [s.symbol, s]));
+
   searchResults.innerHTML = results.map(r => {
-    const inUniverse = universeMap.get(r.symbol);
-    const tag = inUniverse ? `<span class="sr-tick" style="color:var(--gold)">In ledger · ${inUniverse.conviction}</span>` : `<span class="sr-tick">${r.symbol} · ${r.exch}</span>`;
+    const inLedger = ledgerMap.get(r.symbol);
+    const inExtended = !inLedger && extendedMap.get(r.symbol);
+    let tag;
+    if (inLedger) {
+      tag = `<span class="sr-tick" style="color:var(--gold)">In ledger · ${inLedger.conviction}</span>`;
+    } else if (inExtended) {
+      tag = `<span class="sr-tick" style="color:#a3b5d6">Extended · ${inExtended.conviction || 'Brief verdict'}</span>`;
+    } else {
+      tag = `<span class="sr-tick">${r.symbol} · ${r.exch}</span>`;
+    }
     return `<div class="search-result" data-symbol="${r.symbol}" data-name="${r.name}">
       <div>
         <div class="sr-name">${r.name}</div>
@@ -1965,8 +1975,30 @@ function findStockInUniverse(symbol) {
       // Match if any of these are equal
       if (candNorm === targetNorm || candBase === targetBase || tickerNorm === targetBase || tickerNorm === targetNorm) {
         const tabDef = TAB_DEFS.find(t => t.id === bucket);
-        return { stock: s, bucket, tabDef };
+        return { stock: s, bucket, tabDef, source: 'ledger' };
       }
+    }
+  }
+  return null;
+}
+
+// Check the extended universe (Top 100 small/mid-caps with brief Claude verdicts)
+function findStockInExtendedUniverse(symbol) {
+  if (!DATA || !DATA.stocks || !DATA.stocks.extendedUniverse) return null;
+  if (!symbol) return null;
+
+  const normalize = (s) => String(s || '').toUpperCase().trim();
+  const stripSuffix = (s) => normalize(s).replace(/\.(NS|BO)$/i, '');
+  const targetNorm = normalize(symbol);
+  const targetBase = stripSuffix(symbol);
+
+  const list = DATA.stocks.extendedUniverse || [];
+  for (const s of list) {
+    const candNorm = normalize(s.symbol);
+    const candBase = stripSuffix(s.symbol);
+    const tickerNorm = normalize(s.ticker);
+    if (candNorm === targetNorm || candBase === targetBase || tickerNorm === targetBase || tickerNorm === targetNorm) {
+      return { stock: s, source: 'extended' };
     }
   }
   return null;
@@ -2076,6 +2108,7 @@ async function openStockModal(symbol, displayName) {
   document.body.style.overflow = 'hidden';
 
   const found = findStockInUniverse(symbol);
+  const foundExt = found ? null : findStockInExtendedUniverse(symbol);
 
   // Set initial header state
   if (found) {
@@ -2083,9 +2116,14 @@ async function openStockModal(symbol, displayName) {
     statusEl.style.color = 'var(--gold)';
     nameEl.textContent = found.stock.name;
     tickerEl.textContent = found.stock.ticker + ' · NSE';
+  } else if (foundExt) {
+    statusEl.textContent = 'Extended Coverage · ' + (foundExt.stock.sector || 'Small/Mid-cap');
+    statusEl.style.color = '#a3b5d6';
+    nameEl.textContent = foundExt.stock.name;
+    tickerEl.textContent = foundExt.stock.ticker + ' · NSE';
   } else {
-    statusEl.textContent = 'Outside the Ledger · Algorithmic Read';
-    statusEl.style.color = 'var(--ink-soft)';
+    statusEl.textContent = 'Outside Coverage';
+    statusEl.style.color = 'var(--ink-mute)';
     nameEl.textContent = displayName || symbol;
     tickerEl.textContent = symbol + ' · NSE/BSE';
   }
@@ -2099,15 +2137,68 @@ async function openStockModal(symbol, displayName) {
     '<div class="modal-section"><p class="modal-thesis" style="color:var(--ink-mute);font-size:14px;">Fetching latest data…</p></div>'
   ].join('');
 
-  // Fetch quote data first (we need 52w range for the verdict)
+  // Fetch quote data first (we need 52w range)
   const q = await fetchQuote(symbol);
 
   // Now render the full modal with everything
   if (found) {
     renderInLedgerModal(contentEl, found.stock, found.tabDef, q);
+  } else if (foundExt) {
+    renderExtendedUniverseModal(contentEl, foundExt.stock, q);
   } else {
     renderOutsideLedgerModal(contentEl, symbol, displayName, q);
   }
+}
+
+// Render modal for stocks in the EXTENDED universe (Top 100 with brief Claude verdict)
+function renderExtendedUniverseModal(contentEl, s, q) {
+  // Build 52-week range bar
+  let rangeBar = '';
+  if (q && q.fiftyTwoWeekHigh != null && q.fiftyTwoWeekLow != null && q.fiftyTwoWeekHigh > q.fiftyTwoWeekLow) {
+    const range = q.fiftyTwoWeekHigh - q.fiftyTwoWeekLow;
+    const pos = ((q.price - q.fiftyTwoWeekLow) / range) * 100;
+    rangeBar = [
+      '<div class="modal-section">',
+      '  <h4>52-Week Range</h4>',
+      '  <div class="range-bar-wrap">',
+      '    <div class="range-bar"><div class="range-marker" style="left:' + pos.toFixed(1) + '%;"></div></div>',
+      '    <div class="range-labels">',
+      '      <span class="range-low">₹ ' + fmtN(q.fiftyTwoWeekLow) + '</span>',
+      '      <span class="range-now">Now: ' + pos.toFixed(0) + '% of range</span>',
+      '      <span class="range-high">₹ ' + fmtN(q.fiftyTwoWeekHigh) + '</span>',
+      '    </div>',
+      '  </div>',
+      '</div>'
+    ].join('');
+  }
+
+  // Map stance to verdict tag
+  const stanceMap = {
+    'pos': 'tag-buy',
+    'neu': 'tag-hold',
+    'neg': 'tag-sell'
+  };
+  const tagClass = stanceMap[s.stance] || 'tag-hold';
+
+  const priceLine = q ? '₹ ' + fmtN(q.price) : 'Price unavailable';
+  const deltaLine = q ? fmtChange(q.change, q.changePct) : '';
+  const deltaClass = q ? toneClass(q.change) : 'flat';
+
+  contentEl.innerHTML = [
+    '<div class="modal-price-row">',
+    '  <div class="modal-price">' + priceLine + '</div>',
+    '  <div class="modal-delta ' + deltaClass + '">' + deltaLine + '</div>',
+    '</div>',
+    '<div class="modal-verdict-box">',
+    '  <span class="modal-verdict-tag ' + tagClass + '">' + escHtml(s.conviction || 'Watching') + '</span>',
+    '  <p class="modal-thesis">' + escHtml(s.thesis || '') + '</p>',
+    '  <p class="modal-algo-note">Brief verdict from the daily refresh. Lighter than ledger coverage — for a deeper view, this stock would need to be added to the main ledger.</p>',
+    '</div>',
+    rangeBar,
+    s.catalyst ? '<div class="modal-section"><h4>What Could Go Right</h4><ul class="modal-list"><li>' + escHtml(s.catalyst) + '</li></ul></div>' : '',
+    s.risk ? '<div class="modal-section"><h4>What Could Go Wrong</h4><ul class="modal-list"><li>' + escHtml(s.risk) + '</li></ul></div>' : '',
+    s.horizon ? '<div class="modal-section"><h4>Horizon</h4><p class="modal-thesis" style="font-size:14px;">' + escHtml(s.horizon) + '</p></div>' : ''
+  ].join('');
 }
 
 function renderInLedgerModal(contentEl, s, td, q) {
