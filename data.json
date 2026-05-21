@@ -1,7 +1,7 @@
 {
-  "edition": "May 2026 · Daily Refresh — 19 May",
-  "lastUpdated": "2026-05-19T11:43:47.239097+05:30",
-  "macroNarrative": "Markets rally sharply on Tuesday — Nifty +1.44% to 23,749, Sensex +1.26% to 75,550 — as Trump reportedly postponed Iran attacks, triggering a relief rally across risk assets; yet Brent has actually accelerated to $110.27 (+4.3%), suggesting the geopolitical risk is far from resolved and the crude shock is deepening. The rupee is testing 96.34/USD, near record lows, maintaining the bifurcation between exporters (IT, pharma, upstream) and importers (OMCs, EMS, aviation). Key macro read today: ONGC results are due, petrol/diesel price hikes have pushed OMC shares up 2-3% but analysts warn they are insufficient to cover losses at $110 Brent, and the Adani overhang has partially cleared as US drops charges against Gautam Adani — adding 5%+ to Adani Group stocks.",
+  "edition": "May 2026 · Daily Refresh — 21 May",
+  "lastUpdated": "2026-05-21T11:47:37.764736+05:30",
+  "macroNarrative": "Markets continue a modest grind higher — Nifty +0.35% at 23,726, Sensex +0.28% at 75,451 — as Brent crude pulls back sharply to $105.74 (-5.67%) on Iran-US peace deal hopes, providing the first meaningful relief to the import-cost squeeze in weeks. The rupee, however, remains under pressure at 96.30/USD with reports of RBI mulling a rate hike to arrest the slide, a development that could weigh on rate-sensitive financials if confirmed. Critically, with Titan results due tomorrow (22 May) and Grasim surging 4% on robust Q4 profit (+28% YoY), the earnings calendar continues to drive individual stock narratives; a prospective PFC-REC merger and the Sensex reshuffle (Trent possibly making way for Hindalco or Shriram Finance) are the two key structural events to monitor this week.",
   "stocks": {
     "conviction": [
       {
@@ -17,7 +17,7 @@
           "Retail credit cycle turning supportive in FY27"
         ],
         "risks": [
-          "Net interest margin pressure if bond yields surge further on crude-driven inflation",
+          "RBI rate hike speculation emerging — could pressure NIMs and bond portfolio if confirmed",
           "Credit costs in unsecured retail",
           "Heavy index weight invites foreign-flow volatility — FII selling in Q4 a headwind"
         ],
@@ -36,7 +36,7 @@
         "ticker": "ICICIBANK",
         "name": "ICICI Bank",
         "sector": "Private Banking",
-        "thesis": "The best-run large bank in India by almost any operating metric — consistent ROA above 2%, conservative provisioning, a digital stack peers are still trying to replicate. IndusInd Bank saw highest increase in DII holdings in Q4 alongside Max Health, but ICICI's franchise quality remains the gold standard. Thesis unbroken; we pay a premium happily for the quality gap.",
+        "thesis": "The best-run large bank in India by almost any operating metric — consistent ROA above 2%, conservative provisioning, a digital stack peers are still trying to replicate. Thesis unbroken; we pay a premium happily for the quality gap. RBI rate hike chatter is worth monitoring but ICICI's conservative balance sheet is better positioned than peers to absorb any tightening.",
         "catalysts": [
           "Industry-leading return on assets >2%",
           "Cleaner book than every private peer",
@@ -44,9 +44,9 @@
           "FII return to India likely to favour ICICI first among large banks once macro stabilises"
         ],
         "risks": [
-          "Valuation premium leaves less room for error",
+          "RBI rate hike speculation — bond yields rising could pressure mark-to-market treasury book",
           "Slowing retail unsecured credit growth",
-          "Macroprudential tightening overhang if inflation resurges"
+          "Valuation premium leaves less room for error"
         ],
         "fundamentals": {
           "pe": 18.1,
@@ -63,16 +63,16 @@
         "ticker": "SBIN",
         "name": "State Bank of India",
         "sector": "PSU Banking",
-        "thesis": "The flagship PSU bank is macro-pressured but fundamentally sound. Asset quality is at its cleanest in a decade, ROE has migrated above 16%, and it trades at roughly 1.5× book. SBI appeared in top-10 highest DII buying in Q4 — a powerful signal of domestic institutional support at current levels.",
+        "thesis": "The flagship PSU bank is macro-pressured but fundamentally sound. Asset quality is at its cleanest in a decade, ROE has migrated above 16%, and it trades at roughly 1.5× book. SBI appeared in top-10 highest DII buying in Q4 — a powerful signal of domestic institutional support. RBI rate hike speculation is a near-term headwind but a cleaner book means less credit-cycle vulnerability.",
         "catalysts": [
           "Top-10 DII buying in Q4 — domestic institutions accumulating at these levels",
           "Cleanest GNPA/NNPA ratios in 10+ years",
           "Subsidiary value (SBI Cards, SBI Life, AMC) under-counted in price",
-          "Valuation gap vs private peers remains historically wide"
+          "Brent pullback to $105.74 eases macro pressure modestly"
         ],
         "risks": [
+          "RBI rate hike speculation — could pressure treasury portfolio and bond yields",
           "Government cross-currents (PSL targets, minority stake sales)",
-          "Treasury volatility as global yields surge to one-year highs",
           "Slower fee-income growth than private peers"
         ],
         "fundamentals": {
@@ -90,7 +90,7 @@
         "ticker": "ITC",
         "name": "ITC",
         "sector": "Diversified · FMCG",
-        "thesis": "A cash-printing cigarette monopoly funding a steadily compounding FMCG business, plus hotels, paperboards, and agri. Near-zero debt, a 3.5%+ dividend yield, and a hotels demerger unlocking value. Today's price action shows slight daily gains — the fully domestic revenue base remains the cleanest hedge against rupee weakness at 96/USD in the portfolio.",
+        "thesis": "A cash-printing cigarette monopoly funding a steadily compounding FMCG business, plus hotels, paperboards, and agri. Near-zero debt, a 3.5%+ dividend yield, and a hotels demerger unlocking value. The fully domestic revenue base remains the cleanest hedge against rupee weakness at 96/USD and crude volatility in the portfolio.",
         "catalysts": [
           "Hotels demerger value unlock — Q4 PAT ₹317 Cr, revenue ₹1,254 Cr confirms momentum",
           "FMCG margins continuing to expand toward HUL's",
@@ -117,12 +117,12 @@
         "ticker": "BEL",
         "name": "Bharat Electronics",
         "sector": "Defence",
-        "thesis": "The crown jewel of Indian defence indigenisation. Order book over ₹75,000 Cr giving multi-year revenue visibility, ROCE above 25%, debt-free balance sheet. US-Iran combat fears persisting at Brent $110, elevated border tensions, and global geopolitical re-armament converge into the most supportive backdrop for indigenous defence procurement in India's history.",
+        "thesis": "The crown jewel of Indian defence indigenisation. Order book over ₹75,000 Cr giving multi-year revenue visibility, ROCE above 25%, debt-free balance sheet. HCL Tech and BEL both jumping 2% each today confirms the market is rewarding quality defensives. Geopolitical backdrop — Iran-US tensions persisting even as peace deal hopes emerge — keeps defence procurement urgency elevated.",
         "catalysts": [
           "Defence capex growing at low-double digits in FY27 budget",
           "Export orders compounding from a small base",
           "Order book : revenue ratio above 3×",
-          "US-Iran conflict risk and border tensions elevating indigenous procurement urgency to multi-year highs"
+          "HCL Tech and BEL both +2% today — broad quality defensive rotation underway"
         ],
         "risks": [
           "Valuation multiple is the highest in its history",
@@ -144,17 +144,17 @@
         "ticker": "PFC",
         "name": "Power Finance Corp",
         "sector": "PSU · Power Financing",
-        "thesis": "Government-backed NBFC at the centre of India's power and renewables financing build-out. Trades at a single-digit P/E with a ~4% dividend yield, ROE in the high teens, and a loan book with vastly improved asset quality. Crude at $110 directly accelerates India's renewables financing pipeline — PFC is the primary conduit for that capital.",
+        "thesis": "Government-backed NBFC at the centre of India's power and renewables financing build-out. Trades at a single-digit P/E with a ~4% dividend yield, ROE in the high teens, and a loan book with vastly improved asset quality. The reported PFC-REC merger talk adds a significant re-rating catalyst — if executed, creates India's dominant infrastructure lender with superior funding access.",
         "catalysts": [
+          "PFC-REC merger reports — if confirmed, creates dominant infra lender; massive re-rating potential",
           "Renewable energy financing the dominant growth driver",
           "Asset quality at cyclical best",
-          "Re-rating potential as discom risk is repriced lower",
-          "Crude near $110 accelerates India's strategic push to renewables — more financing demand for PFC"
+          "Crude pullback to $105.74 eases macro stress; renewables pipeline structurally intact"
         ],
         "risks": [
+          "Merger execution complexity and timeline uncertainty",
           "Concentration in power sector / discom credit risk",
-          "Tariff / regulatory interventions",
-          "Bond market volatility — global yields at one-year highs as crude-driven inflation bites"
+          "Bond market volatility — RBI rate hike speculation adds yield pressure"
         ],
         "fundamentals": {
           "pe": 6.5,
@@ -171,16 +171,16 @@
         "ticker": "ONGC",
         "name": "Oil & Natural Gas Corp",
         "sector": "Oil & Gas · Upstream",
-        "thesis": "Brent at $110.27 — up a further 4.3% today — is the most direct earnings upgrade for ONGC. Results are due today (19 May); FY27 realisations will be materially higher and the windfall-tax regime appears more stable than feared. IOC Q4 net profit rising 78% YoY (OMC peer) and the petrol/diesel price hike confirmation solidify the upstream read. At P/E ~7.5× and P/B ~1×, this remains the cleanest crude-hedge in the portfolio.",
+        "thesis": "Brent pulling back to $105.74 on Iran-US peace deal hopes is the first material risk to the crude-upside thesis — monitor closely. However, at $105 Brent, ONGC realisations remain strong and FY27 earnings upgrades still hold. ONGC results (reported 19 May) are now the reference point; any windfall tax re-emergence at $100+ is the key risk to watch.",
         "catalysts": [
-          "Brent at $110.27 lifts realisations materially — FY27 earnings upgrade firmly in play",
+          "Brent at $105.74 still highly supportive of FY27 realisations vs FY26 base",
           "Windfall tax regime more stable than feared",
           "Gas price reform supporting earnings floor",
-          "Results today — key read on FY27 capex guidance and management confidence at sustained $110+ Brent"
+          "IOC Q4 net profit +78% YoY — upstream read broadly positive"
         ],
         "risks": [
-          "Sharp crude correction if US-Iran geopolitical risk eases suddenly",
-          "Government windfall taxes can re-emerge at $100+ as political pressure mounts",
+          "Iran-US peace deal could accelerate crude correction toward $90 — watch closely",
+          "Government windfall taxes can re-emerge if sustained above $100",
           "Capex cycle pressure on free cash flow"
         ],
         "fundamentals": {
@@ -198,17 +198,17 @@
         "ticker": "COFORGE",
         "name": "Coforge",
         "sector": "IT · Mid-cap",
-        "thesis": "The bright spot in a battered IT sector. Today IT stocks are rallying up to 5% as tactical rotation from banking fatigue triggers a sector shift — Coforge benefits disproportionately given deal-win momentum. Rupee at 96.34/USD provides a meaningful tailwind to reported rupee earnings. Sector valuations near 2008 levels per one analyst note adds a contrarian entry angle.",
+        "thesis": "The bright spot in a recovering IT sector. IT is flagged as a tactical buy today by multiple analysts, with HCL Tech and BEL jumping 2% each confirming quality-tech rotation. Coforge benefits disproportionately given deal-win momentum. Rupee at 96.30/USD provides a meaningful tailwind to reported rupee earnings.",
         "catalysts": [
           "Deal wins outpacing Tier-1 IT",
           "AI services book gaining real revenue traction",
           "Cigniti acquisition synergies still ahead",
-          "INR near 96/USD adds ~200bps to rupee revenue growth; IT sector tactical rotation underway"
+          "INR near 96/USD adds ~200bps to rupee revenue growth; IT tactical buy call active today"
         ],
         "risks": [
-          "IT sector near 2008 valuation levels — mean reversion risk if global slowdown deepens",
           "Concentration in BFSI vertical",
-          "Higher beta than large-cap IT in any global slowdown"
+          "Higher beta than large-cap IT in any global slowdown",
+          "RBI rate hike speculation could dampen financial-sector client budgets"
         ],
         "fundamentals": {
           "pe": 32.0,
@@ -225,17 +225,17 @@
         "ticker": "BAJAJ-AUTO",
         "name": "Bajaj Auto",
         "sector": "Auto · Two-Wheelers",
-        "thesis": "Export-led two-wheeler franchise with strong April sales momentum. Petrol price hikes will provide some near-term headwind to domestic two-wheeler volume sentiment, but Bajaj's export diversification and CNG/EV mix reduce sensitivity versus domestic-only peers significantly. The rupee at 96.34/USD is an incremental export revenue tailwind.",
+        "thesis": "Export-led two-wheeler franchise with strong April sales momentum. Crude pulling back to $105.74 from $110+ is a modest improvement in domestic fuel-cost sentiment. Bajaj's export diversification and CNG/EV mix reduce sensitivity versus domestic-only peers significantly. The rupee at 96.30/USD is an incremental export revenue tailwind.",
         "catalysts": [
           "Export tailwind back — 83% YoY growth in April",
           "EV (Chetak) reaching meaningful volumes",
           "CNG + 3W commercial cycle underway",
-          "Less domestic fuel-price sensitivity than Hero/TVS peers; INR tailwind on export revenues"
+          "Crude pullback mildly positive for domestic demand sentiment; INR tailwind on export revenues"
         ],
         "risks": [
-          "Petrol price hike dampens domestic two-wheeler demand near-term",
+          "Rupee at 96/USD — Africa/LatAm currency exposure on exports can offset INR gains",
           "EV margin profile still being established",
-          "Africa/LatAm currency exposure on exports"
+          "RBI rate hike speculation could slow consumer credit and dampen two-wheeler demand"
         ],
         "fundamentals": {
           "pe": 29.0,
@@ -252,17 +252,17 @@
         "ticker": "RELIANCE",
         "name": "Reliance Industries",
         "sector": "Diversified Conglomerate",
-        "thesis": "Partial Adani-overhang clearing (US drops charges against Gautam Adani) lifts sentiment for large conglomerates broadly. Reliance's three engines — Jio, Retail, O2C — remain intact; Brent at $110 is supportive for O2C GRMs. FII selling has been a headwind but the group's domestic policy alignment and scale provide a durable floor. Monitor today's price action post Adani clearance for sentiment read.",
+        "thesis": "Three engines — Jio, Retail, O2C — remain intact. Jio IPO reportedly hit a roadblock due to Iran war uncertainty per today's headlines ($4bn Jio IPO delay), a near-term negative for the value-unlock narrative. O2C GRM remains supportive even as Brent pulls back modestly to $105.74. The Adani overhang clearing has improved large-conglomerate sentiment broadly; monitor Jio IPO timeline closely.",
         "catalysts": [
           "Jio tariff hike cycle still has runway",
-          "Reliance Retail IPO talk persists as latent catalyst",
           "New energy capex starting to produce revenue",
-          "O2C margin uplift as GRM widens with Brent near $110; sentiment lift from Adani charges clearance"
+          "O2C margin uplift as GRM remains wide",
+          "Adani charges clearance lifts large-conglomerate sentiment broadly"
         ],
         "risks": [
-          "Reliance hardest hit in top-10 m-cap destruction recently — FII selling confirmed",
+          "Jio IPO $4bn deal hit Iran war roadblock — value unlock timeline pushed out",
           "Quick-commerce competition pressuring retail margins",
-          "Conglomerate discount may persist longer than expected given capital intensity"
+          "FII selling confirmed in Q4; conglomerate discount may persist"
         ],
         "fundamentals": {
           "pe": 24.0,
@@ -281,7 +281,7 @@
         "ticker": "SYRMA",
         "name": "Syrma SGS Technology",
         "sector": "Small-cap · EMS / China+1",
-        "thesis": "Top brokerage pick in Indian Electronics Manufacturing Services. The sector grew 24% CAGR FY19-24 and is forecast at 27% to FY29 on PLI schemes and China+1 supply-chain shifts. Margin expansion is structural as backward integration deepens. Near-term caution warranted on rupee at 96.34/USD raising imported component costs.",
+        "thesis": "Top brokerage pick in Indian Electronics Manufacturing Services. The sector grew 24% CAGR FY19-24 and is forecast at 27% to FY29 on PLI schemes and China+1 supply-chain shifts. Margin expansion is structural as backward integration deepens. Crude pullback to $105.74 modestly relieves logistics cost pressure; rupee at 96/USD remains a headwind on imported components.",
         "catalysts": [
           "FY26-28E revenue CAGR estimated at 29%, profit CAGR 44% by HDFC Sec",
           "PLI scheme extension expected; budget tailwinds",
@@ -289,7 +289,7 @@
           "OSAT (semiconductor packaging) optionality being scoped"
         ],
         "risks": [
-          "Rupee at 96.34/USD raises imported component input costs materially",
+          "Rupee at 96.30/USD raises imported component input costs materially",
           "Cost competitiveness vs. China & Vietnam",
           "Single-quarter margin volatility on input costs"
         ],
@@ -308,17 +308,17 @@
         "ticker": "PRAJIND",
         "name": "Praj Industries",
         "sector": "Small-cap · Bioenergy / Capital Goods",
-        "thesis": "India's largest biofuel technology company. Brent at $110.27 — its highest level in the recent cycle — is an unambiguous positive for biofuel economics; the E20 ethanol blending mandate becomes even more strategically imperative at $110+ oil. SAF (sustainable aviation fuel) commercialisation adds a second long-runway growth engine.",
+        "thesis": "India's largest biofuel technology company. Even with Brent pulling back to $105.74 on Iran-US peace hopes, oil above $100 keeps biofuel economics strongly compelling and E20 ethanol blending strategically imperative. SAF (sustainable aviation fuel) commercialisation adds a second long-runway growth engine. A sharp peace-deal-driven crude collapse to sub-$80 is the key risk to monitor.",
         "catalysts": [
-          "E20 ethanol blending program scaling — crude above $110 accelerates urgency to multi-year high",
+          "E20 ethanol blending program scaling — crude above $100 keeps urgency high",
           "SAF commercialisation underway globally; Praj is among very few Indian players",
           "Order book recovering after temporary pause",
-          "High crude near $110 improves biofuel project economics dramatically"
+          "Brent at $105.74 still highly supportive of biofuel project economics"
         ],
         "risks": [
+          "Iran-US peace deal could cause sharp crude correction — biggest thesis risk",
           "Lumpy project order cycle",
-          "Recent quarterly loss reflects execution slippage",
-          "Sharp crude correction would dampen biofuel economics"
+          "Recent quarterly loss reflects execution slippage"
         ],
         "fundamentals": {
           "pe": 50.8,
@@ -335,7 +335,7 @@
         "ticker": "DATAPATTNS",
         "name": "Data Patterns (India)",
         "sector": "Small-cap · Defence Electronics",
-        "thesis": "Q4 revenue declined 13% YoY to ₹345 Cr — a significant miss confirming lumpy quarterly risk. The thesis has NOT broken: franchise quality, order pipeline, margin structure, and policy tailwind are all intact. US-Iran combat fears at Brent $110, border tensions, and the global re-armament cycle only deepen the indigenisation mandate.",
+        "thesis": "Q4 revenue declined 13% YoY to ₹345 Cr — a significant miss confirming lumpy quarterly risk. The thesis has NOT broken: franchise quality, order pipeline, margin structure, and policy tailwind are all intact. Iran-US peace deal hopes are a near-term sentiment dampener for defence, but structural indigenisation mandate is multi-decade.",
         "catalysts": [
           "FY27 budget targeting 'Force Multipliers' (electronic warfare, drone swarms)",
           "Order pipeline remains substantial despite quarterly lumpiness",
@@ -344,8 +344,8 @@
         ],
         "risks": [
           "Q4 revenue miss confirms lumpy quarterly execution — patience required",
-          "Valuation at 60×+ requires consistent delivery",
-          "Higher beta — 40%+ annualised volatility"
+          "Iran-US peace deal could temporarily dampen defence procurement sentiment",
+          "Valuation at 60×+ requires consistent delivery"
         ],
         "fundamentals": {
           "pe": 62.0,
@@ -389,15 +389,15 @@
         "ticker": "ASTRAMICRO",
         "name": "Astra Microwave Products",
         "sector": "Small-cap · Defence / RF Systems",
-        "thesis": "RF and microwave subsystems for radars, electronic warfare, and satellite payloads. Q3 FY26 profit jumped 96% QoQ; operating margins expanded to 31.7%. US-Iran conflict fears sustaining at Brent $110, India border tensions, and global re-armament are structural tailwinds for indigenous radar and EW procurement. Apollo Micro Systems Q4 profit surging 163% YoY is a positive read-across for the small-cap defence electronics cluster.",
+        "thesis": "RF and microwave subsystems for radars, electronic warfare, and satellite payloads. Q3 FY26 profit jumped 96% QoQ; operating margins expanded to 31.7%. Apollo Micro Systems shares rallied 22% in 3 days after strong Q4 results — the most direct positive read-across for the small-cap defence electronics cluster this week.",
         "catalysts": [
           "12.4% rise in DRDO R&D funding for indigenous AESA radars",
           "Q3 margins jumped to 31.7% on better mix",
-          "Apollo Micro Systems Q4 profit +163% YoY — positive read-across for cluster",
+          "Apollo Micro Systems +22% in 3 days post strong Q4 — direct positive cluster read-across",
           "Relatively cheaper vs Data Patterns on P/E basis"
         ],
         "risks": [
-          "Stock recently in technical downtrend",
+          "Iran-US peace deal could temporarily dampen sector sentiment",
           "ROE at 10.5% lags Garden Reach (20%) and Data Patterns (13%)",
           "Beta of 1.35 means sharper drawdowns in selloffs"
         ],
@@ -421,7 +421,7 @@
           "NHAI award pipeline remains strong",
           "Debt-free working capital management",
           "Margin profile better than larger peers",
-          "Government infrastructure push unchanged despite crude headwinds"
+          "Government infrastructure push unchanged"
         ],
         "risks": [
           "Asset monetisation pace slower than hoped",
@@ -443,16 +443,16 @@
         "ticker": "MAHSEAMLES",
         "name": "Maharashtra Seamless",
         "sector": "Small-cap · Steel Pipes",
-        "thesis": "India's largest seamless pipe manufacturer for oil & gas, power, and infrastructure. Brent at $110.27 directly accelerates domestic upstream capex — ONGC results today are a key catalyst read. Tata Steel CEO TV Narendran is 'cautiously optimistic' with strong Q1 ahead as steel prices rise across India, UK and Europe — directly supportive of Maharashtra Seamless demand.",
+        "thesis": "India's largest seamless pipe manufacturer for oil & gas, power, and infrastructure. Brent at $105.74 remains supportive of domestic upstream capex. Crude pulling back on Iran-US peace talks is a near-term sentiment headwind but structural oil & gas capex is multi-year. Debt-free balance sheet and 14× P/E remain very undemanding.",
         "catalysts": [
-          "Domestic oil & gas capex ramping — Brent near $110 is a direct demand driver; ONGC results today",
-          "Tata Steel CEO cautiously optimistic on strong Q1 — steel price momentum positive for seamless pipes",
+          "Domestic oil & gas capex structurally intact even at $105 Brent",
+          "Steel price momentum broadly positive per industry commentary",
           "Export market widening",
-          "Debt-free balance sheet; 14× P/E remains very undemanding"
+          "Debt-free balance sheet; 14× P/E very undemanding"
         ],
         "risks": [
+          "Iran-US peace deal crude correction — deepest risk to near-term order sentiment",
           "Steel price volatility",
-          "Cyclical demand patterns",
           "Concentration in oil & gas customer base"
         ],
         "fundamentals": {
@@ -470,7 +470,7 @@
         "ticker": "IONEXCHANG",
         "name": "Ion Exchange (India)",
         "sector": "Small-cap · Water Treatment",
-        "thesis": "Pioneer in water and wastewater treatment in India. ROCE of 27.5%, debt-equity 0.2, operating across municipal, industrial, and household water. Direct beneficiary of Jal Jeevan Mission and increasingly stringent industrial effluent norms. Fully domestic revenue — completely insulated from rupee weakness at 96.34/USD.",
+        "thesis": "Pioneer in water and wastewater treatment in India. ROCE of 27.5%, debt-equity 0.2, operating across municipal, industrial, and household water. Direct beneficiary of Jal Jeevan Mission and increasingly stringent industrial effluent norms. Fully domestic revenue — completely insulated from rupee weakness at 96.30/USD.",
         "catalysts": [
           "Jal Jeevan Mission and similar government water programs",
           "Industrial effluent compliance becoming mandatory",
@@ -499,10 +499,10 @@
         "ticker": "CAMS",
         "name": "Computer Age Management Services",
         "sector": "Financial Infrastructure",
-        "thesis": "A duopoly providing the picks-and-shovels for India's mutual fund industry. Q4 EBITDA margin expanded to 46.3%, profit grew 11%. Retail SIP boom is boosting AMC outlook per Siddhartha Khemka — Nippon and ICICI Pru leading, but CAMS services both. NSE EGR (Electronic Gold Receipts) commenced trading 18 May — an incremental new fee pool catalyst now live.",
+        "thesis": "A duopoly providing the picks-and-shovels for India's mutual fund industry. Q4 EBITDA margin expanded to 46.3%, profit grew 11%. Retail SIP boom continues — ET Markets reports mutual funds buying ₹1 lakh crore worth of stocks to absorb FII selling, confirming the SIP machine is at full speed and CAMS fee pools are growing. NSE EGR (Electronic Gold Receipts) is now live, providing an incremental new fee pool.",
         "catalysts": [
-          "MF industry AUM growth structural at 15%+; retail SIP boom confirmed accelerating",
-          "NSE Electronic Gold Receipts platform live from 18 May — new fee pool catalyst activated",
+          "MF industry AUM growth structural at 15%+; SIP boom confirmed — MFs deploying ₹1L Cr",
+          "NSE Electronic Gold Receipts platform live — new fee pool catalyst activated",
           "New product wins (alt fund servicing, AIFs)",
           "Best-in-class operating margins at 46%+"
         ],
@@ -526,7 +526,7 @@
         "ticker": "WOCKPHARMA",
         "name": "Wockhardt",
         "sector": "Pharma · Specialty",
-        "thesis": "Posted a turnaround Q4 — ₹164 Cr profit versus a ₹45 Cr loss a year ago. The novel antibiotic pipeline (Zaynich, others) is reaching commercial inflection. Rupee weakness at 96.34/USD is an incremental tailwind for US export revenues. Speculative but asymmetric.",
+        "thesis": "Posted a turnaround Q4 — ₹164 Cr profit versus a ₹45 Cr loss a year ago. The novel antibiotic pipeline (Zaynich, others) is reaching commercial inflection. Rupee weakness at 96.30/USD is an incremental tailwind for US export revenues. Speculative but asymmetric.",
         "catalysts": [
           "Zaynich US launch progress",
           "Specialty antibiotic pipeline maturing",
@@ -579,16 +579,16 @@
         "ticker": "SUZLON",
         "name": "Suzlon Energy",
         "sector": "Renewables · Wind",
-        "thesis": "A fully restructured balance sheet, the largest order book in its history, and a wind capacity addition cycle just starting after years of dormancy. Brent at $110.27 — the highest in this cycle — is the most powerful political tailwind for accelerating India's domestic renewable energy push. Suzlon is a direct beneficiary and Amber Enterprises (F&O) showing sharp OI buildup is a broader renewables/manufacturing sentiment signal.",
+        "thesis": "A fully restructured balance sheet, the largest order book in its history, and a wind capacity addition cycle just starting after years of dormancy. Even with Brent pulling back to $105.74 on Iran-US peace hopes, oil above $100 remains a powerful political argument for accelerating India's domestic renewable energy push. Suzlon is a direct beneficiary.",
         "catalysts": [
           "Order book at multi-year highs",
           "Net-debt-free for the first time in a decade",
           "Wind add-back cycle in FY27–28",
-          "Crude at $110+ — strongest political argument for domestic renewable acceleration"
+          "Crude above $100 — strong political argument for domestic renewable acceleration"
         ],
         "risks": [
+          "Iran-US peace deal crude correction reduces urgency argument near-term",
           "Single-product, single-geography concentration",
-          "Execution risk on large orders",
           "Investor base still partly speculative"
         ],
         "fundamentals": {
@@ -606,16 +606,16 @@
         "ticker": "IDEAFORGE",
         "name": "IdeaForge Technology",
         "sector": "Defence · Drones",
-        "thesis": "Pure-play on Indian military and homeland-security drone procurement, an area where indigenisation policy is accelerating. Revenue inflection confirmed with a 7× YoY surge and return to profit. US-Iran combat fears sustaining with Iran stock market reopening after 80-day closure — geopolitical backdrop for drone procurement has never been more supportive.",
+        "thesis": "Pure-play on Indian military and homeland-security drone procurement, an area where indigenisation policy is accelerating. Revenue inflection confirmed with a 7× YoY surge and return to profit. Iran-US peace deal hopes introduce near-term geopolitical risk reduction, but India's domestic border-security drone mandate is independently strong.",
         "catalysts": [
           "Defence drone orders multi-year visible",
           "Revenue inflection just confirmed",
           "Limited domestic competition in UAV space",
-          "Iran stock market reopening after 80-day war closure — conflict persistence elevates drone procurement urgency"
+          "India's border-security requirements independent of Iran-US situation"
         ],
         "risks": [
-          "Lumpy order cycle",
-          "Tiny float, very volatile",
+          "Iran-US peace deal could reduce geopolitical urgency for procurement near-term",
+          "Lumpy order cycle; tiny float, very volatile",
           "Margin sustainability unproven at scale"
         ],
         "fundamentals": {
@@ -635,16 +635,16 @@
         "ticker": "TCS",
         "name": "Tata Consultancy Services",
         "sector": "IT · Large-cap",
-        "thesis": "Today IT stocks are rallying up to 5% as tactical rotation from banking fatigue triggers a sector shift — TCS leads by index weight. Sector valuations are near 2008 levels per one analyst note, adding a contrarian dimension. Rupee at 96.34/USD is a meaningful tailwind to reported INR revenues. Quality of business is unchanged; hold what you have, let the tactical rally play out before adding.",
+        "thesis": "IT flagged as a tactical buy today by multiple analysts (Devarsh Vakil names IT among 5 sectors worth buying); HCL Tech jumping 2% is confirming quality-tech rotation. Rupee at 96.30/USD is a meaningful tailwind to reported INR revenues. Quality of business is unchanged; hold what you have, the tactical rotation is playing out.",
         "catalysts": [
           "Buyback / dividend yield supports floor",
           "AI services adoption with marquee clients",
-          "INR near 96/USD meaningfully aids reported rupee earnings; tactical IT rotation underway today"
+          "INR near 96/USD meaningfully aids reported rupee earnings; IT tactical buy calls active today"
         ],
         "risks": [
-          "US client spending caution — global inflation re-ignition from Brent $110 threatens budgets",
+          "RBI rate hike speculation could dampen financial-sector client budgets",
           "FII selling confirmed in Q4 top-10 list",
-          "Sector near 2008 valuation levels — mean reversion risk if macro worsens"
+          "US client spending caution if global inflation re-ignites"
         ],
         "fundamentals": {
           "pe": 25.5,
@@ -661,14 +661,14 @@
         "ticker": "INFY",
         "name": "Infosys",
         "sector": "IT · Large-cap",
-        "thesis": "Same story as TCS, slightly cheaper. Today's IT rally of up to 5% is a tactical rotation signal worth watching but not chasing. Operating margins are pinched, but the franchise, balance sheet and capital return habit are intact. Rupee tailwind at 96/USD is supportive. Not a sell, just not yet an aggressive buy.",
+        "thesis": "Same story as TCS, slightly cheaper. IT tactical buy calls are active today and the rupee tailwind at 96/USD is supportive. Operating margins are pinched, but the franchise, balance sheet and capital return habit are intact. Not a sell, just not yet an aggressive buy — let the tactical rally play out.",
         "catalysts": [
           "AI / cloud deal momentum",
           "Margin recovery as discretionary spend returns",
           "Steady buyback cadence"
         ],
         "risks": [
-          "Global IT budget compression continues — inflation resurgence from crude $110 is not helping",
+          "RBI rate hike speculation — financial sector client budgets at risk",
           "Onsite cost pressure",
           "Sector de-rating not yet over structurally"
         ],
@@ -687,16 +687,16 @@
         "ticker": "HINDUNILVR",
         "name": "Hindustan Unilever",
         "sector": "FMCG",
-        "thesis": "Volume growth has returned and the FY27 outlook is brighter — but at ~55× earnings, you are paying for a perfect recovery. Brent at $110.27 raises palm oil and packaging input cost pressures more acutely now. Trim, don't add.",
+        "thesis": "Volume growth has returned and the FY27 outlook is brighter — but at ~55× earnings, you are paying for a perfect recovery. Brent at $105.74 (slightly lower) modestly relieves palm oil and packaging input cost pressures, but the fundamental overvaluation argument remains. Trim, don't add.",
         "catalysts": [
           "Rural demand recovery gathering pace",
           "Premiumisation across categories",
-          "Margin recovery once palm oil cools"
+          "Crude pullback to $105.74 marginally eases palm oil / packaging input costs"
         ],
         "risks": [
           "Valuation leaves no room for misses",
           "Quick-commerce reshaping distribution economics",
-          "Crude at $110.27 raises palm oil / packaging input cost pressure — highest in this cycle"
+          "RBI rate hike could compress urban consumer sentiment"
         ],
         "fundamentals": {
           "pe": 55.0,
@@ -709,27 +709,28 @@
         "conviction": "Hold"
       },
       {
-        "symbol": "ASIANPAINT.NS",
-        "ticker": "ASIANPAINT",
-        "name": "Asian Paints",
-        "sector": "Consumer Discretionary",
-        "thesis": "The franchise is real, the brand is real — but Birla Opus remains the most credible threat to the moat in twenty years. Until we see how share-loss settles, holding is the right answer; adding is not. Crude at $110.27 also raises raw material (TiO2, petrochemical derivatives) cost pressures to fresh cycle highs.",
+        "symbol": "GRASIM.NS",
+        "ticker": "GRASIM",
+        "name": "Grasim Industries",
+        "sector": "Diversified · Cement / Paints",
+        "thesis": "Grasim surged 4% today after robust Q4 profit +28% YoY — a strong result. The Birla Opus paints ramp is materialising in revenue, and the core VSF and cement businesses are performing. This result warrants watching closely; if the paints business sustains its scale-up, Grasim moves from WatchClose to a potential conviction add. Hold existing positions confidently.",
         "catalysts": [
-          "Decorative volume growth recovery",
-          "Industrial paints scaling",
-          "Margin defence playbook intact"
+          "Q4 PAT +28% YoY — robust result confirmed today; stock +4%",
+          "Birla Opus paints scale-up gaining real revenue traction",
+          "UltraTech Cement (subsidiary) volume growth read from today's results",
+          "VSF demand recovering with domestic consumption pickup"
         ],
         "risks": [
-          "Birla Opus competitive intensity",
-          "Multi-quarter market share concession likely",
-          "Crude at $110.27 raises petrochemical input costs — highest in this cycle"
+          "Paints EBITDA still negative as scale-up burns cash",
+          "Birla Opus competitive response from Asian Paints could intensify price wars",
+          "Conglomerate complexity makes valuation opaque"
         ],
         "fundamentals": {
-          "pe": 51.0,
-          "pb": 13.5,
-          "roe": 23.0,
-          "div": 1.4,
-          "mcap": "2.2L Cr"
+          "pe": 38.0,
+          "pb": 2.8,
+          "roe": 9.5,
+          "div": 0.5,
+          "mcap": "1.7L Cr"
         },
         "horizon": "3–5 yrs",
         "conviction": "Hold"
@@ -739,16 +740,16 @@
         "ticker": "LT",
         "name": "Larsen & Toubro",
         "sector": "Capital Goods · Infra",
-        "thesis": "Guided FY27 revenue growth lower on Middle East disruptions — and Brent at $110 with Iran stock market only now reopening after an 80-day war closure means West Asia tensions are worsening, not easing. Afcons Infrastructure crashing 9% on a ₹89 Cr net loss and guidance miss is a warning for the infrastructure-execution complex. Hold; let the dust settle.",
+        "thesis": "Guided FY27 revenue growth lower on Middle East disruptions. Iran-US peace deal hopes today are modestly positive for Middle East order recovery timeline. Domestic order books are healthy. Hold; let the dust settle and watch Middle East clarity over the coming weeks.",
         "catalysts": [
           "Domestic infra & defence order pipeline intact",
-          "Hyderabad campus / IT services value",
-          "Middle East order book recovery once tensions ease"
+          "Iran-US peace deal hopes — could unlock Middle East order recovery",
+          "Hyderabad campus / IT services value"
         ],
         "risks": [
-          "West Asia execution risk — Iran war closure only now reopening; conflict persists",
-          "Afcons Infrastructure crash 9% on guidance miss — warning for infra execution stocks",
-          "Margin guidance has been reset down"
+          "Peace deal hopes are not peace deal confirmation — West Asia execution risk persists",
+          "Margin guidance has been reset down",
+          "Afcons Infrastructure earlier miss is a warning for infra EPC execution"
         ],
         "fundamentals": {
           "pe": 32.0,
@@ -793,14 +794,14 @@
         "ticker": "TRENT",
         "name": "Trent",
         "sector": "Retail · Apparel",
-        "thesis": "Zudio is a brilliant business; Trent at this price is a brilliant business priced as if it cannot stumble. Lifestyle housing, senior living and second homes driving the next real estate demand wave is an adjacent positive, but Trent's Tier-1 city saturation risk and 145× P/E are structural problems. Trim into today's broad market strength.",
+        "thesis": "Zudio is a brilliant business; Trent at this price is a brilliant business priced as if it cannot stumble. Reports indicate Trent may be removed from the Sensex in Friday's reshuffle (replaced by Hindalco or Shriram Finance) — index removal would trigger forced selling by passive funds, a concrete near-term headwind. Trim before the announcement.",
         "catalysts": [
           "Store rollout still aggressive",
           "Brand strength in value fashion"
         ],
         "risks": [
+          "Sensex reshuffle — Trent may exit, forcing passive fund selling",
           "P/E above 100× is structurally hard to defend",
-          "Saturation in Tier-1 cities arriving",
           "Any same-store-sales miss is asymmetrically punished"
         ],
         "fundamentals": {
@@ -868,15 +869,15 @@
         "ticker": "ZOMATO",
         "name": "Eternal (Zomato)",
         "sector": "Internet · Food & Q-Comm",
-        "thesis": "Blinkit is genuinely interesting; the valuation prices in it being interesting forever. Despite appearing in top-10 DII buying in Q4, crude at $110.27 raises last-mile delivery costs materially and the path to durable profitability is narrower than the share price suggests. The 10-stock ₹17,000 Cr mutual fund selloff in April included names in this cluster. Avoid.",
+        "thesis": "Blinkit is genuinely interesting; the valuation prices in it being interesting forever. Crude at $105.74 (-5.67% today) gives a modest relief to last-mile delivery economics, but the path to durable profitability remains narrow and the capex war with Swiggy and Reliance intensifies. Avoid.",
         "catalysts": [
           "Blinkit GMV scaling rapidly",
-          "Going-out / events business optionality"
+          "Crude pullback to $105.74 marginally eases delivery cost pressure"
         ],
         "risks": [
           "Quick-commerce profitability still unproven at scale",
-          "Crude at $110.27 raises delivery economics pressure to new cycle high",
-          "Capex war intensifying with Swiggy and Reliance; MF selloff pressure noted in April"
+          "Capex war intensifying with Swiggy and Reliance",
+          "MF selloff pressure noted in April; 380× P/E leaves no room for misses"
         ],
         "fundamentals": {
           "pe": 380.0,
@@ -893,15 +894,15 @@
         "ticker": "TITAN",
         "name": "Titan Company",
         "sector": "Consumer Discretionary · Jewellery",
-        "thesis": "Titan stock shows signs of weakness today ahead of its results (22 May). Gold in USD fell sharply to $4,543/oz (-2.89%) but at rupee 96.34/USD, gold in INR terms remains near all-time highs, keeping demand elasticity negative. Import duty tightening adds further margin pressure. Today's weakness ahead of results is a warning — watch jewellery volume guidance on 22 May before reconsidering.",
+        "thesis": "Results due tomorrow (22 May). Gold in USD fell to $4,535/oz today but at rupee 96.30/USD, gold in INR terms remains near all-time highs, keeping demand elasticity negative. Silver also falling sharply. Import duty tightening adds further margin pressure. The verdict will be determined by tomorrow's jewellery volume guidance — watch before reconsidering.",
         "catalysts": [
           "Brand strength and store rollout intact long-term",
           "Non-jewellery categories (watches, eyewear) provide some offset"
         ],
         "risks": [
           "Gold import duty tightening squeezes jewellery margins and volumes",
-          "Gold price in INR terms near all-time highs despite USD pullback to $4,543",
-          "Stock showing weakness ahead of 22 May results — valuation premium under threat"
+          "Gold price in INR terms near all-time highs despite USD pullback to $4,535",
+          "Q4 results 22 May — any volume guidance miss will be severely punished at 85× P/E"
         ],
         "fundamentals": {
           "pe": 85.0,
@@ -918,16 +919,16 @@
         "ticker": "HPCL",
         "name": "Hindustan Petroleum Corp",
         "sector": "Energy · OMC",
-        "thesis": "Brent at $110.27 (+4.3% today) with the rupee at 96.34/USD is a worsening double-body-blow for HPCL. The petrol/diesel price hike announced has pushed shares up 2% today but analysts note the hike is insufficient to cover losses at $110 Brent. Despite the short-term pop, the structural squeeze remains. Avoid while crude stays elevated and geopolitical risk persists with Iran conflict unresolved.",
+        "thesis": "Brent at $105.74 (-5.67% today) on Iran-US peace deal hopes gives OMCs modest near-term relief. However, at $105 Brent with rupee at 96.30/USD, the double-squeeze on refining margins persists. The fuel price hike has been insufficient per analyst consensus. Avoid until crude sustainability below $90 or a full retail price pass-through is confirmed.",
         "catalysts": [
-          "Refining margins could widen if product cracks hold",
+          "Crude pullback to $105.74 on Iran-US peace hopes — first meaningful relief",
           "Government subsidy backstop in extremis",
-          "Fuel price hike announced — short-term sentiment positive"
+          "Refining margins could widen if product cracks hold"
         ],
         "risks": [
-          "Petrol/diesel hike insufficient to offset losses at $110 Brent per analyst consensus",
+          "Rupee at 96.30/USD amplifies crude import cost — double squeeze still active",
           "Government resistance to full retail price pass-through",
-          "Rupee at 96.34/USD amplifies crude import cost — double squeeze worsening"
+          "Iran-US peace deal 'hopes' are not a deal — conflict risk could return"
         ],
         "fundamentals": {
           "pe": 9.0,
@@ -946,146 +947,146 @@
     {
       "name": "Private Banking",
       "stance": "pos",
-      "note": "Asset quality at a decadal best; DII buying confirmed HDFC Bank and ICICI in top-10 most accumulated in Q4. Today's Bank Nifty +0.27% underperforms broader Nifty +1.44% as banking fatigue triggers IT rotation — a tactical caution but structural thesis intact."
+      "note": "Asset quality at a decadal best; DII buying confirmed in Q4. RBI rate hike speculation is a new near-term watch item — could pressure NIMs and bond portfolios — but franchise quality of HDFC Bank and ICICI means any weakness is an accumulation opportunity, not a thesis break."
     },
     {
       "name": "PSU Banking",
       "stance": "pos",
-      "note": "SBI in top-10 DII buying in Q4 — domestic institutions adding conviction. Cleanest books in years, single-digit P/Es. Macro pressure (crude + weak INR) is temporary; subsidiary value remains a multi-year unlock."
+      "note": "SBI in top-10 DII buying in Q4. PFC-REC merger reports add a significant re-rating catalyst for the PSU financial space. RBI rate hike chatter is a headwind to monitor; single-digit P/Es provide a large margin of safety."
     },
     {
       "name": "Information Technology",
-      "stance": "neu",
-      "note": "IT stocks rallying up to 5% today as banking fatigue triggers tactical sector rotation; sector valuations near 2008 levels per Dhananjay Sinha adding a contrarian dimension. INR at 96.34/USD is a structural rupee earnings tailwind. Not yet a conviction add — demand outlook uncertain — but the rotation is worth tracking."
+      "stance": "pos",
+      "note": "Devarsh Vakil names IT among 5 sectors worth buying today; HCL Tech +2% confirms quality-tech rotation. INR at 96.30/USD is a structural rupee earnings tailwind. Upgrading stance to positive from neutral on the convergence of tactical rotation + valuation support + rupee tailwind."
     },
     {
       "name": "FMCG",
       "stance": "neu",
-      "note": "Recovery underway but priced into most names. Brent at $110.27 (new cycle high today) raises palm oil and packaging input costs further. ITC remains the best-positioned given domestic revenue base and hotels demerger."
+      "note": "Recovery underway but priced into most names. Crude pullback to $105.74 modestly eases palm oil and packaging input costs. ITC remains best-positioned; HUL and Nestle remain overvalued for their growth rates. Grasim Q4 +28% profit adds a positive read for consumer demand."
     },
     {
       "name": "Auto",
       "stance": "neu",
-      "note": "Petrol/diesel price hike announced today — near-term headwind to domestic two-wheeler demand confirmed. Export-heavy players (Bajaj) more insulated; EV mix growing. Maruti Suzuki live updates show sideways price action — domestic demand caution priced in."
+      "note": "Crude pullback to $105.74 is a mild positive for domestic two-wheeler demand sentiment. Bajaj's export tailwinds remain strong. EV mix growing. RBI rate hike speculation is a new risk to consumer credit and vehicle financing demand."
     },
     {
       "name": "Pharma",
       "stance": "pos",
-      "note": "US generics cycle stable, domestic chronic therapy compounding. Rupee at 96.34/USD is a structural export earnings booster — most direct sector beneficiary of INR weakness. Laurus Labs +120% in a year adds to the bullish small-cap pharma read. Wockhardt turnaround adds small-cap optionality."
+      "note": "US generics cycle stable, domestic chronic therapy compounding. Rupee at 96.30/USD is a structural export earnings booster. Wockhardt turnaround adds small-cap optionality. Gland Pharma outlook positive on Cenexi recovery and new product launches."
     },
     {
       "name": "Real Estate",
       "stance": "pos",
-      "note": "Lifestyle housing, senior living and second homes driving the next real estate demand wave per industry experts — demand tailwinds secular. Puravankara +13% after Q4FY26 turnaround (₹114 Cr profit) confirms residential demand is real. Rate cuts flowing through; inventory cycle supportive in top-7 cities."
+      "note": "Lifestyle housing, senior living and second homes driving secular demand tailwinds. Rate cut cycle supportive; inventory in top-7 cities healthy. RBI rate hike speculation is a risk to monitor — any reversal of rate cuts could cool demand at the margin."
     },
     {
       "name": "Capital Goods / Infra",
       "stance": "neu",
-      "note": "Domestic order books healthy; Middle East execution risk has worsened with Iran only now reopening its stock market after 80-day war closure. Afcons Infrastructure crashing 9% on ₹89 Cr net loss and guidance miss is a warning signal for the infrastructure EPC complex."
+      "note": "Domestic order books healthy. Iran-US peace deal hopes could be modestly positive for Middle East order recovery (positive for L&T). TeamLease buyback signals confidence in services-adjacent capital goods. Afcons earlier miss remains a caution signal."
     },
     {
       "name": "Energy / Oil & Gas",
-      "stance": "pos",
-      "note": "Brent at $110.27 (+4.3% today) is a strong earnings upgrade for upstream — ONGC results due today are key. Fuel price hike announced; IOC Q4 net profit +78% YoY. OMCs face a double-squeeze (crude cost + rupee weakness, hike insufficient per analysts) — bifurcate sharply: own upstream, avoid downstream."
+      "stance": "neu",
+      "note": "Brent at $105.74 (-5.67%) on Iran-US peace deal hopes — the first meaningful crude pullback in this cycle. Bifurcation maintained: own upstream (ONGC), avoid downstream OMCs (HPCL). Watch for peace deal confirmation which could push Brent to $90 and fundamentally alter the upstream thesis."
     },
     {
       "name": "Defence",
       "stance": "pos",
-      "note": "Iran stock market reopening after 80-day war closure confirms conflict persistence — geopolitical backdrop for Indian indigenous procurement is the most supportive in years. Apollo Micro Systems Q4 profit +163% YoY confirms small-cap defence earnings cycle is firing. Data Patterns Q4 miss is lumpy quarterly execution, not thesis-breaking."
+      "note": "Apollo Micro Systems +22% in 3 days post strong Q4 confirms small-cap defence earnings cycle is firing. Iran-US peace deal hopes introduce near-term sentiment caution but India's indigenous procurement mandate is independently structural. BEL +2% today confirms large-cap defence quality still bid."
     },
     {
       "name": "Renewables",
       "stance": "pos",
-      "note": "Brent at $110.27 — new cycle high today — is the strongest political argument for accelerating domestic renewables ever recorded in this cycle. Strategic energy self-sufficiency imperative rising sharply. PFC and Suzlon are primary beneficiaries. Wind and solar capacity addition urgency at multi-year high."
+      "note": "Crude at $105.74 — even after the pullback — keeps the political urgency for domestic renewables very high. PFC-REC merger adds a financing superstructure catalyst for the sector. Suzlon order book at multi-year highs. Iran-US peace deal crude normalisation is a near-term sentiment test but not a thesis-breaker."
     },
     {
       "name": "Quick-Commerce / Internet",
       "stance": "neg",
-      "note": "Capex war intensifying; crude at $110.27 raises last-mile delivery costs to new cycle highs. Mutual fund selloff of ₹17,000 Cr across 10 stocks in April signals institutional caution in this cluster. Delivery economics under structural pressure — avoid."
+      "note": "Crude pullback to $105.74 gives marginal delivery economics relief but doesn't change the structural profitability challenge. Capex war with Reliance intensifies. Zomato/Eternal and peers remain avoid. The SIP-driven MF buying machine is not prioritising this cluster."
     }
   ],
   "earnings": [
     {
-      "date": "19 May",
-      "name": "ONGC",
-      "watch": "FY26 exit realisations and FY27 capex guidance with Brent at $110.27 — key crude-hedge earnings read today; watch for windfall tax commentary and management confidence at sustained $110+ Brent"
-    },
-    {
-      "date": "20 May",
-      "name": "Adani Enterprises",
-      "watch": "New energy capex progress, airport revenue ramp, green hydrogen timeline — read on renewables capex cycle; watch for tone post US charges dropped against Gautam Adani"
+      "date": "21 May",
+      "name": "UltraTech Cement",
+      "watch": "Volume growth, realisation per tonne, capacity utilisation — read for infrastructure demand health and commodity cost pass-through; Grasim Q4 +28% sets positive tone for the Aditya Birla cement complex"
     },
     {
       "date": "21 May",
-      "name": "UltraTech Cement",
-      "watch": "Volume growth, realisation per tonne, capacity utilisation — read for infrastructure demand health and commodity cost pass-through at Brent $110"
+      "name": "LIC",
+      "watch": "Q4 results today — VNB margins, new business premium growth, equity portfolio mark-to-market at Nifty ~23,726; key read for insurance sector sentiment and PSU financial health"
     },
     {
       "date": "22 May",
       "name": "Titan Company",
-      "watch": "Critical: jewellery volume guidance post gold duty tightening; management commentary on demand at gold near all-time INR highs (despite USD gold falling to $4,543) — stock showing pre-results weakness; will determine Trim vs Avoid verdict"
+      "watch": "CRITICAL — jewellery volume guidance post gold duty tightening; management commentary on demand at gold near all-time INR highs ($4,535 USD but rupee 96.30); will determine Trim vs Avoid verdict for the family corpus"
     },
     {
       "date": "TBC May",
       "name": "JSW Steel",
-      "watch": "Q4 PAT surged 13-fold per headlines — confirm order book, realisation trends and capacity expansion timeline; Tata Steel CEO cautiously optimistic on strong Q1; read-across for Maharashtra Seamless"
-    },
-    {
-      "date": "TBC May",
-      "name": "JSW Energy",
-      "watch": "Rs 3,150-Cr JSW Steel stake sale to lower debt — Jefferies explains debt reduction strategy; monitor clean energy capex guidance and how asset recycling supports renewable growth"
+      "watch": "Q4 PAT surged 13-fold — confirm order book, realisation trends and capacity expansion timeline; Tata Steel cautiously optimistic on Q1; read-across for Maharashtra Seamless"
     },
     {
       "date": "TBC May",
       "name": "Muthoot Finance",
-      "watch": "Q4 net profit +105% YoY but stock crashed 8% — read Jefferies/Morgan Stanley notes; gold loan AUM growth at elevated gold prices; key for gold sector sentiment"
+      "watch": "Q4 net profit +105% YoY but stock crashed 8% — monitor gold loan AUM growth at elevated gold prices; key for NBFCs and gold-sector sentiment"
+    },
+    {
+      "date": "TBC May",
+      "name": "IndusInd Bank",
+      "watch": "Highest increase in DII holdings in Q4 — monitor credit quality, NIM trajectory and management commentary on macro risks including RBI rate hike speculation"
     },
     {
       "date": "TBC May",
       "name": "Mahanadi Coalfields IPO",
-      "watch": "Government nod confirmed; Coal India diluting up to 25% stake — IPO fundraising at two-year low with fears second half sluggish; watch pricing and grey market premium as read on PSU paper appetite"
+      "watch": "Government nod confirmed; Coal India diluting up to 25% stake — watch pricing and grey market premium as read on PSU paper appetite at two-year IPO fundraising low"
+    },
+    {
+      "date": "Fri 23 May",
+      "name": "Sensex Reshuffle Announcement",
+      "watch": "Trent may exit Sensex replaced by Hindalco or Shriram Finance — forced passive selling in Trent, forced passive buying in entrants; Hindalco flagged in 7 bullish signal stocks today"
     },
     {
       "date": "Ongoing",
-      "name": "NSE EGR (Electronic Gold Receipts)",
-      "watch": "Live from 18 May — monitor first-week volumes; physical gold backing questions answered per ET Markets; read-through for CAMS fee pool expansion and gold demand patterns at $4,543/oz"
+      "name": "Iran-US Peace Deal Talks",
+      "watch": "Crude fell 5.67% to $105.74 today on peace deal hopes — if confirmed, Brent could correct to $85-90, fundamentally altering upstream (ONGC), biofuels (Praj), and OMC (HPCL) thesis in different directions; the single most important macro watch for the corpus"
     }
   ],
   "whispers": [
     {
-      "tag": "Brent at New Cycle High $110.27",
-      "text": "Brent crude has hit $110.27 — up 4.3% today alone — as Iran stock market reopens after an 80-day war closure, confirming the conflict is not easing. The crude shock is deepening, not dissipating. The bifurcation between crude-winners (ONGC, upstream, biofuels, renewables, pharma/IT exporters) and crude-losers (HPCL, OMCs, aviation, quick-commerce delivery) must be maintained with full conviction. ONGC results today are the most timely earnings read possible.",
-      "src": "Brent futures; ET Markets; Iran stock market reopening headlines"
+      "tag": "Iran-US Peace Deal — Crude at Crossroads",
+      "text": "Brent fell 5.67% to $105.74 today on Iran-US peace deal hopes — the first major crude pullback in this cycle. This is the most important macro development for the family corpus this week. A confirmed peace deal could push Brent toward $85-90, delivering a decisive verdict: ONGC and upstream earnings would face a meaningful downgrade, biofuel economics (Praj) would soften, but OMCs (HPCL) and aviation would get a lifeline. 'Hopes' are not a deal — the crude above $100 thesis is still intact today, but the probability of reversal has meaningfully risen. Monitor daily.",
+      "src": "Brent futures; ET Markets crude desk; Iran-US diplomacy reports"
     },
     {
-      "tag": "Rupee at 96.34/USD — Record Zone",
-      "text": "The rupee is holding at 96.34/USD, near record lows, with RBI intervention providing a soft floor rather than a reversal. At $110 Brent and 96.34 INR, India's import bill is at a historic high in rupee terms. The earnings calculus is clear: IT (TCS, Infosys, Coforge), pharma, and upstream exporters win structurally; EMS importers, OMCs, and crude-dependent sectors lose. Watch RBI FX reserve drawdown pace.",
-      "src": "RBI intervention reports; ET Markets FX desk; USD/INR live data"
+      "tag": "RBI Rate Hike Speculation — New Tail Risk",
+      "text": "Reports indicate RBI is mulling a rate hike to arrest the rupee's slide toward 96.30/USD, reversing the recent rate-cut cycle. If confirmed, this is a significant negative for rate-sensitive financials (housing finance, NBFCs, real estate) and a modest positive for the rupee. India bonds have already reversed gains on this report. The SIP boom and DII accumulation provide a demand floor, but any RBI hawkish pivot would require revisiting the real estate and NBFC positions in the portfolio.",
+      "src": "ET Markets; India bond market data; RBI commentary reports"
     },
     {
-      "tag": "IT Sector Tactical Rotation",
-      "text": "IT stocks are rallying up to 5% today as banking sector fatigue triggers a tactical rotation. Sector valuations are near 2008 levels per Dhananjay Sinha — a contrarian signal worth tracking carefully. The rupee tailwind at 96/USD is the structural support. However, the rally is tactical, not yet a confirmed cyclical turn; US client budget visibility remains cloudy with global inflation re-igniting on $110 Brent.",
-      "src": "ET Markets; Dhananjay Sinha analysis; IT sector price data"
+      "tag": "Sensex Reshuffle — Trent Exit Risk",
+      "text": "The Sensex reshuffle announcement is due Friday. Trent is reportedly at risk of removal, potentially replaced by Hindalco or Shriram Finance. Index removal triggers forced selling by passive funds — a concrete, near-term price risk for an already-overvalued stock at 145× P/E. Hindalco, flagged in 7 stocks with bullish signals today, would be the beneficiary of index inclusion buying. This is actionable: trim Trent before Friday's announcement.",
+      "src": "ET Markets Sensex reshuffle report; Hindalco bullish signals note"
     },
     {
-      "tag": "Adani Overhang Partially Cleared",
-      "text": "US authorities have dropped charges against Gautam Adani — Adani Group stocks are up 5%+ today. This removes a significant governance overhang that had suppressed FII appetite for the group and by association the broader PSU/conglomerate space. Adani Enterprises results tomorrow (20 May) will be the first clean read on fundamentals without the legal cloud. Watch new energy capex commentary carefully.",
-      "src": "ET Markets; US DOJ announcement; Adani Group stock price data"
+      "tag": "IT Sector Tactical Buy — Rotating Into Quality",
+      "text": "Multiple analysts today (Devarsh Vakil) name IT among 5 sectors worth buying as markets turn volatile. HCL Tech and BEL both jumped 2% each confirming quality-defensive rotation. The rupee at 96.30/USD remains a structural tailwind for IT rupee revenues. We upgrade the IT sector stance to positive today. Coforge, TCS, and Infosys are the primary beneficiaries in the corpus — hold with conviction through this rotation.",
+      "src": "ET Markets; Devarsh Vakil analysis; HCL Tech/BEL price data"
     },
     {
-      "tag": "Defence Procurement Urgency at Peak",
-      "text": "US-Iran combat fears sustaining with Iran's market only now reopening after 80-day closure, elevated India border tensions, and global re-armament converge into the most supportive geopolitical backdrop for Indian defence indigenisation ever. Apollo Micro Systems Q4 profit +163% YoY confirms the small-cap defence earnings cycle is accelerating. BEL, Data Patterns, Astra Microwave, MTAR, and IdeaForge all benefit — quarterly noise is irrelevant against this structural backdrop.",
-      "src": "Geopolitical developments; Apollo Micro Systems Q4; DRDO budget; ET Markets"
+      "tag": "PFC-REC Merger — Re-rating Catalyst",
+      "text": "Headlines today flag a mega merger incoming for PFC and REC — analysts at multiple brokerages are weighing in on whether to buy ahead of the merger. A combined entity would be India's dominant infrastructure lender with superior funding access, lower cost of capital, and stronger negotiating power with large power projects. PFC already sits in our conviction list at 6.5× P/E — a confirmed merger announcement would be the most powerful near-term re-rating catalyst for the position.",
+      "src": "ET Markets merger report; Jefferies/Morgan Stanley PFC-REC analysis"
     },
     {
-      "tag": "IPO Market Cooling — Two-Year Low",
-      "text": "IPO fundraising has fallen to a two-year low in 2026 with fears the second half could be sluggish. This is a risk-appetite signal for high-multiple small-cap names and new-economy stocks. For the family corpus, it reinforces the preference for established, cash-generating businesses over pre-IPO or recent-listing speculative names. The Mahanadi Coalfields IPO (Coal India stake sale) will be a key litmus test for PSU paper appetite.",
-      "src": "ET Markets IPO tracker; market intelligence"
+      "tag": "Grasim Q4 +28% — Paints Scale-Up Inflection",
+      "text": "Grasim surged 4% today after robust Q4 profit rising 28% YoY. This result is significant: it suggests the Birla Opus paints ramp-up is beginning to contribute meaningfully to consolidated numbers, and the core VSF and cement businesses remain solid. For Asian Paints holders, this confirms competitive intensity from Birla Opus is real and sustained — the Asian Paints 'Hold, don't add' stance is reinforced. Grasim itself moves to our WatchClose list as a potential upgrade candidate.",
+      "src": "ET Markets Grasim Q4 results; stock price data +4%"
     },
     {
-      "tag": "FII vs DII Divergence — DII Accumulation Continues",
-      "text": "Q4 data shows continued FII selling in Reliance, TCS, HDFC Bank while SBI, ICICI Bank, HDFC Bank simultaneously saw highest DII buying in value terms. IndusInd Bank and Max Health also saw highest increase in DII holdings in Q4. This divergence — foreign capital exiting and domestic capital (fuelled by SIP boom confirmed today) absorbing — is a classic Indian market pattern near cycle lows. The retail SIP machine remains intact and is a crucial demand floor.",
-      "src": "ET Markets Q4 institutional flow data; SIP data; Siddhartha Khemka analysis"
+      "tag": "SIP Machine Absorbing FII Selling — Domestic Floor Intact",
+      "text": "ET Markets reports mutual funds are buying ₹1 lakh crore worth of stocks to defy historic FII selling — the 20 most-accumulated stocks by MFs paint a picture of domestic conviction overriding foreign pessimism. The retail SIP machine remains the single most important structural support for Indian equities. CAMS, the picks-and-shovels beneficiary of this trend, continues to see AUM-linked fee growth. This domestic demand floor is why 52-week lows are buying opportunities, not panic signals, for long-term family corpus management.",
+      "src": "ET Markets MF buying data; Siddhartha Khemka analysis; CAMS fee pool data"
     }
   ]
 }
