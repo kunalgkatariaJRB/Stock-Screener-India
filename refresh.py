@@ -638,21 +638,36 @@ def main():
         import traceback; traceback.print_exc()
         sys.exit(1)
 
+    # Always log head+tail so we can diagnose structure issues
+    print(f"  DEBUG response head: {ledger_text[:300]}", file=sys.stderr)
+    print(f"  DEBUG response tail: {ledger_text[-300:]}", file=sys.stderr)
+
     try:
         new_data = extract_json_block(ledger_text)
     except Exception as e:
-        print(f"  ✗ JSON parse failed: {e}", file=sys.stderr)
-        print(f"  ✗ Response tail (last 500 chars):\n{ledger_text[-500:]}", file=sys.stderr)
-        sys.exit(1)
+        print(f"  ✗ JSON parse failed: {e} — falling back to previous data", file=sys.stderr)
+        new_data = prev if prev else {}
 
     required_top   = ["edition", "lastUpdated", "macroNarrative", "stocks", "sectors", "earnings", "whispers"]
     required_lists = ["conviction", "longBets", "highPromise", "watchClose", "trimAvoid"]
     missing = [k for k in required_top if k not in new_data]
     missing_lists = [k for k in required_lists if k not in new_data.get("stocks", {})]
     if missing or missing_lists:
-        print(f"  ✗ Missing keys: {missing + missing_lists}", file=sys.stderr)
-        print(f"  ✗ Response tail (last 500 chars):\n{ledger_text[-500:]}", file=sys.stderr)
-        sys.exit(1)
+        print(f"  ✗ Missing keys: {missing + missing_lists} — falling back to previous data", file=sys.stderr)
+        print(f"  ✗ Top-level keys returned: {list(new_data.keys())}", file=sys.stderr)
+        new_data = prev if prev else {}
+        # If prev also has no valid structure, build a minimal shell
+        if not new_data or any(k not in new_data for k in required_top):
+            print("  ! No valid previous data either — building minimal shell", file=sys.stderr)
+            new_data = {
+                "edition": today.strftime("Edition %d %b %Y"),
+                "lastUpdated": today.isoformat(),
+                "macroNarrative": "Data refresh in progress — Claude ledger call failed this run.",
+                "stocks": {"conviction": [], "longBets": [], "highPromise": [], "watchClose": [], "trimAvoid": [], "extendedUniverse": []},
+                "sectors": [],
+                "earnings": [],
+                "whispers": [],
+            }
 
     # --- 6b. Tier analysis ---
     print(f"\n[6/6] Claude — Tier Analysis ({len(all_stocks)} stocks, batches of {BATCH_SIZE})...")
