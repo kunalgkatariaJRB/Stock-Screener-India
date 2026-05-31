@@ -453,7 +453,47 @@ Process:
 Keep verdicts stable when fundamentals are stable.
 Update when: earnings surprise, management change, structural sector shift, valuation re-rating.
 
-Output the complete data.json JSON object."""
+== REQUIRED JSON SCHEMA (output EXACTLY this structure) ==
+{{
+  "edition": "June 2026 · Daily Refresh — 1 Jun",
+  "lastUpdated": "2026-06-01T07:30:00+05:30",
+  "macroNarrative": "3-sentence macro view here.",
+  "stocks": {{
+    "conviction": [
+      {{"symbol": "RELIANCE.NS", "ticker": "RELIANCE", "name": "Reliance Industries", "sector": "Conglomerate",
+        "thesis": "2-3 sentence thesis.", "catalysts": ["catalyst 1", "catalyst 2", "catalyst 3"],
+        "risks": ["risk 1", "risk 2", "risk 3"],
+        "fundamentals": {{"pe": 24.5, "pb": 2.1, "roe": 14.2, "div": 0.4, "mcap": "18.5L Cr"}},
+        "horizon": "5-7 years", "conviction": "High", "verdict": "Buy"}}
+    ],
+    "longBets": [ /* same stock object structure */ ],
+    "highPromise": [ /* same stock object structure */ ],
+    "watchClose": [ /* same stock object structure */ ],
+    "trimAvoid": [ /* same stock object structure */ ]
+  }},
+  "sectors": [
+    {{"name": "Private Banking", "stance": "pos", "note": "One-line rationale."}},
+    {{"name": "IT Services", "stance": "neu", "note": "One-line rationale."}},
+    {{"name": "Defence & Aerospace", "stance": "pos", "note": "One-line rationale."}},
+    {{"name": "Specialty Chemicals", "stance": "pos", "note": "One-line rationale."}},
+    {{"name": "Capital Goods", "stance": "pos", "note": "One-line rationale."}},
+    {{"name": "Healthcare & Pharma", "stance": "neu", "note": "One-line rationale."}},
+    {{"name": "Auto & EV", "stance": "neu", "note": "One-line rationale."}},
+    {{"name": "FMCG & Consumer", "stance": "neu", "note": "One-line rationale."}},
+    {{"name": "Infrastructure", "stance": "pos", "note": "One-line rationale."}},
+    {{"name": "Real Estate", "stance": "neu", "note": "One-line rationale."}},
+    {{"name": "Telecom & Media", "stance": "neg", "note": "One-line rationale."}},
+    {{"name": "Commodities & Steel", "stance": "neu", "note": "One-line rationale."}}
+  ],
+  "earnings": [
+    {{"company": "TCS", "date": "2026-07-10", "expectation": "One line."}}
+  ],
+  "whispers": [
+    {{"theme": "Theme title", "note": "One line."}}
+  ]
+}}
+
+Output ONLY the JSON object. No prose before or after. No code fences."""
 
 
 TIER_SYSTEM_PROMPT = """You are the research analyst for "The Heritage Ledger". \
