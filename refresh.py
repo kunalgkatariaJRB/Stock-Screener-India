@@ -23,6 +23,7 @@ from urllib.parse import quote
 import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import anthropic
 
@@ -669,8 +670,9 @@ def main():
                 "whispers": [],
             }
 
-    # --- 6b. Tier analysis ---
-    print(f"\n[6/6] Claude — Tier Analysis ({len(all_stocks)} stocks, batches of {BATCH_SIZE})...")
+    # --- 6b. Tier analysis — all 6 tiers run in parallel ---
+    print(f"\n[6/6] Claude — Tier Analysis ({len(all_stocks)} stocks, batches of {BATCH_SIZE}, 6 tiers in parallel)...")
+
     tier_configs = [
         ("compounders",          "Tier 1 — Compounders",           compounders),
         ("multibaggers",         "Tier 2 — Multibagger Candidates", multibaggers),
@@ -679,16 +681,13 @@ def main():
         ("emerging_compounders", "Tier 5 — Emerging Compounders",   emerging),
         ("inflection_watch",     "Tier 6 — Inflection Watch",       inflection),
     ]
-    tiers_output = {}
 
-    for tier_key, tier_label, stocks in tier_configs:
+    def run_tier(tier_key, tier_label, stocks):
+        """Process one tier's batches sequentially; called in parallel across tiers."""
         if not stocks:
-            tiers_output[tier_key] = []
-            continue
-        print(f"  → {tier_label}: {len(stocks)} stocks...")
-        tier_results = []
+            return tier_key, []
         batches = [stocks[i:i+BATCH_SIZE] for i in range(0, len(stocks), BATCH_SIZE)]
-
+        tier_results = []
         for batch_num, batch in enumerate(batches):
             prompt = build_tier_prompt(tier_key, tier_label, batch, price_lookup, macro_block, today_pretty)
             try:
@@ -706,7 +705,6 @@ def main():
                     out_tok = final.usage.output_tokens
                 parsed = extract_json_block(text)
                 batch_stocks = parsed.get("stocks", [])
-
                 # Enrich with Screener data
                 stock_map = {s["name"]: s for s in batch}
                 for result in batch_stocks:
@@ -720,14 +718,21 @@ def main():
                         ]
                     }
                 tier_results.extend(batch_stocks)
-                print(f"    ✓ Batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | in={in_tok} out={out_tok}")
-                time.sleep(1)
+                print(f"    ✓ {tier_label} batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | in={in_tok} out={out_tok}")
             except Exception as e:
-                print(f"    ! Batch {batch_num+1} failed: {e}", file=sys.stderr)
-                continue
+                print(f"    ! {tier_label} batch {batch_num+1} failed: {e}", file=sys.stderr)
+        return tier_key, tier_results
 
-        tiers_output[tier_key] = tier_results
-        print(f"  ✓ {tier_label}: {len(tier_results)} total")
+    tiers_output = {}
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        futures = {
+            executor.submit(run_tier, tier_key, tier_label, stocks): tier_key
+            for tier_key, tier_label, stocks in tier_configs
+        }
+        for future in as_completed(futures):
+            tier_key, results = future.result()
+            tiers_output[tier_key] = results
+            print(f"  ✓ {tier_key}: {len(results)} total")
 
     # --- 7. Write ---
     new_data["lastUpdated"] = today.isoformat()
