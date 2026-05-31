@@ -1,16 +1,18 @@
 """
-The Heritage Ledger — Daily Refresh Script
-==========================================
-Runs once a day (via GitHub Actions). Fetches the current market state and
-recent headlines, asks Claude to regenerate the editorial portion of
-data.json (verdicts, sector views, earnings calendar, whispers), and writes
-the result back to disk.
+The Heritage Ledger — Daily Refresh Script (v3)
+================================================
+What changed from v2:
+  - Now reads data/processed/master_universe.json (built from Screener.in CSVs)
+  - Claude receives REAL fundamentals (ROCE, P/E, growth rates, promoter data)
+    instead of stale hand-entered numbers
+  - Analyzes three tiers from Screener screens (Compounders, Multibaggers,
+    Special Situations) in addition to the editorial high-conviction ledger
+  - Output data.json gains a "tiers" section for the dashboard
 
-Set ANTHROPIC_API_KEY in your GitHub repo Secrets. That's the only secret
-this script needs.
+Run daily via GitHub Actions. See .github/workflows/refresh.yml.
 
-Cost note: ~₹50–150 per month at one refresh per day, depending on model.
-Default model is Claude Sonnet 4.6 (good cost/quality balance).
+Required secrets: ANTHROPIC_API_KEY
+Optional env var: HERITAGE_MODEL (default: claude-sonnet-4-6)
 """
 
 import os
@@ -22,43 +24,43 @@ import datetime as dt
 from urllib.parse import quote
 import urllib.request
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 import anthropic
-from extended_universe import EXTENDED_UNIVERSE_STOCKS
 
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 # CONFIG
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 
-MODEL = os.environ.get("HERITAGE_MODEL", "claude-sonnet-4-6")
-DATA_PATH = "data.json"
-MAX_OUTPUT_TOKENS = 16000
+MODEL          = os.environ.get("HERITAGE_MODEL", "claude-sonnet-4-6")
+DATA_PATH      = "data.json"
+UNIVERSE_PATH  = Path("data/processed/master_universe.json")
+MAX_TOKENS     = 16000
+BATCH_SIZE     = 55   # max stocks per Claude tier-analysis call
 
-# Macro tickers we summarise into the prompt
 MACRO_TICKERS = {
-    "^NSEI": "Nifty 50",
-    "^BSESN": "Sensex",
+    "^NSEI":    "Nifty 50",
+    "^BSESN":   "Sensex",
     "^NSEBANK": "Bank Nifty",
-    "INR=X": "USD/INR",
-    "BZ=F": "Brent crude (USD)",
-    "GC=F": "Gold (USD/oz)",
-    "SI=F": "Silver (USD/oz)",
+    "INR=X":    "USD/INR",
+    "BZ=F":     "Brent Crude (USD)",
+    "GC=F":     "Gold (USD/oz)",
+    "SI=F":     "Silver (USD/oz)",
 }
 
 NEWS_FEEDS = [
-    ("Moneycontrol",  "https://www.moneycontrol.com/rss/MCtopnews.xml"),
-    ("BS Markets",    "https://www.business-standard.com/rss/markets-106.rss"),
-    ("BS Companies",  "https://www.business-standard.com/rss/companies-101.rss"),
-    ("ET Markets",    "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms"),
-    ("Mint Markets",  "https://www.livemint.com/rss/markets"),
+    ("Moneycontrol", "https://www.moneycontrol.com/rss/MCtopnews.xml"),
+    ("BS Markets",   "https://www.business-standard.com/rss/markets-106.rss"),
+    ("BS Companies", "https://www.business-standard.com/rss/companies-101.rss"),
+    ("ET Markets",   "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms"),
+    ("Mint Markets", "https://www.livemint.com/rss/markets"),
 ]
 
-# ----------------------------------------------------------------------
-# HELPERS
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------
+# HTTP + YAHOO HELPERS (unchanged from v2)
+# -----------------------------------------------------------------------
 
 def http_get(url: str, timeout: int = 20) -> str:
-    """Plain GET with a normal browser UA. Returns text or empty string."""
     req = urllib.request.Request(url, headers={
         "User-Agent": "Mozilla/5.0 (compatible; HeritageLedgerBot/1.0)",
         "Accept": "*/*",
@@ -67,7 +69,7 @@ def http_get(url: str, timeout: int = 20) -> str:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return r.read().decode("utf-8", errors="replace")
     except Exception as e:
-        print(f"  ! GET {url} failed: {e}", file=sys.stderr)
+        print(f"  ! GET failed: {e}", file=sys.stderr)
         return ""
 
 
@@ -81,24 +83,23 @@ def yahoo_quote(symbol: str) -> dict | None:
         r = j["chart"]["result"][0]
         m = r["meta"]
         price = m.get("regularMarketPrice")
-        prev = m.get("chartPreviousClose") or m.get("previousClose")
+        prev  = m.get("chartPreviousClose") or m.get("previousClose")
         if price is None or prev is None:
             return None
         return {
-            "price": price,
-            "prev_close": prev,
-            "change_pct": (price - prev) / prev * 100,
-            "currency": m.get("currency", "INR"),
+            "price":          round(price, 2),
+            "prev_close":     round(prev, 2),
+            "change_pct":     round((price - prev) / prev * 100, 2),
+            "currency":       m.get("currency", "INR"),
             "fifty_two_w_high": m.get("fiftyTwoWeekHigh"),
-            "fifty_two_w_low": m.get("fiftyTwoWeekLow"),
-            "market_state": m.get("marketState", "UNKNOWN"),
+            "fifty_two_w_low":  m.get("fiftyTwoWeekLow"),
+            "market_state":   m.get("marketState", "UNKNOWN"),
         }
     except Exception:
         return None
 
 
 def fetch_news() -> list[dict]:
-    """Pull RSS headlines from the configured feeds."""
     items = []
     for src, url in NEWS_FEEDS:
         body = http_get(url, timeout=15)
@@ -108,24 +109,19 @@ def fetch_news() -> list[dict]:
             root = ET.fromstring(body)
             for item in root.iter("item"):
                 title = (item.findtext("title") or "").strip()
-                pub = (item.findtext("pubDate") or "").strip()
                 if not title:
                     continue
-                # crude clean of CDATA tags
                 title = re.sub(r"<!\[CDATA\[|\]\]>", "", title)
-                items.append({"src": src, "title": title, "pub": pub})
+                items.append({"src": src, "title": title})
         except Exception as e:
-            print(f"  ! parse {src} failed: {e}", file=sys.stderr)
-    # de-dupe by title prefix and take a reasonable sample
-    seen = set()
-    uniq = []
+            print(f"  ! parse {src}: {e}", file=sys.stderr)
+    seen, uniq = set(), []
     for it in items:
         k = it["title"][:80].lower()
-        if k in seen:
-            continue
-        seen.add(k)
-        uniq.append(it)
-    return uniq[:60]  # cap
+        if k not in seen:
+            seen.add(k)
+            uniq.append(it)
+    return uniq[:60]
 
 
 def load_existing_data() -> dict:
@@ -133,30 +129,31 @@ def load_existing_data() -> dict:
         with open(DATA_PATH, "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        print(f"  ! {DATA_PATH} not found — starting fresh", file=sys.stderr)
         return {}
 
 
+def load_universe() -> dict:
+    """Load master_universe.json built by data_ingest.py."""
+    if not UNIVERSE_PATH.exists():
+        print(f"  ! Universe file not found at {UNIVERSE_PATH}", file=sys.stderr)
+        print(f"  ! Run data_ingest.py first or upload CSVs to data/screens/", file=sys.stderr)
+        return {}
+    with open(UNIVERSE_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
 def extract_json_block(text: str) -> dict:
-    """
-    Claude will sometimes wrap JSON in code fences. Be tolerant.
-    Find the largest balanced { ... } block and parse it.
-    """
-    # try direct parse first
     try:
         return json.loads(text)
     except Exception:
         pass
-    # strip code fences
     fenced = re.search(r"```(?:json)?\s*(\{.*\})\s*```", text, re.DOTALL)
     if fenced:
         try:
             return json.loads(fenced.group(1))
         except Exception:
             pass
-    # find first { to last }
-    first = text.find("{")
-    last = text.rfind("}")
+    first, last = text.find("{"), text.rfind("}")
     if first != -1 and last > first:
         try:
             return json.loads(text[first:last + 1])
@@ -165,264 +162,420 @@ def extract_json_block(text: str) -> dict:
     raise ValueError("Could not extract JSON from model output")
 
 
-# ----------------------------------------------------------------------
-# PROMPT
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------
+# PROMPT BUILDERS
+# -----------------------------------------------------------------------
 
-SYSTEM_PROMPT = """You are the editor of "The Heritage Ledger", a fundamentals-first dashboard that helps a long-term Indian-equity investor make considered decisions for a family corpus. Your job is to update the editorial portion of the dashboard each day based on fresh market data and headlines.
+def fmt_fundamentals(s: dict, q: dict | None) -> str:
+    """
+    Build a rich one-line fundamentals string for a Screener stock.
+    Combines CSV data (real ratios) with live Yahoo price.
+    """
+    parts = []
 
-You think in cycles, not quarters. You apply the principles of Benjamin Graham (Mr. Market, margin of safety), Warren Buffett (wonderful business at fair price, circle of competence, time as ally), Charlie Munger (concentration with conviction, sell when thesis breaks), and Naval Ravikant (compound interest in everything, contrarian + patient + informed-optimist, asymmetric upside, long-term games with long-term people).
+    # Live price
+    if q:
+        parts.append(f"Price ₹{q['price']:,.2f} ({q['change_pct']:+.2f}%)")
+        if q.get("fifty_two_w_low") and q.get("fifty_two_w_high"):
+            hi = q["fifty_two_w_high"]
+            lo = q["fifty_two_w_low"]
+            pos = round((q["price"] - lo) / (hi - lo) * 100) if hi > lo else 0
+            parts.append(f"52w {lo}–{hi} [{pos}% of range]")
+    elif s.get("price"):
+        parts.append(f"Price ₹{s['price']:,.2f} [as of CSV]")
 
-You are honest. If verdicts barely need to change because the fundamentals haven't changed, you keep them. If an event has shifted the picture (a results miss, a major macro shock, a guidance cut, a sector tailwind solidifying), you update the relevant cards' thesis, catalysts, risks, and conviction. You never invent fundamentals — when the trailing P/E or ROE is unknown to you, you keep the previously-stored value or write it as null.
+    # Core ratios from Screener
+    if s.get("roce") is not None:
+        roce_str = f"ROCE {s['roce']:.1f}%"
+        if s.get("roce_5yr"):
+            roce_str += f" (5yr avg {s['roce_5yr']:.1f}%)"
+        elif s.get("roce_3yr"):
+            roce_str += f" (3yr avg {s['roce_3yr']:.1f}%)"
+        parts.append(roce_str)
 
-You output ONE valid JSON object that exactly matches the schema of the previous data.json passed to you. No prose, no code fences, no commentary outside the JSON. The dashboard parses this directly.
+    if s.get("pe") is not None:
+        parts.append(f"P/E {s['pe']:.1f}x")
 
-Stocks lists must include:
-  conviction (8-12 large/mid-cap high-conviction buys),
-  longBets (6-10 small/micro-cap multi-year wagers on India's growth),
-  highPromise (3-6 mid-cap speculative watch names),
-  watchClose (4-7 quality holds at stretched valuations),
-  trimAvoid (3-6 names to reduce or avoid).
+    if s.get("price_to_book") is not None:
+        parts.append(f"P/B {s['price_to_book']:.1f}x")
 
-Each stock must have: symbol (Yahoo .NS suffix), ticker, name, sector, thesis (2-3 sentences max), catalysts (3-4 bullets), risks (3 bullets), fundamentals (pe, pb, roe, div, mcap as a string like "1.3L Cr"), horizon, conviction.
+    if s.get("div_yield") is not None and s["div_yield"] > 0:
+        parts.append(f"Div {s['div_yield']:.1f}%")
 
-The macroNarrative field is a single ~3-sentence reading of the current Indian-equity environment given the data you've been shown. The whispers list is 5-7 themes / catalysts you're tracking. The sectors list contains exactly the same 12 sectors as before (don't add or remove), only updating the stance ("pos"/"neu"/"neg") and one-line note when warranted. The earnings list shows the next 7-10 calendar entries you're aware of.
-
-The edition label should be e.g. "May 2026 · Daily Refresh — 7 May" so the family can see when this was regenerated."""
-
-USER_TEMPLATE = """Today is {today_iso} ({today_pretty} IST).
-
-== CURRENT MACRO SNAPSHOT ==
-{macro_block}
-
-== RECENT HEADLINES (last 24-48h, sampled) ==
-{news_block}
-
-== PREVIOUS data.json (your prior thinking — keep what still holds) ==
-{prev_json}
-
-Your task: produce the updated data.json for today. Apply the principles in the system prompt. Where fundamentals are unchanged, keep them. Where a recent event changes a thesis or moves a stock between buckets, update accordingly. Make sure the JSON is valid and matches the schema exactly. Output ONLY the JSON object."""
-
-
-# ----------------------------------------------------------------------
-# EXTENDED UNIVERSE — Top 100 small/mid-cap analysis
-# ----------------------------------------------------------------------
-
-EXTENDED_SYSTEM_PROMPT = """You are the editor of "The Heritage Ledger", writing a brief read on a list of small/mid-cap Indian stocks NOT in the main ledger.
-
-For each stock, you produce a brief, fundamentals-aware verdict — lighter than the main ledger but still grounded in what you know about the company, its sector, and the macro setup.
-
-You apply Graham, Buffett, Munger, Naval principles. You are honest: if a stock is rich, say so. If it's worth watching, say so. If you genuinely don't have enough conviction either way, say "neutral" with a one-line reason.
-
-You output ONE JSON object: {"extendedUniverse": [...]}. No prose, no code fences.
-
-Each stock entry must have exactly these fields:
-  symbol (string, with .NS suffix exactly as given)
-  ticker (string, exactly as given)
-  name (string, exactly as given)
-  sector (string, exactly as given)
-  stance (string: "pos" | "neu" | "neg")
-  conviction (string, e.g. "Constructive · medium", "Cautious · low", "Watching · medium")
-  thesis (string: 2-3 sentences, fundamentals-first, applying our principles)
-  catalyst (string: one short sentence — the most important thing that would make this work)
-  risk (string: one short sentence — the most important thing that would break it)
-  horizon (string: e.g. "12-24 months", "2-3 yrs", "long-term")
-
-Be brief but substantive. No filler. No generic advice. Each thesis must be specific to that company and its current setup."""
-
-
-def build_extended_user_message(today_pretty: str, macro_block: str, stocks: list[dict], price_lookup: dict) -> str:
-    """Build the user message for the extended universe call."""
-    stock_lines = []
-    for s in stocks:
-        q = price_lookup.get(s["symbol"])
-        if q:
-            stock_lines.append(
-                f"  • {s['name']} ({s['ticker']}, {s['symbol']}) — {s['sector']} — "
-                f"₹{q['price']:.2f} ({q['change_pct']:+.2f}%), 52w {q.get('fifty_two_w_low', '?')}–{q.get('fifty_two_w_high', '?')}"
-            )
+    if s.get("market_cap_cr"):
+        mc = s["market_cap_cr"]
+        if mc >= 100000:
+            mcap_str = f"₹{mc/100000:.1f}L Cr"
+        elif mc >= 1000:
+            mcap_str = f"₹{mc/1000:.0f}K Cr"
         else:
-            stock_lines.append(f"  • {s['name']} ({s['ticker']}, {s['symbol']}) — {s['sector']} — price unavailable")
-    stock_block = "\n".join(stock_lines)
+            mcap_str = f"₹{mc:.0f} Cr"
+        parts.append(f"MCap {mcap_str}")
+
+    # Growth signals
+    if s.get("profit_growth_qtr") is not None:
+        growth = s["profit_growth_qtr"]
+        flag = " ⚠" if abs(growth) > 150 else ""
+        parts.append(f"Qtr profit Δ {growth:+.0f}%{flag}")
+
+    if s.get("sales_growth_qtr") is not None:
+        growth = s["sales_growth_qtr"]
+        flag = " ⚠" if abs(growth) > 200 else ""
+        parts.append(f"Qtr sales Δ {growth:+.0f}%{flag}")
+
+    # Red flag or caution
+    if s.get("is_red_flagged"):
+        parts.append("🔴 RED FLAGGED — passes positive screen but also on avoid list")
+    elif s.get("caution_note"):
+        parts.append(f"⚠ NOTE: {s['caution_note']}")
+
+    return " | ".join(parts)
+
+
+def build_tier_prompt(
+    tier_name: str,
+    tier_label: str,
+    stocks: list[dict],
+    price_lookup: dict,
+    macro_block: str,
+    today_pretty: str,
+) -> str:
+    lines = []
+    for s in stocks:
+        sym = s.get("symbol")
+        q = price_lookup.get(sym) if sym else None
+        fund_line = fmt_fundamentals(s, q)
+        lines.append(f"  • {s['name']} | {s.get('tier','?')} | {fund_line}")
+
+    stock_block = "\n".join(lines)
+    count = len(stocks)
 
     return f"""Today is {today_pretty} IST.
 
-== CURRENT MACRO SNAPSHOT ==
+== MACRO SNAPSHOT ==
 {macro_block}
 
-== EXTENDED UNIVERSE (small/mid-cap NSE names beyond the main ledger) ==
+== YOUR TASK ==
+Analyze the following {count} Indian-listed stocks for the Heritage Ledger's
+"{tier_label}" tier. These passed our rigorous quantitative screens from
+Screener.in with real 5-year ROCE, growth, debt, and promoter data.
+
+For each stock, apply the Graham-Buffett-Munger-Naval framework:
+- Graham: Is there margin of safety? Is the business durable?
+- Buffett: Is it a wonderful business at a fair price?
+- Munger: Does it pass the inversion test — no obvious stupidity?
+- Naval: Is there asymmetric upside? Is the promoter a long-term player?
+
+Note: stocks marked ⚠ or 🔴 need extra scrutiny in your analysis.
+Quarterly growth spikes >150% flagged with ⚠ may be one-time.
+
+== STOCKS TO ANALYZE ==
 {stock_block}
 
-Your task: produce {{"extendedUniverse": [...]}} with one entry per stock above, in the same order. Apply our editorial principles and write a brief, specific, fundamentals-aware verdict for each. Output ONLY the JSON object."""
+== OUTPUT FORMAT ==
+Return ONLY a valid JSON object:
+{{
+  "tier": "{tier_name}",
+  "analyzed_at": "{today_pretty}",
+  "stocks": [
+    {{
+      "name": "exact name as given",
+      "stance": "pos" | "neu" | "neg",
+      "conviction": "High" | "Medium" | "Low",
+      "label": "e.g. Constructive · High | Cautious · Low | Watching · Medium",
+      "thesis": "2-3 specific sentences applying our principles. Reference actual ROCE/growth numbers given. No generic statements.",
+      "catalyst": "One specific sentence — the most important thing that would drive this higher.",
+      "risk": "One specific sentence — the most important thing that could break the thesis.",
+      "horizon": "e.g. 3-5 yrs | 12-18 months | 5-10 yrs",
+      "quality_flag": "QUALITY" | "CAUTION" | "AVOID",
+      "flag_reason": "null if QUALITY, else brief reason for CAUTION or AVOID"
+    }}
+  ]
+}}
+
+Rules:
+- Mark is_red_flagged stocks as quality_flag: "AVOID"
+- Mark caution_note stocks as quality_flag: "CAUTION"
+- Be specific — reference the actual numbers given
+- If quarterly growth is flagged ⚠, investigate whether it appears sustainable
+- Don't invent numbers not provided
+- Output ONLY the JSON object, no prose"""
 
 
-def analyze_extended_universe(client, macro_block: str, today_pretty: str, price_lookup: dict) -> list[dict]:
-    """Call Claude to analyze the extended universe stocks. Returns a list of entries."""
-    print(f"  → analyzing extended universe ({len(EXTENDED_UNIVERSE_STOCKS)} stocks)...")
-    user_msg = build_extended_user_message(today_pretty, macro_block, EXTENDED_UNIVERSE_STOCKS, price_lookup)
-    resp = client.messages.create(
-        model=MODEL,
-        max_tokens=MAX_OUTPUT_TOKENS,
-        system=EXTENDED_SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_msg}],
-    )
-    text = "".join(b.text for b in resp.content if hasattr(b, "text"))
-    print(f"  ✓ extended response received ({len(text)} chars)")
-    print(f"    extended usage: input {resp.usage.input_tokens}, output {resp.usage.output_tokens}")
+# -----------------------------------------------------------------------
+# MAIN LEDGER PROMPT (existing, now enriched with macro context)
+# -----------------------------------------------------------------------
 
-    try:
-        parsed = extract_json_block(text)
-    except Exception as e:
-        print(f"  ✗ extended universe JSON parse failed: {e}", file=sys.stderr)
-        return []
+SYSTEM_PROMPT = """You are the editor of "The Heritage Ledger", a fundamentals-first \
+investment dashboard for a long-term Indian-equity family corpus.
 
-    items = parsed.get("extendedUniverse")
-    if not isinstance(items, list):
-        print(f"  ✗ extendedUniverse missing or wrong type", file=sys.stderr)
-        return []
+You think in cycles, not quarters. You apply the principles of:
+- Benjamin Graham: Mr. Market, margin of safety, business durability
+- Warren Buffett: wonderful business at fair price, circle of competence, time as ally
+- Charlie Munger: concentration with conviction, inversion (avoid stupidity first)
+- Naval Ravikant: asymmetric upside, non-consensus and right, compound interest in everything
 
-    # Light validation per item
-    valid = []
-    required_fields = {"symbol", "ticker", "name", "sector", "stance", "conviction", "thesis", "catalyst", "risk"}
-    for it in items:
-        if not isinstance(it, dict):
-            continue
-        missing = required_fields - set(it.keys())
-        if missing:
-            print(f"  ! extended item missing fields {missing}: {it.get('ticker', '?')}", file=sys.stderr)
-            continue
-        valid.append(it)
+You are honest. You never invent fundamentals. If verdicts don't need to change
+because nothing fundamental has changed, you keep them steady.
 
-    print(f"  ✓ extended universe parsed ({len(valid)}/{len(items)} valid entries)")
-    return valid
+You output ONE valid JSON object matching the previous data.json schema.
+No prose, no code fences. The dashboard parses this directly.
+
+INVESTMENT FRAMEWORK (apply to every verdict):
+Tier 1 Compounders: ROCE >18% sustained, clean balance sheet, durable moat, 5-10yr hold
+Tier 2 Multibaggers: Small/mid-cap, high growth, improving quality, 3-5yr horizon
+Tier 3 Special Situations: Deep value with specific catalyst, 12-24 month thesis
+Macro Plays: Sector/theme positions driven by macro regime shifts
+
+Stock lists must include:
+  conviction (8-12 large/mid-cap high-conviction picks),
+  longBets (6-10 small/micro-cap multi-year wagers),
+  highPromise (3-6 speculative watch names),
+  watchClose (4-7 quality holds at stretched valuations),
+  trimAvoid (3-6 names to reduce or avoid).
+
+Each stock must have: symbol, ticker, name, sector, thesis, catalysts, risks,
+fundamentals (pe, pb, roe, div, mcap), horizon, conviction, verdict.
+
+The macroNarrative is ~3 sentences on the current Indian-equity environment.
+The whispers list is 5-7 themes/catalysts being tracked.
+The sectors list has exactly 12 sectors with stance and one-line note.
+The earnings list shows next 7-10 calendar entries."""
 
 
-# ----------------------------------------------------------------------
+USER_TEMPLATE = """Today is {today_pretty} IST.
+
+== MACRO SNAPSHOT ==
+{macro_block}
+
+== LATEST HEADLINES ==
+{news_block}
+
+== GEOPOLITICAL & MACRO CONTEXT ==
+Key themes to weave into your macro narrative and sector views:
+- Global conflict risk: Multiple heads of government anticipating cross-border crisis spillovers
+- Energy markets: Elevated crude prices (Brent >$100) with direct India inflationary impact
+- Currency: INR near historic lows (~94/USD) — headwind for import-heavy businesses
+- Rate cycle: RBI has eased; global rates still elevated — watch capex-heavy sectors
+- China+1: PLI scheme beneficiaries (EMS, chemicals, defence) remain strong structural theme
+- FII flows: Monitor daily — sentiment driver even when fundamentals are unchanged
+
+== PREVIOUS DATA.JSON (your prior thinking) ==
+{prev_json}
+
+== YOUR TASK ==
+Generate a fresh, complete data.json for today.
+
+Apply the Heritage Ledger framework:
+1. First pass — INVERT: which stocks/sectors should be avoided? Apply Red Flags
+2. Second pass — QUALITY: which businesses have durable ROCE >18% with clean balance sheets?
+3. Third pass — VALUATION: of the quality businesses, which have margin of safety?
+4. Fourth pass — NARRATIVE: what does the macro context mean for each position?
+
+Update only what has meaningfully changed. Keep verdicts stable when fundamentals are stable.
+Flag any earnings surprises or sector developments from the headlines.
+
+Output the complete data.json JSON object."""
+
+
+TIER_SYSTEM_PROMPT = """You are the research analyst for "The Heritage Ledger", \
+a fundamentals-first Indian equity investment system.
+
+Your job is to assess stocks that have passed rigorous quantitative screening \
+(ROCE, growth, debt, promoter data from Screener.in) and provide a \
+fundamentals-based verdict for each.
+
+You apply Graham-Buffett-Munger-Naval principles. You are specific — you \
+reference the actual numbers provided. You never invent data.
+
+You output clean JSON only. No prose, no code fences."""
+
+
+# -----------------------------------------------------------------------
 # MAIN
-# ----------------------------------------------------------------------
+# -----------------------------------------------------------------------
 
 def main():
-    print(f"[{dt.datetime.utcnow().isoformat()}Z] Heritage Ledger refresh starting...")
+    print(f"[{dt.datetime.utcnow().isoformat()}Z] Heritage Ledger v3 refresh starting...")
     print(f"  model: {MODEL}")
 
-    # 1. Macro snapshot
+    # IST timestamp
+    ist = dt.timezone(dt.timedelta(hours=5, minutes=30))
+    today = dt.datetime.now(ist)
+    today_pretty = today.strftime("%A, %d %B %Y, %H:%M")
+
+    # --- 1. Macro ---
+    print("\n[1/6] Fetching macro data...")
     macro_lines = []
     for sym, label in MACRO_TICKERS.items():
         q = yahoo_quote(sym)
         time.sleep(0.3)
         if q:
             macro_lines.append(
-                f"  {label} ({sym}): {q['price']:.2f}  "
-                f"({q['change_pct']:+.2f}%)  "
-                f"52w range {q.get('fifty_two_w_low', '—')}–{q.get('fifty_two_w_high', '—')}  "
-                f"state={q['market_state']}"
+                f"  {label}: ₹{q['price']:,.2f} ({q['change_pct']:+.2f}%)"
+                f"  | 52w {q.get('fifty_two_w_low','?')}–{q.get('fifty_two_w_high','?')}"
+                f"  | state={q['market_state']}"
             )
         else:
-            macro_lines.append(f"  {label} ({sym}): unavailable")
+            macro_lines.append(f"  {label}: unavailable")
     macro_block = "\n".join(macro_lines)
-    print(f"  ✓ macro fetched ({len(macro_lines)} tickers)")
+    print(f"  ✓ {len(macro_lines)} macro tickers")
 
-    # 2. Headlines
+    # --- 2. News ---
+    print("\n[2/6] Fetching news headlines...")
     news = fetch_news()
     news_block = "\n".join(f"  • [{n['src']}] {n['title']}" for n in news[:50])
     if not news_block:
-        news_block = "  (RSS feeds returned nothing this run — proceed with macro + prior data only.)"
-    print(f"  ✓ news fetched ({len(news)} headlines)")
+        news_block = "  (No headlines this run — proceed with macro + prior data)"
+    print(f"  ✓ {len(news)} headlines")
 
-    # 3. Prior data
-    prev = load_existing_data()
+    # --- 3. Load universe & prior data ---
+    print("\n[3/6] Loading universe and prior data...")
+    universe = load_universe()
+    prev     = load_existing_data()
     prev_json = json.dumps(prev, indent=2)
-    print(f"  ✓ prior data loaded ({len(prev_json)} chars)")
 
-    # 4. Build the user message for main ledger refresh
-    today = dt.datetime.now(dt.timezone(dt.timedelta(hours=5, minutes=30)))  # IST
-    today_pretty = today.strftime("%A, %d %B %Y, %H:%M")
-    user_msg = USER_TEMPLATE.format(
+    universe_stocks = universe.get("universe", {})
+    compounders      = universe_stocks.get("compounders", [])
+    multibaggers     = universe_stocks.get("multibaggers", [])
+    special          = universe_stocks.get("special_situations", [])
+    all_tier_stocks  = compounders + multibaggers + special
+    print(f"  ✓ Universe: {len(compounders)} compounders, {len(multibaggers)} multibaggers, {len(special)} special situations")
+    print(f"  ✓ Prior data: {len(prev_json)} chars")
+
+    # --- 4. Fetch live prices for all universe stocks ---
+    print(f"\n[4/6] Fetching live prices for {len(all_tier_stocks)} universe stocks...")
+    price_lookup = {}
+    for s in all_tier_stocks:
+        sym = s.get("symbol")
+        if sym and s.get("symbol_resolved"):
+            q = yahoo_quote(sym)
+            if q:
+                price_lookup[sym] = q
+            time.sleep(0.12)
+    print(f"  ✓ Prices fetched: {len(price_lookup)}/{len(all_tier_stocks)}")
+
+    # --- 5. API client ---
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        print("  ✗ ANTHROPIC_API_KEY not set", file=sys.stderr)
+        sys.exit(1)
+    client = anthropic.Anthropic(api_key=api_key)
+
+    # --- 6a. CALL 1: Main ledger refresh ---
+    print(f"\n[5/6] Calling Claude — Main Ledger...")
+    ledger_msg = USER_TEMPLATE.format(
         today_iso=today.isoformat(),
         today_pretty=today_pretty,
         macro_block=macro_block,
         news_block=news_block,
         prev_json=prev_json,
     )
-
-    # 5. Validate API key and create client
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        print("  ✗ ANTHROPIC_API_KEY not set — cannot proceed.", file=sys.stderr)
-        sys.exit(1)
-
-    client = anthropic.Anthropic(api_key=api_key)
-
-    # 6. CALL 1: Main ledger refresh
-    print(f"  → calling Claude for main ledger ({MODEL})...")
     resp = client.messages.create(
         model=MODEL,
-        max_tokens=MAX_OUTPUT_TOKENS,
+        max_tokens=MAX_TOKENS,
         system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": user_msg}],
+        messages=[{"role": "user", "content": ledger_msg}],
     )
-    text = "".join(b.text for b in resp.content if hasattr(b, "text"))
-    print(f"  ✓ main response received ({len(text)} chars)")
-    print(f"    main usage: input {resp.usage.input_tokens}, output {resp.usage.output_tokens}")
+    ledger_text = "".join(b.text for b in resp.content if hasattr(b, "text"))
+    print(f"  ✓ Ledger response: {len(ledger_text)} chars | tokens in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
 
-    # 7. Parse and validate main ledger response
     try:
-        new_data = extract_json_block(text)
+        new_data = extract_json_block(ledger_text)
     except Exception as e:
-        print(f"  ✗ main JSON parse failed: {e}", file=sys.stderr)
-        print("  ✗ keeping previous data.json", file=sys.stderr)
+        print(f"  ✗ Ledger JSON parse failed: {e} — keeping previous", file=sys.stderr)
         sys.exit(1)
 
-    # Light validation
+    # Validate
     required_top = ["edition", "lastUpdated", "macroNarrative", "stocks", "sectors", "earnings", "whispers"]
-    missing = [k for k in required_top if k not in new_data]
-    if missing:
-        print(f"  ✗ missing keys: {missing} — keeping previous data.json", file=sys.stderr)
-        sys.exit(1)
-
     required_stock_lists = ["conviction", "longBets", "highPromise", "watchClose", "trimAvoid"]
-    missing_lists = [k for k in required_stock_lists if k not in new_data["stocks"]]
-    if missing_lists:
-        print(f"  ✗ missing stock lists: {missing_lists} — keeping previous data.json", file=sys.stderr)
+    missing = [k for k in required_top if k not in new_data]
+    missing_lists = [k for k in required_stock_lists if k not in new_data.get("stocks", {})]
+    if missing or missing_lists:
+        print(f"  ✗ Missing keys {missing + missing_lists} — keeping previous", file=sys.stderr)
         sys.exit(1)
 
-    # 8. CALL 2: Extended universe analysis
-    # First, fetch live prices for the extended universe (so Claude can see current valuations)
-    print(f"  → fetching prices for extended universe ({len(EXTENDED_UNIVERSE_STOCKS)} stocks)...")
-    price_lookup = {}
-    for s in EXTENDED_UNIVERSE_STOCKS:
-        q = yahoo_quote(s["symbol"])
-        if q:
-            price_lookup[s["symbol"]] = q
-        time.sleep(0.15)  # be polite to Yahoo
-    print(f"  ✓ prices fetched ({len(price_lookup)}/{len(EXTENDED_UNIVERSE_STOCKS)} successful)")
+    # --- 6b. CALL 2+: Tier analysis (Screener stocks in batches) ---
+    print(f"\n[6/6] Calling Claude — Tier Analysis ({len(all_tier_stocks)} stocks in batches of {BATCH_SIZE})...")
 
-    try:
-        extended = analyze_extended_universe(client, macro_block, today_pretty, price_lookup)
-    except Exception as e:
-        print(f"  ! extended universe call failed: {e}", file=sys.stderr)
-        print(f"  ! falling back to previous extendedUniverse if available", file=sys.stderr)
-        extended = (prev.get("stocks") or {}).get("extendedUniverse", [])
+    tier_configs = [
+        ("compounders",       "Tier 1 — Compounders",       compounders),
+        ("multibaggers",      "Tier 2 — Multibagger Candidates", multibaggers),
+        ("special_situations","Tier 3 — Special Situations", special),
+    ]
 
-    # Always carry over the previous extended universe if the new one is empty
-    if not extended:
-        extended = (prev.get("stocks") or {}).get("extendedUniverse", [])
+    tiers_output = {}
 
-    # Merge extended universe into main data
-    new_data["stocks"]["extendedUniverse"] = extended
+    for tier_key, tier_label, stocks in tier_configs:
+        if not stocks:
+            tiers_output[tier_key] = []
+            continue
 
-    # Force lastUpdated to now
+        print(f"  → {tier_label}: {len(stocks)} stocks...")
+        tier_results = []
+
+        # Split into batches
+        batches = [stocks[i:i+BATCH_SIZE] for i in range(0, len(stocks), BATCH_SIZE)]
+        for batch_num, batch in enumerate(batches):
+            prompt = build_tier_prompt(
+                tier_key, tier_label, batch,
+                price_lookup, macro_block, today_pretty
+            )
+            try:
+                resp = client.messages.create(
+                    model=MODEL,
+                    max_tokens=MAX_TOKENS,
+                    system=TIER_SYSTEM_PROMPT,
+                    messages=[{"role": "user", "content": prompt}],
+                )
+                text = "".join(b.text for b in resp.content if hasattr(b, "text"))
+                parsed = extract_json_block(text)
+                batch_stocks = parsed.get("stocks", [])
+
+                # Enrich with the original screener fundamentals
+                stock_map = {s["name"]: s for s in batch}
+                for result in batch_stocks:
+                    orig = stock_map.get(result["name"], {})
+                    result["screener_data"] = {
+                        k: orig.get(k) for k in
+                        ["roce", "roce_5yr", "roce_3yr", "pe", "price_to_book",
+                         "div_yield", "market_cap_cr", "profit_growth_qtr",
+                         "sales_growth_qtr", "is_red_flagged", "caution_note",
+                         "symbol", "ticker", "tier"]
+                    }
+
+                tier_results.extend(batch_stocks)
+                print(f"    ✓ Batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | tokens in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
+                time.sleep(1)  # brief pause between calls
+
+            except Exception as e:
+                print(f"    ! Batch {batch_num+1} failed: {e}", file=sys.stderr)
+                # Continue with other batches
+                continue
+
+        tiers_output[tier_key] = tier_results
+        print(f"  ✓ {tier_label}: {len(tier_results)} verdicts total")
+
+    # --- 7. Merge and write ---
     new_data["lastUpdated"] = today.isoformat()
+    new_data["stocks"]["extendedUniverse"] = []  # deprecated — replaced by tiers
+    new_data["tiers"] = {
+        "last_updated": today.isoformat(),
+        "universe_source": "Screener.in Premium",
+        "universe_last_refreshed": universe.get("last_updated", "unknown"),
+        **tiers_output,
+    }
 
-    # 9. Write
     with open(DATA_PATH, "w", encoding="utf-8") as f:
         json.dump(new_data, f, indent=2, ensure_ascii=False)
-    print(f"  ✓ wrote {DATA_PATH}")
-    print(f"    edition: {new_data.get('edition')}")
-    counts = {k: len(new_data['stocks'][k]) for k in required_stock_lists}
-    counts["extendedUniverse"] = len(extended)
-    print(f"    counts: {counts}")
-    print(f"[done] Heritage Ledger refresh complete.")
+
+    print(f"\n  ✓ Written: {DATA_PATH}")
+    print(f"    Edition: {new_data.get('edition')}")
+    ledger_counts = {k: len(new_data["stocks"].get(k, [])) for k in required_stock_lists}
+    tier_counts = {k: len(tiers_output.get(k, [])) for k in ["compounders", "multibaggers", "special_situations"]}
+    print(f"    Ledger: {ledger_counts}")
+    print(f"    Tiers: {tier_counts}")
+    print(f"[done] Heritage Ledger v3 refresh complete.\n")
 
 
 if __name__ == "__main__":
