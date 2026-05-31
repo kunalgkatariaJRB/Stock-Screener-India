@@ -1,50 +1,107 @@
-name: Refresh Heritage Ledger
+name: Heritage Ledger — Daily Refresh
 
 on:
   schedule:
-    - cron: "0 2 * * *"
+    # 7:30 AM IST = 02:00 UTC daily
+    - cron: '0 2 * * *'
   workflow_dispatch:
+    inputs:
+      run_ingest:
+        description: 'Also run data ingest (re-process Screener CSVs)?'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
 
 permissions:
   contents: write
 
-concurrency:
-  group: refresh
-  cancel-in-progress: false
-
 jobs:
-  refresh:
+
+  # -----------------------------------------------------------------------
+  # JOB 1: Data Ingest
+  # Runs when you manually upload new Screener CSVs to data/screens/
+  # Also runs daily before the refresh (reads latest CSVs if they changed)
+  # -----------------------------------------------------------------------
+  data_ingest:
+    name: Process Screener CSVs
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    outputs:
+      universe_updated: ${{ steps.check.outputs.changed }}
 
     steps:
-      - name: Check out the repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-          cache: pip
+          python-version: '3.11'
+
+      - name: Check if CSVs exist
+        id: check
+        run: |
+          if [ -d "data/screens" ] && [ "$(ls -A data/screens/*.csv 2>/dev/null | wc -l)" -gt "0" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "CSVs found: $(ls data/screens/*.csv | wc -l) files"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No CSVs found in data/screens/ — skipping ingest"
+          fi
+
+      - name: Run data ingest
+        if: steps.check.outputs.changed == 'true'
+        run: python data_ingest.py
+
+      - name: Commit processed universe
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "Heritage Bot"
+          git add data/processed/
+          if git diff --staged --quiet; then
+            echo "Universe unchanged — no commit needed"
+          else
+            git commit -m "📊 Universe updated from Screener CSVs — $(date -u +'%Y-%m-%d') [skip ci]"
+            git push
+
+  # -----------------------------------------------------------------------
+  # JOB 2: Daily Editorial Refresh
+  # Runs every morning at 7:30 AM IST after data_ingest completes
+  # -----------------------------------------------------------------------
+  daily_refresh:
+    name: Daily Claude Refresh
+    runs-on: ubuntu-latest
+    needs: data_ingest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          # Pull latest (including any universe updates from data_ingest job)
+          ref: main
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install --upgrade anthropic
+        run: pip install anthropic
 
-      - name: Run the refresh script
+      - name: Run Heritage Ledger refresh
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          HERITAGE_MODEL: "claude-sonnet-4-6"
+          HERITAGE_MODEL: claude-sonnet-4-6
         run: python refresh.py
 
-      - name: Commit and push if data.json changed
+      - name: Commit updated data.json
         run: |
-          git config --local user.name  "Heritage Ledger Bot"
-          git config --local user.email "bot@heritageledger.local"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "Heritage Bot"
           git add data.json
-          if git diff --quiet --staged; then
-            echo "No changes to commit today."
+          if git diff --staged --quiet; then
+            echo "data.json unchanged — nothing to commit"
           else
-            git commit -m "Daily refresh: $(date -u +%Y-%m-%d) [skip ci]"
+            git commit -m "🤖 Daily refresh: $(date -u +'%Y-%m-%d %H:%M') UTC [skip ci]"
             git push
-            echo "Pushed updated data.json"
-          fi
