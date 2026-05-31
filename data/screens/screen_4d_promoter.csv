@@ -1,26 +1,26 @@
-Name,BSE Code,NSE Code,ISIN Code,Industry Group,Industry,Current Price,Price to Earning,Market Capitalization,Dividend yield,Net Profit latest quarter,YOY Quarterly profit growth,Sales latest quarter,YOY Quarterly sales growth,Return on capital employed,Promoter holding,Pledged percentage
-Arshiya,506074,ARSHIYA,INE968D01022,Transport Services,Logistics Solution Provider,1.18,,31.09,0.00,-0.88,99.58,4.65,35.17,,14.37,100.00
-Bajaj Hindusthan,500032,BAJAJHIND,INE306A01021,Agricultural Food & other Products,Sugar,18.38,31.24,4394.04,0.00,390.68,85.69,1668.71,7.41,2.27,13.43,100.00
-Bluestone Jewel,544484,BLUESTONE,INE304W01038,Consumer Durables,"Gems, Jewellery And Watches",479.60,492.40,7307.23,0.00,31.18,162.67,681.47,47.73,7.07,16.26,37.21
-Constronics,523844,,INE537B01011,Commercial Services & Supplies,Trading & Distributors,44.50,19.77,55.75,0.00,0.17,-83.33,7.15,-61.20,7.90,10.63,99.99
-Deccan Polypacks,531989,,INE132E01015,Industrial Products,Packaging,35.06,12.58,7.42,0.00,-0.02,-100.00,0.00,,,12.94,19.00
-Diamant Infra.,508860,,INE206I01026,Construction,Civil Construction,0.84,,2.96,0.00,-0.10,-600.00,0.00,,0.15,18.32,77.52
-Dish TV India,532839,DISHTV,INE836F01026,Entertainment,TV Broadcasting & Software Production,3.21,,591.05,0.00,-303.95,-244.96,243.07,-29.27,,4.06,11.61
-Esaar (India),531502,,INE404L01039,Commercial Services & Supplies,Diversified Commercial Services,10.44,1.92,21.34,0.00,25.01,1216.52,21.46,751.59,30.86,4.14,99.82
-Family Care,516110,,INE146N01016,Healthcare Services,Healthcare Service Provider,3.20,,17.28,0.00,-2.42,87.88,0.06,200.00,-25.62,18.54,61.71
-Gokaldas Exports,532630,GOKEX,INE887G01027,Textiles & Apparels,Garments & Apparels,691.80,50.62,5069.07,0.00,35.96,-31.97,1068.85,5.27,8.39,9.15,96.28
-Hind.Construct.,500185,HCC,INE549A01026,Construction,Civil Construction,22.81,43.47,5975.01,0.00,58.94,-34.57,992.20,-27.77,22.84,16.72,79.74
-IndusInd Bank,532187,INDUSINDBK,INE095A01012,Banks,Private Sector Bank,914.35,80.10,71240.00,0.16,594.17,125.51,11005.42,3.49,5.68,15.50,42.78
-Inland Printers,530787,,INE055O01033,Printing & Publication,Printing & Publication,46.52,,23.00,0.00,-0.09,0.00,0.00,,-8.82,16.94,20.00
-Jet Solar,538794,,INE155R01018,Realty,"Residential, Commercial Projects",11.83,351.25,14.05,0.00,0.02,112.50,0.20,253.85,0.25,12.54,13.42
-Max Financial,500271,MFSL,INE180A01020,Insurance,Life Insurance,1674.00,695.39,57772.21,0.00,-31.52,-184.35,10801.94,-12.72,2.95,1.25,42.07
-Pro Fin Capital,511557,,INE732K01027,Commercial Services & Supplies,Diversified Commercial Services,3.55,216.88,210.37,0.00,-12.49,66.16,-8.23,74.37,4.58,3.90,34.14
-SEPC,532945,SEPC,INE964H01014,Construction,Civil Construction,7.78,26.99,1470.50,0.00,13.73,40.72,273.83,132.45,5.03,18.67,71.45
-SGL Resources,526544,,INE967B01028,IT - Services,IT Enabled Services,2.89,,72.39,0.00,-0.40,-165.57,-8.27,-203.76,1.67,6.90,17.94
-Supertex Inds.,526133,,INE881B01054,Textiles & Apparels,Other Textile Products,5.41,,6.14,0.00,-0.12,-175.00,10.72,-48.83,5.73,13.29,32.66
-Tricom Fruit,531716,,INE843F01014,Food Products,Other Food Products,1.79,,3.42,0.00,-0.07,,0.00,,,12.62,62.69
-Vikas Wsp,519307,VIKASWSP,INE706A01022,Agricultural Food & other Products,Other Agricultural Products,0.98,,20.04,0.00,-40.72,-9831.71,0.00,,-10.14,14.55,56.92
-Vipul Ltd,511726,VIPULLTD,INE946H01037,Realty,"Residential, Commercial Projects",8.81,,124.19,0.00,1.21,-67.56,9.19,-18.38,-0.44,18.24,30.71
-Visagar Polytex,506146,VIVIDHA,INE370E01029,Textiles & Apparels,Garments & Apparels,0.58,,16.98,0.00,-0.42,16.00,0.00,,-17.81,5.63,83.69
-Vivimed Labs.,532660,VIVIMEDLAB,INE526G01021,Pharmaceuticals & Biotechnology,Pharmaceuticals,6.72,,55.72,0.00,-16.55,-176.76,15.99,-56.20,-8.10,7.57,15.18
-Zee Learn,533287,ZEELEARN,INE565L01011,Other Consumer Services,Education,7.01,10.01,229.27,0.00,45.42,-4.21,176.77,11.40,12.97,15.01,29.16
+Name,BSE Code,NSE Code,ISIN Code,Industry Group,Industry,Current Price,Price to Earning,Market Capitalization,Dividend yield,Net Profit latest quarter,YOY Quarterly profit growth,Sales latest quarter,YOY Quarterly sales growth,Return on capital employed,Sales growth,Profit growth,Operating profit growth,TTM Result Date,EPS,EPS latest quarter,EPS growth 3Years,Promoter holding,Pledged percentage
+Arshiya,506074,ARSHIYA,INE968D01022,Transport Services,Logistics Solution Provider,1.18,,31.09,0.00,-0.88,99.58,4.65,35.17,,8.57,92.54,80.82,202503.00,-41.54,-0.03,16.17,14.37,100.00
+Bajaj Hindusthan,500032,BAJAJHIND,INE306A01021,Agricultural Food & other Products,Sugar,18.38,31.24,4394.04,0.00,390.68,85.69,1668.71,7.41,2.27,-2.15,702.77,26.01,202603.00,0.53,1.65,36.82,13.43,100.00
+Bluestone Jewel,544484,BLUESTONE,INE304W01038,Consumer Durables,"Gems, Jewellery And Watches",479.60,492.40,7307.23,0.00,31.18,162.67,681.47,47.73,7.07,37.65,106.64,407.25,202603.00,0.97,2.10,,16.26,37.21
+Constronics,523844,,INE537B01011,Commercial Services & Supplies,Trading & Distributors,44.50,19.77,55.75,0.00,0.17,-83.33,7.15,-61.20,7.90,-4.63,-9.90,-25.00,202603.00,2.25,0.14,,10.63,99.99
+Deccan Polypacks,531989,,INE132E01015,Industrial Products,Packaging,35.06,12.58,7.42,0.00,-0.02,-100.00,0.00,,,,1083.33,-783.33,202512.00,2.79,-0.09,21.29,12.94,19.00
+Diamant Infra.,508860,,INE206I01026,Construction,Civil Construction,0.84,,2.96,0.00,-0.10,-600.00,0.00,,0.15,,-166.67,-33.33,202603.00,-0.02,-0.03,7.72,18.32,77.52
+Dish TV India,532839,DISHTV,INE836F01026,Entertainment,TV Broadcasting & Software Production,3.21,,591.05,0.00,-303.95,-244.96,243.07,-29.27,,-25.84,-335.20,-101.30,202603.00,-4.38,-1.65,,4.06,11.61
+Esaar (India),531502,,INE404L01039,Commercial Services & Supplies,Diversified Commercial Services,10.44,1.92,21.34,0.00,25.01,1216.52,21.46,751.59,30.86,175.63,597.32,24550.00,202603.00,5.45,12.23,35.48,4.14,99.82
+Family Care,516110,,INE146N01016,Healthcare Services,Healthcare Service Provider,3.20,,17.28,0.00,-2.42,87.88,0.06,200.00,-25.62,-97.34,-114.33,-111.60,202603.00,-1.61,-0.45,,18.54,61.71
+Gokaldas Exports,532630,GOKEX,INE887G01027,Textiles & Apparels,Garments & Apparels,691.80,50.62,5069.07,0.00,35.96,-31.97,1068.85,5.27,8.39,3.19,-27.23,-3.94,202603.00,13.67,4.91,-19.04,9.15,96.28
+Hind.Construct.,500185,HCC,INE549A01026,Construction,Civil Construction,22.81,43.47,5975.01,0.00,58.94,-34.57,992.20,-27.77,22.84,-29.16,5427.52,-10.86,202603.00,0.63,0.23,31.82,16.72,79.74
+IndusInd Bank,532187,INDUSINDBK,INE095A01012,Banks,Private Sector Bank,914.35,80.10,71240.00,0.16,594.17,125.51,11005.42,3.49,5.68,-4.97,-65.45,-14.44,202603.00,11.41,7.63,-50.82,15.50,42.78
+Inland Printers,530787,,INE055O01033,Printing & Publication,Printing & Publication,46.52,,23.00,0.00,-0.09,0.00,0.00,,-8.82,,-146.67,10.34,202603.00,-0.75,-0.18,-31.73,16.94,20.00
+Jet Solar,538794,,INE155R01018,Realty,"Residential, Commercial Projects",11.83,351.25,14.05,0.00,0.02,112.50,0.20,253.85,0.25,1.85,0.00,-129.23,202603.00,0.03,0.02,-38.22,12.54,13.42
+Max Financial,500271,MFSL,INE180A01020,Insurance,Life Insurance,1674.00,695.39,57772.21,0.00,-31.52,-184.35,10801.94,-12.72,2.95,2.59,-74.97,-55.52,202603.00,2.43,-0.76,-39.68,1.25,42.07
+Pro Fin Capital,511557,,INE732K01027,Commercial Services & Supplies,Diversified Commercial Services,3.55,216.88,210.37,0.00,-12.49,66.16,-8.23,74.37,4.58,-615.31,102.64,116.53,202512.00,0.02,-0.21,-5.97,3.90,34.14
+SEPC,532945,SEPC,INE964H01014,Construction,Civil Construction,7.78,26.99,1470.50,0.00,13.73,40.72,273.83,132.45,5.03,76.44,57.23,20.82,202603.00,0.28,0.07,35.76,18.67,71.45
+SGL Resources,526544,,INE967B01028,IT - Services,IT Enabled Services,2.89,,72.39,0.00,-0.40,-165.57,-8.27,-203.76,1.67,-48.79,-103.70,-155.46,202512.00,0.00,-0.02,13.92,6.90,17.94
+Supertex Inds.,526133,,INE881B01054,Textiles & Apparels,Other Textile Products,5.41,,6.14,0.00,-0.12,-175.00,10.72,-48.83,5.73,-51.20,-183.78,-18.07,202512.00,-0.55,-0.11,,13.29,32.66
+Tricom Fruit,531716,,INE843F01014,Food Products,Other Food Products,1.79,,3.42,0.00,-0.07,,0.00,,,,,,202503.00,-0.21,-0.04,,12.62,62.69
+Vikas Wsp,519307,VIKASWSP,INE706A01022,Agricultural Food & other Products,Other Agricultural Products,0.98,,20.04,0.00,-40.72,-9831.71,0.00,,-10.14,,-151.71,-6605.00,202603.00,-3.28,-1.99,,14.55,56.92
+Vipul Ltd,511726,VIPULLTD,INE946H01037,Realty,"Residential, Commercial Projects",8.81,,124.19,0.00,1.21,-67.56,9.19,-18.38,-0.44,-19.72,-116.05,-257.11,202512.00,-1.98,0.09,11.57,18.24,30.71
+Visagar Polytex,506146,VIVIDHA,INE370E01029,Textiles & Apparels,Garments & Apparels,0.58,,16.98,0.00,-0.42,16.00,0.00,,-17.81,,7.23,-18.64,202603.00,-0.05,-0.01,-3.45,5.63,83.69
+Vivimed Labs.,532660,VIVIMEDLAB,INE526G01021,Pharmaceuticals & Biotechnology,Pharmaceuticals,6.72,,55.72,0.00,-16.55,-176.76,15.99,-56.20,-8.10,-35.33,-65.51,62.54,202512.00,-4.21,-2.00,15.17,7.57,15.18
+Zee Learn,533287,ZEELEARN,INE565L01011,Other Consumer Services,Education,7.01,10.01,229.27,0.00,45.42,-4.21,176.77,11.40,12.97,18.05,24.58,0.38,202603.00,1.18,1.39,35.85,15.01,29.16
