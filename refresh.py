@@ -615,19 +615,29 @@ def main():
         news_block=news_block,
         prev_summary=prev_summary,
     )
-    resp = client.messages.create(
-        model=MODEL,
-        max_tokens=MAX_TOKENS_LEDGER,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": ledger_msg}],
-    )
-    ledger_text = "".join(b.text for b in resp.content if hasattr(b, "text"))
-    print(f"  ✓ {len(ledger_text)} chars | in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
+    try:
+        resp = client.messages.create(
+            model=MODEL,
+            max_tokens=MAX_TOKENS_LEDGER,
+            system=SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": ledger_msg}],
+        )
+        ledger_text = "".join(b.text for b in resp.content if hasattr(b, "text"))
+        stop_reason = resp.stop_reason
+        print(f"  ✓ {len(ledger_text)} chars | stop={stop_reason} | in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
+        if stop_reason == "max_tokens":
+            print("  ✗ Response truncated — hit max_tokens limit. Increase MAX_TOKENS_LEDGER or reduce prompt.", file=sys.stderr)
+            sys.exit(1)
+    except Exception as e:
+        print(f"  ✗ Claude API call failed: {e}", file=sys.stderr)
+        import traceback; traceback.print_exc()
+        sys.exit(1)
 
     try:
         new_data = extract_json_block(ledger_text)
     except Exception as e:
         print(f"  ✗ JSON parse failed: {e}", file=sys.stderr)
+        print(f"  ✗ Response tail (last 500 chars):\n{ledger_text[-500:]}", file=sys.stderr)
         sys.exit(1)
 
     required_top   = ["edition", "lastUpdated", "macroNarrative", "stocks", "sectors", "earnings", "whispers"]
@@ -636,6 +646,7 @@ def main():
     missing_lists = [k for k in required_lists if k not in new_data.get("stocks", {})]
     if missing or missing_lists:
         print(f"  ✗ Missing keys: {missing + missing_lists}", file=sys.stderr)
+        print(f"  ✗ Response tail (last 500 chars):\n{ledger_text[-500:]}", file=sys.stderr)
         sys.exit(1)
 
     # --- 6b. Tier analysis ---
@@ -719,4 +730,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        import traceback
+        print(f"\n✗ Fatal unhandled error: {e}", file=sys.stderr)
+        traceback.print_exc()
+        sys.exit(1)
