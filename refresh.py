@@ -1,16 +1,13 @@
 """
-The Heritage Ledger — Daily Refresh Script (v3)
+The Heritage Ledger — Daily Refresh Script (v4)
 ================================================
-What changed from v2:
-  - Now reads data/processed/master_universe.json (built from Screener.in CSVs)
-  - Claude receives REAL fundamentals (ROCE, P/E, growth rates, promoter data)
-    instead of stale hand-entered numbers
-  - Analyzes three tiers from Screener screens (Compounders, Multibaggers,
-    Special Situations) in addition to the editorial high-conviction ledger
-  - Output data.json gains a "tiers" section for the dashboard
+Changes from v3:
+  - Multi-source price fetching: Yahoo (query1) → Yahoo (query2) → NSE Direct API
+  - Staggered timing to avoid rate limits (group pause every 10 stocks)
+  - Sector balance rule in SYSTEM_PROMPT (prevents all-cautious bias)
+  - Uses compress_prev_data to reduce input tokens (keeps MAX_TOKENS_LEDGER at 32000)
 
 Run daily via GitHub Actions. See .github/workflows/refresh.yml.
-
 Required secrets: ANTHROPIC_API_KEY
 Optional env var: HERITAGE_MODEL (default: claude-sonnet-4-6)
 """
@@ -20,6 +17,7 @@ import sys
 import json
 import time
 import re
+import http.cookiejar
 import datetime as dt
 from urllib.parse import quote
 import urllib.request
@@ -35,9 +33,9 @@ import anthropic
 MODEL              = os.environ.get("HERITAGE_MODEL", "claude-sonnet-4-6")
 DATA_PATH          = "data.json"
 UNIVERSE_PATH      = Path("data/processed/master_universe.json")
-MAX_TOKENS_LEDGER  = 32000   # main ledger output — needs room for full JSON
-MAX_TOKENS_TIER    = 16000   # tier analysis per batch — smaller JSON
-BATCH_SIZE         = 40      # reduced from 55 — smaller batches = better quality + fits in tokens
+MAX_TOKENS_LEDGER  = 32000
+MAX_TOKENS_TIER    = 16000
+BATCH_SIZE         = 40
 
 MACRO_TICKERS = {
     "^NSEI":    "Nifty 50",
@@ -58,87 +56,31 @@ NEWS_FEEDS = [
 ]
 
 # -----------------------------------------------------------------------
-# HTTP + YAHOO HELPERS (unchanged from v2)
+# HTTP HELPERS
 # -----------------------------------------------------------------------
 
 def http_get(url: str, timeout: int = 20) -> str:
     req = urllib.request.Request(url, headers={
-        "User-Agent": "Mozilla/5.0 (compatible; HeritageLedgerBot/1.0)",
-        "Accept": "*/*",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "application/json, text/html, */*",
     })
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return r.read().decode("utf-8", errors="replace")
     except Exception as e:
-        print(f"  ! GET failed: {e}", file=sys.stderr)
+        print(f"  ! GET failed {url[:60]}: {e}", file=sys.stderr)
         return ""
 
 
-def http_get_nse(path: str, timeout: int = 15) -> str:
-    """
-    NSE India requires a valid session cookie — we get one by hitting the
-    homepage first, then use that cookie for the API call.
-    """
-    import urllib.request, http.cookiejar
-    jar = http.cookiejar.CookieJar()
-    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "application/json",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Referer": "https://www.nseindia.com/",
-    }
-    try:
-        # Establish session
-        req0 = urllib.request.Request("https://www.nseindia.com/", headers=headers)
-        opener.open(req0, timeout=timeout)
-        time.sleep(0.5)
-        # Hit the actual API
-        req1 = urllib.request.Request(
-            f"https://www.nseindia.com/api/{path}",
-            headers=headers
-        )
-        with opener.open(req1, timeout=timeout) as r:
-            return r.read().decode("utf-8", errors="replace")
-    except Exception as e:
-        return ""
-
-
-def nse_quote(nse_symbol: str) -> dict | None:
-    """Fetch quote from NSE India's official API. Handles .NS suffix."""
-    sym = nse_symbol.replace(".NS", "").upper()
-    body = http_get_nse(f"quote-equity?symbol={quote(sym)}")
-    if not body:
-        return None
-    try:
-        j = json.loads(body)
-        pd = j.get("priceInfo", {})
-        price = pd.get("lastPrice")
-        prev  = pd.get("previousClose")
-        if price is None or prev is None:
-            return None
-        wk52 = pd.get("weekHighLow", {})
-        return {
-            "price":            round(float(price), 2),
-            "prev_close":       round(float(prev), 2),
-            "change_pct":       round((float(price) - float(prev)) / float(prev) * 100, 2),
-            "currency":         "INR",
-            "fifty_two_w_high": wk52.get("max"),
-            "fifty_two_w_low":  wk52.get("min"),
-            "market_state":     "REGULAR",
-            "source":           "NSE",
-        }
-    except Exception:
-        return None
-
+# -----------------------------------------------------------------------
+# PRICE SOURCES — 3-LEVEL WATERFALL
+# -----------------------------------------------------------------------
 
 def yahoo_quote(symbol: str) -> dict | None:
-    """Try Yahoo Finance with two endpoint variants."""
-    for endpoint in [
-        f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(symbol)}?interval=1d&range=5d",
-        f"https://query2.finance.yahoo.com/v8/finance/chart/{quote(symbol)}?interval=1d&range=5d",
-    ]:
-        body = http_get(endpoint)
+    """Try Yahoo Finance on both query1 and query2 endpoints."""
+    for host in ["query1", "query2"]:
+        url = f"https://{host}.finance.yahoo.com/v8/finance/chart/{quote(symbol)}?interval=1d&range=5d"
+        body = http_get(url)
         if not body:
             continue
         try:
@@ -164,26 +106,73 @@ def yahoo_quote(symbol: str) -> dict | None:
     return None
 
 
-def fetch_quote_with_fallback(symbol: str) -> dict | None:
+def nse_quote(nse_symbol: str) -> dict | None:
     """
-    Waterfall: Yahoo (query1) → Yahoo (query2) → NSE direct.
-    NSE direct only works for .NS symbols.
-    Adds small random jitter between calls to reduce rate-limit risk.
+    Fetch from NSE India's official API.
+    NSE requires a session cookie — we get one by hitting the homepage first.
+    Only works for .NS symbols.
     """
-    # Try Yahoo first
+    sym = nse_symbol.replace(".NS", "").upper()
+    jar = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0",
+        "Accept": "application/json",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.nseindia.com/",
+    }
+    try:
+        # Step 1: establish session cookie
+        req0 = urllib.request.Request("https://www.nseindia.com/", headers=headers)
+        opener.open(req0, timeout=15)
+        time.sleep(0.5)
+        # Step 2: fetch quote
+        req1 = urllib.request.Request(
+            f"https://www.nseindia.com/api/quote-equity?symbol={quote(sym)}",
+            headers=headers,
+        )
+        with opener.open(req1, timeout=15) as r:
+            body = r.read().decode("utf-8", errors="replace")
+        j = json.loads(body)
+        pd = j.get("priceInfo", {})
+        price = pd.get("lastPrice")
+        prev  = pd.get("previousClose")
+        if price is None or prev is None:
+            return None
+        wk52 = pd.get("weekHighLow", {})
+        return {
+            "price":            round(float(price), 2),
+            "prev_close":       round(float(prev), 2),
+            "change_pct":       round((float(price) - float(prev)) / float(prev) * 100, 2),
+            "currency":         "INR",
+            "fifty_two_w_high": wk52.get("max"),
+            "fifty_two_w_low":  wk52.get("min"),
+            "market_state":     "REGULAR",
+            "source":           "NSE",
+        }
+    except Exception as e:
+        print(f"  ! NSE failed {sym}: {e}", file=sys.stderr)
+        return None
+
+
+def fetch_quote(symbol: str) -> dict | None:
+    """
+    Waterfall: Yahoo (query1+query2) → NSE Direct.
+    Adds per-symbol jitter to reduce rate-limit clustering.
+    """
     q = yahoo_quote(symbol)
     if q:
         return q
-
-    # Fallback to NSE for Indian stocks
+    # NSE fallback for Indian stocks only
     if symbol.endswith(".NS"):
-        time.sleep(0.3 + (hash(symbol) % 7) * 0.1)  # jitter 0.3–1.0s
-        q = nse_quote(symbol)
-        if q:
-            return q
-
+        time.sleep(0.4 + (hash(symbol) % 6) * 0.1)  # 0.4–1.0s jitter
+        return nse_quote(symbol)
     return None
 
+
+# -----------------------------------------------------------------------
+# NEWS + DATA HELPERS
+# -----------------------------------------------------------------------
 
 def fetch_news() -> list[dict]:
     items = []
@@ -219,10 +208,8 @@ def load_existing_data() -> dict:
 
 
 def load_universe() -> dict:
-    """Load master_universe.json built by data_ingest.py."""
     if not UNIVERSE_PATH.exists():
-        print(f"  ! Universe file not found at {UNIVERSE_PATH}", file=sys.stderr)
-        print(f"  ! Run data_ingest.py first or upload CSVs to data/screens/", file=sys.stderr)
+        print(f"  ! Universe not found at {UNIVERSE_PATH} — run data_ingest.py first", file=sys.stderr)
         return {}
     with open(UNIVERSE_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -248,195 +235,190 @@ def extract_json_block(text: str) -> dict:
     raise ValueError("Could not extract JSON from model output")
 
 
+def compress_prev_data(prev: dict) -> str:
+    """Compact summary of previous data.json — saves ~13k input tokens."""
+    if not prev:
+        return "  (No prior data — first run)"
+    lines = []
+    lines.append(f"Edition: {prev.get('edition', 'unknown')}")
+    lines.append(f"Last updated: {prev.get('lastUpdated', 'unknown')}")
+    lines.append(f"Macro narrative: {prev.get('macroNarrative', '')[:300]}")
+    lines.append("")
+    stocks = prev.get("stocks", {})
+    bucket_labels = {
+        "conviction": "CONVICTION BUYS",
+        "longBets": "INDIA TOMORROW",
+        "highPromise": "HIGH PROMISE",
+        "watchClose": "HOLD & WATCH",
+        "trimAvoid": "TRIM OR AVOID",
+    }
+    for bucket, label in bucket_labels.items():
+        items = stocks.get(bucket, [])
+        if not items:
+            continue
+        lines.append(f"--- {label} ({len(items)}) ---")
+        for s in items:
+            lines.append(
+                f"  {s.get('ticker','?')} | {s.get('name','?')} | "
+                f"{s.get('conviction','?')} | {(s.get('thesis') or '')[:120]}"
+            )
+        lines.append("")
+    sectors = prev.get("sectors", [])
+    if sectors:
+        lines.append("--- SECTORS ---")
+        for sec in sectors:
+            lines.append(f"  {sec.get('name','?')}: {sec.get('stance','?')} — {sec.get('note','')[:80]}")
+        lines.append("")
+    whispers = prev.get("whispers", [])
+    if whispers:
+        lines.append("--- WHISPERS ---")
+        for w in whispers:
+            if isinstance(w, str):
+                lines.append(f"  • {w[:100]}")
+            elif isinstance(w, dict):
+                lines.append(f"  • {w.get('theme', str(w))[:100]}")
+    return "\n".join(lines)
+
+
 # -----------------------------------------------------------------------
 # PROMPT BUILDERS
 # -----------------------------------------------------------------------
 
 def fmt_fundamentals(s: dict, q: dict | None) -> str:
-    """
-    Build a rich one-line fundamentals string for a Screener stock.
-    Combines CSV data (real ratios) with live Yahoo price.
-    """
     parts = []
-
-    # Live price
     if q:
-        parts.append(f"Price ₹{q['price']:,.2f} ({q['change_pct']:+.2f}%)")
-        if q.get("fifty_two_w_low") and q.get("fifty_two_w_high"):
-            hi = q["fifty_two_w_high"]
-            lo = q["fifty_two_w_low"]
-            pos = round((q["price"] - lo) / (hi - lo) * 100) if hi > lo else 0
+        parts.append(f"Price ₹{q['price']:,.2f} ({q['change_pct']:+.2f}%) [{q.get('source','?')}]")
+        hi = q.get("fifty_two_w_high")
+        lo = q.get("fifty_two_w_low")
+        if hi and lo and hi > lo:
+            pos = round((q["price"] - lo) / (hi - lo) * 100)
             parts.append(f"52w {lo}–{hi} [{pos}% of range]")
     elif s.get("price"):
-        parts.append(f"Price ₹{s['price']:,.2f} [as of CSV]")
-
-    # Core ratios from Screener
+        parts.append(f"Price ₹{s['price']:,.2f} [CSV]")
     if s.get("roce") is not None:
-        roce_str = f"ROCE {s['roce']:.1f}%"
+        r = f"ROCE {s['roce']:.1f}%"
         if s.get("roce_5yr"):
-            roce_str += f" (5yr avg {s['roce_5yr']:.1f}%)"
+            r += f" (5yr {s['roce_5yr']:.1f}%)"
         elif s.get("roce_3yr"):
-            roce_str += f" (3yr avg {s['roce_3yr']:.1f}%)"
-        parts.append(roce_str)
-
+            r += f" (3yr {s['roce_3yr']:.1f}%)"
+        parts.append(r)
     if s.get("pe") is not None:
         parts.append(f"P/E {s['pe']:.1f}x")
-
     if s.get("price_to_book") is not None:
         parts.append(f"P/B {s['price_to_book']:.1f}x")
-
     if s.get("div_yield") is not None and s["div_yield"] > 0:
         parts.append(f"Div {s['div_yield']:.1f}%")
-
-    if s.get("market_cap_cr"):
-        mc = s["market_cap_cr"]
-        if mc >= 100000:
-            mcap_str = f"₹{mc/100000:.1f}L Cr"
-        elif mc >= 1000:
-            mcap_str = f"₹{mc/1000:.0f}K Cr"
-        else:
-            mcap_str = f"₹{mc:.0f} Cr"
-        parts.append(f"MCap {mcap_str}")
-
-    # Growth signals
-    if s.get("profit_growth_qtr") is not None:
-        growth = s["profit_growth_qtr"]
-        flag = " ⚠" if abs(growth) > 150 else ""
-        parts.append(f"Qtr profit Δ {growth:+.0f}%{flag}")
-
-    if s.get("sales_growth_qtr") is not None:
-        growth = s["sales_growth_qtr"]
-        flag = " ⚠" if abs(growth) > 200 else ""
-        parts.append(f"Qtr sales Δ {growth:+.0f}%{flag}")
-
-    # Red flag or caution
+    mc = s.get("market_cap_cr")
+    if mc:
+        parts.append(f"MCap ₹{mc/100000:.1f}L Cr" if mc >= 100000 else f"MCap ₹{mc/1000:.0f}K Cr" if mc >= 1000 else f"MCap ₹{mc:.0f} Cr")
+    pg = s.get("profit_growth_qtr")
+    if pg is not None:
+        parts.append(f"Qtr profit Δ {pg:+.0f}%{'⚠' if abs(pg) > 150 else ''}")
+    sg = s.get("sales_growth_qtr")
+    if sg is not None:
+        parts.append(f"Qtr sales Δ {sg:+.0f}%{'⚠' if abs(sg) > 200 else ''}")
     if s.get("is_red_flagged"):
-        parts.append("🔴 RED FLAGGED — passes positive screen but also on avoid list")
+        parts.append("🔴 RED FLAGGED")
     elif s.get("caution_note"):
-        parts.append(f"⚠ NOTE: {s['caution_note']}")
-
+        parts.append(f"⚠ {s['caution_note']}")
     return " | ".join(parts)
 
 
-def build_tier_prompt(
-    tier_name: str,
-    tier_label: str,
-    stocks: list[dict],
-    price_lookup: dict,
-    macro_block: str,
-    today_pretty: str,
-) -> str:
+def build_tier_prompt(tier_name, tier_label, stocks, price_lookup, macro_block, today_pretty):
     lines = []
     for s in stocks:
         sym = s.get("symbol")
         q = price_lookup.get(sym) if sym else None
-        fund_line = fmt_fundamentals(s, q)
-        lines.append(f"  • {s['name']} | {s.get('tier','?')} | {fund_line}")
-
+        lines.append(f"  • {s['name']} | {s.get('tier','?')} | {fmt_fundamentals(s, q)}")
     stock_block = "\n".join(lines)
-    count = len(stocks)
-
     return f"""Today is {today_pretty} IST.
 
 == MACRO SNAPSHOT ==
 {macro_block}
 
 == YOUR TASK ==
-Analyze the following {count} Indian-listed stocks for the Heritage Ledger's
-"{tier_label}" tier. These passed our rigorous quantitative screens from
-Screener.in with real 5-year ROCE, growth, debt, and promoter data.
+Analyze {len(stocks)} Indian-listed stocks for the Heritage Ledger "{tier_label}" tier.
+These passed rigorous Screener.in quantitative screens (real 5-year ROCE, growth, debt, promoter data).
 
-For each stock, apply the Graham-Buffett-Munger-Naval framework:
-- Graham: Is there margin of safety? Is the business durable?
-- Buffett: Is it a wonderful business at a fair price?
-- Munger: Does it pass the inversion test — no obvious stupidity?
-- Naval: Is there asymmetric upside? Is the promoter a long-term player?
+Apply Graham-Buffett-Munger-Naval:
+- Graham: margin of safety, business durability
+- Buffett: wonderful business at fair price
+- Munger: inversion — no obvious stupidity
+- Naval: asymmetric upside, long-term promoter alignment
 
-Note: stocks marked ⚠ or 🔴 need extra scrutiny in your analysis.
-Quarterly growth spikes >150% flagged with ⚠ may be one-time.
+⚠ quarterly growth spikes >150% may be one-time — flag in your analysis.
+🔴 RED FLAGGED stocks should be marked AVOID.
 
-== STOCKS TO ANALYZE ==
+== STOCKS ==
 {stock_block}
 
-== OUTPUT FORMAT ==
-Return ONLY a valid JSON object:
+== OUTPUT ==
+Return ONLY this JSON:
 {{
   "tier": "{tier_name}",
   "analyzed_at": "{today_pretty}",
   "stocks": [
     {{
       "name": "exact name as given",
-      "stance": "pos" | "neu" | "neg",
-      "conviction": "High" | "Medium" | "Low",
-      "label": "e.g. Constructive · High | Cautious · Low | Watching · Medium",
-      "thesis": "2-3 specific sentences applying our principles. Reference actual ROCE/growth numbers given. No generic statements.",
-      "catalyst": "One specific sentence — the most important thing that would drive this higher.",
-      "risk": "One specific sentence — the most important thing that could break the thesis.",
-      "horizon": "e.g. 3-5 yrs | 12-18 months | 5-10 yrs",
-      "quality_flag": "QUALITY" | "CAUTION" | "AVOID",
-      "flag_reason": "null if QUALITY, else brief reason for CAUTION or AVOID"
+      "stance": "pos|neu|neg",
+      "conviction": "High|Medium|Low",
+      "label": "e.g. Constructive · High",
+      "thesis": "2-3 specific sentences referencing actual ROCE/growth numbers. No generic statements.",
+      "catalyst": "One sentence — most important driver.",
+      "risk": "One sentence — most important risk.",
+      "horizon": "e.g. 3-5 yrs",
+      "quality_flag": "QUALITY|CAUTION|AVOID",
+      "flag_reason": null
     }}
   ]
 }}
-
-Rules:
-- Mark is_red_flagged stocks as quality_flag: "AVOID"
-- Mark caution_note stocks as quality_flag: "CAUTION"
-- Be specific — reference the actual numbers given
-- If quarterly growth is flagged ⚠, investigate whether it appears sustainable
-- Don't invent numbers not provided
-- Output ONLY the JSON object, no prose"""
+Output ONLY the JSON object, no prose."""
 
 
 # -----------------------------------------------------------------------
-# MAIN LEDGER PROMPT (existing, now enriched with macro context)
+# SYSTEM PROMPTS
 # -----------------------------------------------------------------------
 
 SYSTEM_PROMPT = """You are the editor of "The Heritage Ledger", a fundamentals-first \
 investment dashboard for a long-term Indian-equity family corpus.
 
-You think in cycles, not quarters. You apply the principles of:
-- Benjamin Graham: Mr. Market, margin of safety, business durability
-- Warren Buffett: wonderful business at fair price, circle of competence, time as ally
-- Charlie Munger: concentration with conviction, inversion (avoid stupidity first)
-- Naval Ravikant: asymmetric upside, non-consensus and right, compound interest in everything
+You apply Graham, Buffett, Munger, Naval principles. You are honest. \
+Verdicts stay stable unless something fundamental has actually changed.
 
-You are honest. You never invent fundamentals. If verdicts don't need to change
-because nothing fundamental has changed, you keep them steady.
-
-You output ONE valid JSON object matching the previous data.json schema.
-No prose, no code fences. The dashboard parses this directly.
-
-CRITICAL — SECTOR BALANCE RULE:
-Even in weak markets, sectors do NOT all move together. You MUST differentiate.
-A blanket "all cautious" reading is almost always wrong. Use this guide:
-- "pos" (Constructive): Sector has clear tailwinds, valuations acceptable, earnings momentum
-- "neu" (Selective): Mixed signals — good stocks within the sector but sector itself is range-bound
-- "neg" (Cautious): Structural headwinds, overvaluation, earnings deteriorating
-
-In a typical Indian market, expect roughly: 4-6 constructive, 3-5 selective, 1-3 cautious.
-If you are outputting more than 4 cautious sectors, pause and reconsider — you are likely
-being overly pessimistic or repeating the previous reading without independent thought.
+You output ONE valid JSON object. No prose, no code fences.
 
 INVESTMENT FRAMEWORK:
-Tier 1 Compounders: ROCE >18% sustained, clean balance sheet, durable moat, 5-10yr hold
-Tier 2 Multibaggers: Small/mid-cap, high growth, improving quality, 3-5yr horizon
-Tier 3 Special Situations: Deep value with specific catalyst, 12-24 month thesis
+- Compounders: ROCE >18% sustained, clean balance sheet, durable moat, 5-10yr hold
+- Multibaggers: Small/mid-cap, high growth, improving quality, 3-5yr horizon
+- Special Situations: Deep value with specific catalyst, 12-24 month thesis
 
-Stock lists must include:
-  conviction (8-12 large/mid-cap high-conviction picks),
-  longBets (6-10 small/micro-cap multi-year wagers),
-  highPromise (3-6 speculative watch names),
-  watchClose (4-7 quality holds at stretched valuations),
-  trimAvoid (3-6 names to reduce or avoid).
+STOCK LISTS REQUIRED:
+  conviction (8-12 picks), longBets (6-10), highPromise (3-6),
+  watchClose (4-7), trimAvoid (3-6)
 
-Each stock must have: symbol, ticker, name, sector, thesis, catalysts, risks,
-fundamentals (pe, pb, roe, div, mcap), horizon, conviction, verdict.
+Each stock needs: symbol, ticker, name, sector, thesis, catalysts (list),
+risks (list), fundamentals (pe, pb, roe, div, mcap), horizon, conviction, verdict.
 
-The macroNarrative is ~3 sentences on the current Indian-equity environment.
-The whispers list is 5-7 themes/catalysts being tracked.
-The sectors list has exactly 12 sectors with stance and one-line note.
-The earnings list shows next 7-10 calendar entries."""
+macroNarrative: 3 sentences on current Indian-equity environment.
+whispers: 5-7 themes/catalysts being tracked.
+earnings: next 7-10 results calendar entries.
+
+SECTOR BALANCE — CRITICAL RULE:
+The sectors list must have exactly 12 sectors with stance: pos/neu/neg and a one-line note.
+
+Stance definitions:
+- pos (Constructive): Clear tailwinds, acceptable valuations, earnings momentum
+- neu (Selective): Mixed signals — some good stocks but sector is range-bound
+- neg (Cautious): Structural headwinds, overvaluation, or deteriorating earnings
+
+IMPORTANT: In virtually every market environment, sectors are differentiated.
+A reading of ALL sectors as cautious is almost always wrong.
+Expected distribution in a normal Indian market: 4-6 constructive, 3-5 selective, 1-3 cautious.
+If you find yourself writing more than 4 cautious sectors, stop and reconsider each one independently.
+
+Current constructive candidates to evaluate honestly:
+Defence & Aerospace, Private Banking, Specialty Chemicals, Capital Goods,
+Healthcare/Pharma, Renewable Energy. These have structural tailwinds regardless of index level."""
 
 
 USER_TEMPLATE = """Today is {today_pretty} IST.
@@ -447,105 +429,37 @@ USER_TEMPLATE = """Today is {today_pretty} IST.
 == LATEST HEADLINES ==
 {news_block}
 
-== GEOPOLITICAL & MACRO CONTEXT ==
-Key themes to weave into your macro narrative and sector views:
-- Global conflict risk: Multiple heads of government anticipating cross-border crisis spillovers
-- Energy markets: Elevated crude prices (Brent >$100) with direct India inflationary impact
-- Currency: INR near historic lows (~94/USD) — headwind for import-heavy businesses
-- Rate cycle: RBI has eased; global rates still elevated — watch capex-heavy sectors
-- China+1: PLI scheme beneficiaries (EMS, chemicals, defence) remain strong structural theme
-- FII flows: Monitor daily — sentiment driver even when fundamentals are unchanged
+== KEY MACRO THEMES ==
+- Global conflict risk: Spillover concerns affecting risk appetite
+- Brent crude elevated: Direct inflationary pressure on India
+- INR near historic lows ~94/USD: Headwind for import-heavy sectors
+- RBI has eased; global rates still elevated
+- China+1: PLI beneficiaries (EMS, chemicals, defence) = structural tailwind
+- FII flows: Monitor daily — major sentiment driver
 
-== PREVIOUS VERDICTS SUMMARY (your prior thinking — keep stable unless something changed) ==
+== PREVIOUS VERDICTS (keep stable unless fundamentals changed) ==
 {prev_summary}
 
 == YOUR TASK ==
-Generate a fresh, complete data.json for today.
+Generate a complete, fresh data.json for today.
 
-Apply the Heritage Ledger framework:
-1. First pass — INVERT: which stocks/sectors should be avoided? Apply Red Flags
-2. Second pass — QUALITY: which businesses have durable ROCE >18% with clean balance sheets?
-3. Third pass — VALUATION: of the quality businesses, which have margin of safety?
-4. Fourth pass — NARRATIVE: what does the macro context mean for each position?
+Process:
+1. INVERT first — what should be avoided? (Red flags, overvaluation, broken thesis)
+2. QUALITY — which businesses have durable ROCE >18% with clean balance sheets?
+3. VALUATION — of quality businesses, which offer margin of safety?
+4. NARRATIVE — what does today's macro mean for each position?
+5. SECTORS — assess each of 12 sectors independently (see sector balance rule)
 
-Update only what has meaningfully changed. Keep verdicts stable when fundamentals are stable.
-Flag any earnings surprises or sector developments from the headlines.
+Keep verdicts stable when fundamentals are stable.
+Update when: earnings surprise, management change, structural sector shift, valuation re-rating.
 
 Output the complete data.json JSON object."""
 
 
-TIER_SYSTEM_PROMPT = """You are the research analyst for "The Heritage Ledger", \
-a fundamentals-first Indian equity investment system.
-
-Your job is to assess stocks that have passed rigorous quantitative screening \
-(ROCE, growth, debt, promoter data from Screener.in) and provide a \
-fundamentals-based verdict for each.
-
-You apply Graham-Buffett-Munger-Naval principles. You are specific — you \
-reference the actual numbers provided. You never invent data.
-
-You output clean JSON only. No prose, no code fences."""
-
-
-def compress_prev_data(prev: dict) -> str:
-    """
-    Compress the previous data.json into a compact summary.
-    This saves ~13,000 input tokens vs sending the full JSON,
-    leaving more budget for the output (which is what we need).
-    """
-    if not prev:
-        return "  (No prior data — this is the first run)"
-
-    lines = []
-
-    # Edition and narrative
-    lines.append(f"Edition: {prev.get('edition', 'unknown')}")
-    lines.append(f"Last updated: {prev.get('lastUpdated', 'unknown')}")
-    lines.append(f"Macro narrative: {prev.get('macroNarrative', '')[:300]}")
-    lines.append("")
-
-    # Stock verdicts — just ticker + conviction + one-line thesis
-    stocks = prev.get("stocks", {})
-    bucket_labels = {
-        "conviction":   "CONVICTION BUYS",
-        "longBets":     "INDIA TOMORROW",
-        "highPromise":  "HIGH PROMISE",
-        "watchClose":   "HOLD & WATCH",
-        "trimAvoid":    "TRIM OR AVOID",
-    }
-    for bucket, label in bucket_labels.items():
-        items = stocks.get(bucket, [])
-        if not items:
-            continue
-        lines.append(f"--- {label} ({len(items)} stocks) ---")
-        for s in items:
-            thesis_snippet = (s.get("thesis") or "")[:120]
-            lines.append(
-                f"  {s.get('ticker','?')} | {s.get('name','?')} | "
-                f"Conviction: {s.get('conviction','?')} | "
-                f"Thesis: {thesis_snippet}"
-            )
-        lines.append("")
-
-    # Sectors — just name + stance
-    sectors = prev.get("sectors", [])
-    if sectors:
-        lines.append("--- SECTORS ---")
-        for sec in sectors:
-            lines.append(f"  {sec.get('name','?')}: {sec.get('stance','?')} — {sec.get('note','')[:80]}")
-        lines.append("")
-
-    # Whispers
-    whispers = prev.get("whispers", [])
-    if whispers:
-        lines.append("--- WHISPERS / THEMES ---")
-        for w in whispers:
-            if isinstance(w, str):
-                lines.append(f"  • {w[:100]}")
-            elif isinstance(w, dict):
-                lines.append(f"  • {w.get('theme', w.get('title', str(w)))[:100]}")
-
-    return "\n".join(lines)
+TIER_SYSTEM_PROMPT = """You are the research analyst for "The Heritage Ledger". \
+Assess stocks that passed rigorous Screener.in quantitative screens. \
+Apply Graham-Buffett-Munger-Naval principles. Be specific — reference actual numbers. \
+Never invent data. Output clean JSON only. No prose, no code fences."""
 
 
 # -----------------------------------------------------------------------
@@ -553,10 +467,9 @@ def compress_prev_data(prev: dict) -> str:
 # -----------------------------------------------------------------------
 
 def main():
-    print(f"[{dt.datetime.utcnow().isoformat()}Z] Heritage Ledger v3 refresh starting...")
+    print(f"[{dt.datetime.utcnow().isoformat()}Z] Heritage Ledger v4 refresh starting...")
     print(f"  model: {MODEL}")
 
-    # IST timestamp
     ist = dt.timezone(dt.timedelta(hours=5, minutes=30))
     today = dt.datetime.now(ist)
     today_pretty = today.strftime("%A, %d %B %Y, %H:%M")
@@ -565,77 +478,78 @@ def main():
     print("\n[1/6] Fetching macro data...")
     macro_lines = []
     for sym, label in MACRO_TICKERS.items():
-        q = fetch_quote_with_fallback(sym)
+        q = fetch_quote(sym)
         time.sleep(0.5)
         if q:
             macro_lines.append(
-                f"  {label}: ₹{q['price']:,.2f} ({q['change_pct']:+.2f}%)"
-                f"  | 52w {q.get('fifty_two_w_low','?')}–{q.get('fifty_two_w_high','?')}"
-                f"  | src={q.get('source','?')}"
+                f"  {label}: {q['price']:,.2f} ({q['change_pct']:+.2f}%)"
+                f" | 52w {q.get('fifty_two_w_low','?')}–{q.get('fifty_two_w_high','?')}"
+                f" | src={q.get('source','?')}"
             )
         else:
             macro_lines.append(f"  {label}: unavailable")
     macro_block = "\n".join(macro_lines)
-    print(f"  ✓ {len(macro_lines)} macro tickers")
+    print(f"  ✓ {sum(1 for l in macro_lines if 'unavailable' not in l)}/{len(MACRO_TICKERS)} macro tickers fetched")
 
     # --- 2. News ---
     print("\n[2/6] Fetching news headlines...")
     news = fetch_news()
     news_block = "\n".join(f"  • [{n['src']}] {n['title']}" for n in news[:50])
     if not news_block:
-        news_block = "  (No headlines this run — proceed with macro + prior data)"
+        news_block = "  (No headlines — proceed with macro + prior data)"
     print(f"  ✓ {len(news)} headlines")
 
-    # --- 3. Load universe & prior data ---
+    # --- 3. Universe + prior data ---
     print("\n[3/6] Loading universe and prior data...")
     universe = load_universe()
-    prev     = load_existing_data()
-    prev_summary = compress_prev_data(prev)   # compressed — saves ~13k input tokens
+    prev = load_existing_data()
+    prev_summary = compress_prev_data(prev)
 
     universe_stocks = universe.get("universe", {})
-    compounders      = universe_stocks.get("compounders", [])
-    multibaggers     = universe_stocks.get("multibaggers", [])
-    special          = universe_stocks.get("special_situations", [])
-    all_tier_stocks  = compounders + multibaggers + special
-    print(f"  ✓ Universe: {len(compounders)} compounders, {len(multibaggers)} multibaggers, {len(special)} special situations")
-    print(f"  ✓ Previous summary: {len(prev_summary)} chars (vs {len(json.dumps(prev))} chars full JSON)")
+    compounders  = universe_stocks.get("compounders", [])
+    multibaggers = universe_stocks.get("multibaggers", [])
+    special      = universe_stocks.get("special_situations", [])
+    all_stocks   = compounders + multibaggers + special
 
-    # --- 4. Fetch live prices for all universe stocks ---
-    print(f"\n[4/6] Fetching live prices for {len(all_tier_stocks)} universe stocks...")
+    print(f"  ✓ Universe: {len(compounders)} compounders, {len(multibaggers)} multibaggers, {len(special)} special")
+    print(f"  ✓ Prev summary: {len(prev_summary)} chars (vs {len(json.dumps(prev))} chars full JSON)")
+
+    # --- 4. Live prices — staggered, multi-source ---
+    print(f"\n[4/6] Fetching prices for {len(all_stocks)} stocks (Yahoo → NSE fallback)...")
     price_lookup = {}
-    yahoo_ok, nse_ok, missing = 0, 0, 0
-    for i, s in enumerate(all_tier_stocks):
+    yahoo_ok = nse_ok = skipped = 0
+
+    for i, s in enumerate(all_stocks):
         sym = s.get("symbol")
         if not sym or not s.get("symbol_resolved"):
-            missing += 1
+            skipped += 1
             continue
-        q = fetch_quote_with_fallback(sym)
+        q = fetch_quote(sym)
         if q:
             price_lookup[sym] = q
             if q.get("source") == "NSE":
                 nse_ok += 1
             else:
                 yahoo_ok += 1
-        else:
-            missing += 1
-        # Staggered sleep — group of 10 gets a longer pause to avoid rate limits
+        # Stagger: pause 2s every 10 stocks, else 0.25s
         if (i + 1) % 10 == 0:
             time.sleep(2.0)
         else:
-            time.sleep(0.2)
-    print(f"  ✓ Prices: Yahoo={yahoo_ok} NSE={nse_ok} missing={missing} / {len(all_tier_stocks)}")
+            time.sleep(0.25)
 
-    # --- 5. API client ---
+    total_fetched = yahoo_ok + nse_ok
+    print(f"  ✓ Prices: {total_fetched}/{len(all_stocks)} | Yahoo={yahoo_ok} NSE={nse_ok} skipped={skipped}")
+
+    # --- 5. Claude client ---
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         print("  ✗ ANTHROPIC_API_KEY not set", file=sys.stderr)
         sys.exit(1)
     client = anthropic.Anthropic(api_key=api_key)
 
-    # --- 6a. CALL 1: Main ledger refresh ---
-    print(f"\n[5/6] Calling Claude — Main Ledger...")
+    # --- 6a. Main ledger ---
+    print(f"\n[5/6] Claude — Main Ledger...")
     ledger_msg = USER_TEMPLATE.format(
-        today_iso=today.isoformat(),
         today_pretty=today_pretty,
         macro_block=macro_block,
         news_block=news_block,
@@ -648,49 +562,41 @@ def main():
         messages=[{"role": "user", "content": ledger_msg}],
     )
     ledger_text = "".join(b.text for b in resp.content if hasattr(b, "text"))
-    print(f"  ✓ Ledger response: {len(ledger_text)} chars | tokens in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
+    print(f"  ✓ {len(ledger_text)} chars | in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
 
     try:
         new_data = extract_json_block(ledger_text)
     except Exception as e:
-        print(f"  ✗ Ledger JSON parse failed: {e} — keeping previous", file=sys.stderr)
+        print(f"  ✗ JSON parse failed: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # Validate
-    required_top = ["edition", "lastUpdated", "macroNarrative", "stocks", "sectors", "earnings", "whispers"]
-    required_stock_lists = ["conviction", "longBets", "highPromise", "watchClose", "trimAvoid"]
+    required_top   = ["edition", "lastUpdated", "macroNarrative", "stocks", "sectors", "earnings", "whispers"]
+    required_lists = ["conviction", "longBets", "highPromise", "watchClose", "trimAvoid"]
     missing = [k for k in required_top if k not in new_data]
-    missing_lists = [k for k in required_stock_lists if k not in new_data.get("stocks", {})]
+    missing_lists = [k for k in required_lists if k not in new_data.get("stocks", {})]
     if missing or missing_lists:
-        print(f"  ✗ Missing keys {missing + missing_lists} — keeping previous", file=sys.stderr)
+        print(f"  ✗ Missing keys: {missing + missing_lists}", file=sys.stderr)
         sys.exit(1)
 
-    # --- 6b. CALL 2+: Tier analysis (Screener stocks in batches) ---
-    print(f"\n[6/6] Calling Claude — Tier Analysis ({len(all_tier_stocks)} stocks in batches of {BATCH_SIZE})...")
-
+    # --- 6b. Tier analysis ---
+    print(f"\n[6/6] Claude — Tier Analysis ({len(all_stocks)} stocks, batches of {BATCH_SIZE})...")
     tier_configs = [
-        ("compounders",       "Tier 1 — Compounders",       compounders),
-        ("multibaggers",      "Tier 2 — Multibagger Candidates", multibaggers),
-        ("special_situations","Tier 3 — Special Situations", special),
+        ("compounders",        "Tier 1 — Compounders",           compounders),
+        ("multibaggers",       "Tier 2 — Multibagger Candidates", multibaggers),
+        ("special_situations", "Tier 3 — Special Situations",     special),
     ]
-
     tiers_output = {}
 
     for tier_key, tier_label, stocks in tier_configs:
         if not stocks:
             tiers_output[tier_key] = []
             continue
-
         print(f"  → {tier_label}: {len(stocks)} stocks...")
         tier_results = []
-
-        # Split into batches
         batches = [stocks[i:i+BATCH_SIZE] for i in range(0, len(stocks), BATCH_SIZE)]
+
         for batch_num, batch in enumerate(batches):
-            prompt = build_tier_prompt(
-                tier_key, tier_label, batch,
-                price_lookup, macro_block, today_pretty
-            )
+            prompt = build_tier_prompt(tier_key, tier_label, batch, price_lookup, macro_block, today_pretty)
             try:
                 resp = client.messages.create(
                     model=MODEL,
@@ -702,33 +608,31 @@ def main():
                 parsed = extract_json_block(text)
                 batch_stocks = parsed.get("stocks", [])
 
-                # Enrich with the original screener fundamentals
+                # Enrich with Screener data
                 stock_map = {s["name"]: s for s in batch}
                 for result in batch_stocks:
                     orig = stock_map.get(result["name"], {})
                     result["screener_data"] = {
-                        k: orig.get(k) for k in
-                        ["roce", "roce_5yr", "roce_3yr", "pe", "price_to_book",
-                         "div_yield", "market_cap_cr", "profit_growth_qtr",
-                         "sales_growth_qtr", "is_red_flagged", "caution_note",
-                         "symbol", "ticker", "tier"]
+                        k: orig.get(k) for k in [
+                            "roce", "roce_5yr", "roce_3yr", "pe", "price_to_book",
+                            "div_yield", "market_cap_cr", "profit_growth_qtr",
+                            "sales_growth_qtr", "is_red_flagged", "caution_note",
+                            "symbol", "ticker", "tier",
+                        ]
                     }
-
                 tier_results.extend(batch_stocks)
-                print(f"    ✓ Batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | tokens in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
-                time.sleep(1)  # brief pause between calls
-
+                print(f"    ✓ Batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
+                time.sleep(1)
             except Exception as e:
                 print(f"    ! Batch {batch_num+1} failed: {e}", file=sys.stderr)
-                # Continue with other batches
                 continue
 
         tiers_output[tier_key] = tier_results
-        print(f"  ✓ {tier_label}: {len(tier_results)} verdicts total")
+        print(f"  ✓ {tier_label}: {len(tier_results)} total")
 
-    # --- 7. Merge and write ---
+    # --- 7. Write ---
     new_data["lastUpdated"] = today.isoformat()
-    new_data["stocks"]["extendedUniverse"] = []  # deprecated — replaced by tiers
+    new_data["stocks"]["extendedUniverse"] = []
     new_data["tiers"] = {
         "last_updated": today.isoformat(),
         "universe_source": "Screener.in Premium",
@@ -739,13 +643,13 @@ def main():
     with open(DATA_PATH, "w", encoding="utf-8") as f:
         json.dump(new_data, f, indent=2, ensure_ascii=False)
 
+    ledger_counts = {k: len(new_data["stocks"].get(k, [])) for k in required_lists}
+    tier_counts   = {k: len(tiers_output.get(k, [])) for k in ["compounders", "multibaggers", "special_situations"]}
     print(f"\n  ✓ Written: {DATA_PATH}")
     print(f"    Edition: {new_data.get('edition')}")
-    ledger_counts = {k: len(new_data["stocks"].get(k, [])) for k in required_stock_lists}
-    tier_counts = {k: len(tiers_output.get(k, [])) for k in ["compounders", "multibaggers", "special_situations"]}
     print(f"    Ledger: {ledger_counts}")
-    print(f"    Tiers: {tier_counts}")
-    print(f"[done] Heritage Ledger v3 refresh complete.\n")
+    print(f"    Tiers:  {tier_counts}")
+    print(f"[done] Heritage Ledger v4 complete.\n")
 
 
 if __name__ == "__main__":
