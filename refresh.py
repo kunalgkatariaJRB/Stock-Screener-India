@@ -32,11 +32,12 @@ import anthropic
 # CONFIG
 # -----------------------------------------------------------------------
 
-MODEL          = os.environ.get("HERITAGE_MODEL", "claude-sonnet-4-6")
-DATA_PATH      = "data.json"
-UNIVERSE_PATH  = Path("data/processed/master_universe.json")
-MAX_TOKENS     = 16000
-BATCH_SIZE     = 55   # max stocks per Claude tier-analysis call
+MODEL              = os.environ.get("HERITAGE_MODEL", "claude-sonnet-4-6")
+DATA_PATH          = "data.json"
+UNIVERSE_PATH      = Path("data/processed/master_universe.json")
+MAX_TOKENS_LEDGER  = 32000   # main ledger output — needs room for full JSON
+MAX_TOKENS_TIER    = 16000   # tier analysis per batch — smaller JSON
+BATCH_SIZE         = 40      # reduced from 55 — smaller batches = better quality + fits in tokens
 
 MACRO_TICKERS = {
     "^NSEI":    "Nifty 50",
@@ -360,8 +361,8 @@ Key themes to weave into your macro narrative and sector views:
 - China+1: PLI scheme beneficiaries (EMS, chemicals, defence) remain strong structural theme
 - FII flows: Monitor daily — sentiment driver even when fundamentals are unchanged
 
-== PREVIOUS DATA.JSON (your prior thinking) ==
-{prev_json}
+== PREVIOUS VERDICTS SUMMARY (your prior thinking — keep stable unless something changed) ==
+{prev_summary}
 
 == YOUR TASK ==
 Generate a fresh, complete data.json for today.
@@ -389,6 +390,67 @@ You apply Graham-Buffett-Munger-Naval principles. You are specific — you \
 reference the actual numbers provided. You never invent data.
 
 You output clean JSON only. No prose, no code fences."""
+
+
+def compress_prev_data(prev: dict) -> str:
+    """
+    Compress the previous data.json into a compact summary.
+    This saves ~13,000 input tokens vs sending the full JSON,
+    leaving more budget for the output (which is what we need).
+    """
+    if not prev:
+        return "  (No prior data — this is the first run)"
+
+    lines = []
+
+    # Edition and narrative
+    lines.append(f"Edition: {prev.get('edition', 'unknown')}")
+    lines.append(f"Last updated: {prev.get('lastUpdated', 'unknown')}")
+    lines.append(f"Macro narrative: {prev.get('macroNarrative', '')[:300]}")
+    lines.append("")
+
+    # Stock verdicts — just ticker + conviction + one-line thesis
+    stocks = prev.get("stocks", {})
+    bucket_labels = {
+        "conviction":   "CONVICTION BUYS",
+        "longBets":     "INDIA TOMORROW",
+        "highPromise":  "HIGH PROMISE",
+        "watchClose":   "HOLD & WATCH",
+        "trimAvoid":    "TRIM OR AVOID",
+    }
+    for bucket, label in bucket_labels.items():
+        items = stocks.get(bucket, [])
+        if not items:
+            continue
+        lines.append(f"--- {label} ({len(items)} stocks) ---")
+        for s in items:
+            thesis_snippet = (s.get("thesis") or "")[:120]
+            lines.append(
+                f"  {s.get('ticker','?')} | {s.get('name','?')} | "
+                f"Conviction: {s.get('conviction','?')} | "
+                f"Thesis: {thesis_snippet}"
+            )
+        lines.append("")
+
+    # Sectors — just name + stance
+    sectors = prev.get("sectors", [])
+    if sectors:
+        lines.append("--- SECTORS ---")
+        for sec in sectors:
+            lines.append(f"  {sec.get('name','?')}: {sec.get('stance','?')} — {sec.get('note','')[:80]}")
+        lines.append("")
+
+    # Whispers
+    whispers = prev.get("whispers", [])
+    if whispers:
+        lines.append("--- WHISPERS / THEMES ---")
+        for w in whispers:
+            if isinstance(w, str):
+                lines.append(f"  • {w[:100]}")
+            elif isinstance(w, dict):
+                lines.append(f"  • {w.get('theme', w.get('title', str(w)))[:100]}")
+
+    return "\n".join(lines)
 
 
 # -----------------------------------------------------------------------
@@ -433,7 +495,7 @@ def main():
     print("\n[3/6] Loading universe and prior data...")
     universe = load_universe()
     prev     = load_existing_data()
-    prev_json = json.dumps(prev, indent=2)
+    prev_summary = compress_prev_data(prev)   # compressed — saves ~13k input tokens
 
     universe_stocks = universe.get("universe", {})
     compounders      = universe_stocks.get("compounders", [])
@@ -441,7 +503,7 @@ def main():
     special          = universe_stocks.get("special_situations", [])
     all_tier_stocks  = compounders + multibaggers + special
     print(f"  ✓ Universe: {len(compounders)} compounders, {len(multibaggers)} multibaggers, {len(special)} special situations")
-    print(f"  ✓ Prior data: {len(prev_json)} chars")
+    print(f"  ✓ Previous summary: {len(prev_summary)} chars (vs {len(json.dumps(prev))} chars full JSON)")
 
     # --- 4. Fetch live prices for all universe stocks ---
     print(f"\n[4/6] Fetching live prices for {len(all_tier_stocks)} universe stocks...")
@@ -469,11 +531,11 @@ def main():
         today_pretty=today_pretty,
         macro_block=macro_block,
         news_block=news_block,
-        prev_json=prev_json,
+        prev_summary=prev_summary,
     )
     resp = client.messages.create(
         model=MODEL,
-        max_tokens=MAX_TOKENS,
+        max_tokens=MAX_TOKENS_LEDGER,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": ledger_msg}],
     )
@@ -524,7 +586,7 @@ def main():
             try:
                 resp = client.messages.create(
                     model=MODEL,
-                    max_tokens=MAX_TOKENS,
+                    max_tokens=MAX_TOKENS_TIER,
                     system=TIER_SYSTEM_PROMPT,
                     messages=[{"role": "user", "content": prompt}],
                 )
