@@ -16,7 +16,6 @@ import csv
 import time
 import datetime as dt
 import urllib.request
-import urllib.parse
 import sys
 from pathlib import Path
 
@@ -28,117 +27,29 @@ SCREENS_DIR = Path("data/screens")
 PROCESSED_DIR = Path("data/processed")
 OUTPUT_FILE = PROCESSED_DIR / "master_universe.json"
 
-# -----------------------------------------------------------------------
-# NAME → YAHOO SYMBOL MAP
-# Built from the Screener screen data we fetched. Maps Screener display
-# name → Yahoo Finance symbol (.NS for NSE, .BO for BSE-only)
-# Extend this as more stocks appear in your screens.
-# -----------------------------------------------------------------------
-
-NAME_TO_SYMBOL = {
-    # === SCREEN 1 — COMPOUNDERS ===
-    "ICICI AMC":            "ICICIAMC.NS",
-    "Gillette India":       "GILLETTE.NS",
-    "GE Vernova T&D":       "GVTD.NS",
-    "Page Industries":      "PAGEIND.NS",
-    "HBL Engineering":      "HBLENGINE.NS",
-    "3M India":             "3MINDIA.NS",
-    "I R C T C":            "IRCTC.NS",
-    "IRCTC":                "IRCTC.NS",
-    "Atlanta Electric":     "ATLANTAELE.NS",
-    "Nippon Life Ind.":     "NAM-INDIA.NS",
-    "Nippon Life India":    "NAM-INDIA.NS",
-    "HDFC AMC":             "HDFCAMC.NS",
-    "Travel Food":          "TRAVELFOOD.NS",
-    "Natl. Aluminium":      "NATIONALUM.NS",
-    "National Aluminium":   "NATIONALUM.NS",
-    "Cummins India":        "CUMMINSIND.NS",
-    "Netweb Technol.":      "NETWEB.NS",
-    "Netweb Technologies":  "NETWEB.NS",
-    "Inventurus Knowl":     "IKS.NS",
-    "Inventurus Knowledge": "IKS.NS",
-    "Bharat Electron":      "BEL.NS",
-    "BEL":                  "BEL.NS",
-    "Force Motors":         "FORCEMOT.NS",
-    "Triveni Turbine":      "TRITURBINE.NS",
-    "Coal India":           "COALINDIA.NS",
-    "Polycab India":        "POLYCAB.NS",
-    "Pidilite Inds.":       "PIDILITIND.NS",
-    "Pidilite":             "PIDILITIND.NS",
-    "International Ge":     "IGIL.NS",
-    "Eicher Motors":        "EICHERMOT.NS",
-    "Anthem Bioscienc":     "ANTHEM.NS",
-    "Anthem Bioscience":    "ANTHEM.NS",
-    "Hexaware Tech.":       "HEXT.NS",
-    "Hexaware":             "HEXT.NS",
-
-    # === SCREEN 2 — MULTIBAGGERS ===
-    "Tips Music":           "TIPSMUSIC.NS",
-    "Waaree Renewab.":      "WAAREERTL.NS",
-    "Waaree Renewables":    "WAAREERTL.NS",
-    "RRP Defense":          "530929.BO",
-    "JD Cables":            "544524.BO",
-    "Vivid Electromech":    "VIVIDEL.NS",
-    "One Global Serv":      "514330.BO",
-    "One Global Services":  "514330.BO",
-    "Australian Prem":      "APS.NS",
-    "Crizac":               "CRIZAC.NS",
-    "Frontier Springs":     "FRONTSP.NS",
-    "Shilchar Tech.":       "SHILCTECH.NS",
-    "Shilchar Technologies":"SHILCTECH.NS",
-    "Jeena Sikho":          "JSLL.NS",
-    "Rajesh Power":         "544291.BO",
-    "Unified Data":         "544406.BO",
-    "Om Power Transmission":"OMPOWER.NS",
-    "Garuda Cons":          "GARUDA.NS",
-    "Garuda Construction":  "GARUDA.NS",
-    "GK Energy":            "GKENERGY.NS",
-    "Canara Robeco":        "CRAMC.NS",
-    "Dynacons Sys.":        "DSSL.NS",
-    "Bondada Engineer":     "543971.BO",
-    "Bondada Engineering":  "543971.BO",
-    "Oswal Pumps":          "OSWALPUMPS.NS",
-    "Prizor Viztech":       "PRIZOR.NS",
-    "SRM Contractors":      "SRM.NS",
-    "Sathlokhar Sys.":      "SSEGL.NS",
-    "Ganesh Green":         "GGBL.NS",
-    "Sacheerome":           "SACHEEROME.NS",
-
-    # === SCREEN 3 — SPECIAL SITUATIONS ===
-    "The Bombay Burmah":    "BBTC.NS",
-    "Bombay Burmah":        "BBTC.NS",
-    "Expleo Solutions":     "EXPLEOSOL.NS",
-    "Petronet LNG":         "PETRONET.NS",
-    "Panama Petrochem":     "PANAMAPET.NS",
-    "Siyaram Silk":         "SIYSIL.NS",
-    "AGI Greenpac":         "AGI.NS",
-    "D B Corp":             "DBCORP.NS",
-    "Indraprastha Gas":     "IGL.NS",
-    "IGL":                  "IGL.NS",
-    "S P I C":              "SPIC.NS",
-    "Route Mobile":         "ROUTE.NS",
-    "Balmer Law. Inv.":     "BLIL.NS",
-    "Balmer Lawrie":        "BLIL.NS",
-    "HMA Agro Inds.":       "HMAAGRO.NS",
-    "HMA Agro":             "HMAAGRO.NS",
-    "Kalyani Steels":       "KSL.NS",
-    "Mah. Seamless":        "MAHSEAMLES.NS",
-    "Maharashtra Seamless": "MAHSEAMLES.NS",
-    "Kama Holdings":        "KAMAHOLD.NS",
-    "Monte Carlo Fas.":     "MONTECARLO.NS",
-    "Monte Carlo Fashion":  "MONTECARLO.NS",
-    "Dollar Industrie":     "DOLLAR.NS",
-    "Dollar Industries":    "DOLLAR.NS",
-}
-
-# Stocks that are structurally not true compounders — flag for review
-STRUCTURAL_CAUTION = {
-    "NATIONALUM.NS":  "Cyclical commodity business — ROCE driven by aluminium price cycle, not structural moat",
-    "COALINDIA.NS":   "Cash cow but limited growth in energy transition — evaluate as value, not compounder",
-    "530929.BO":      "BSE-only, very small, earnings volatile — high speculative risk",
-    "514330.BO":      "Profit spike appears one-time (+522% QoQ) — verify sustainability",
-    "544406.BO":      "Very small cap, limited information — exercise extreme caution",
-    "GGBL.NS":        "Sales spike +300% QoQ — investigate if one-time contract or structural",
+COLUMN_MAP = {
+    'Current Price':                      'price',
+    'Price to Earning':                   'pe',
+    'Market Capitalization':              'market_cap_cr',
+    'Dividend yield':                     'div_yield',
+    'Net Profit latest quarter':          'net_profit_qtr',
+    'YOY Quarterly profit growth':        'profit_growth_qtr',
+    'Sales latest quarter':               'sales_qtr',
+    'YOY Quarterly sales growth':         'sales_growth_qtr',
+    'Return on capital employed':         'roce',
+    'Average return on capital employed 5Years': 'roce_5yr',
+    'Sales growth':                       'sales_growth',
+    'Profit growth':                      'profit_growth',
+    'Operating profit growth':            'op_profit_growth',
+    'EPS':                                'eps_ttm',
+    'EPS latest quarter':                 'eps_latest_qtr',
+    'EPS growth 3Years':                  'eps_growth_3yr',
+    'TTM Result Date':                    'ttm_result_date',
+    'Industry':                           'industry',
+    'Industry Group':                     'industry_group',
+    'NSE Code':                           'nse_code',
+    'BSE Code':                           'bse_code',
+    'ISIN Code':                          'isin_code',
 }
 
 
@@ -157,29 +68,6 @@ def http_get(url: str, timeout: int = 15) -> str:
     except Exception as e:
         return ""
 
-
-def yahoo_search_symbol(company_name: str) -> str | None:
-    """Use Yahoo Finance search API to find NSE/BSE symbol for a company name."""
-    query = urllib.parse.quote(company_name + " NSE India")
-    url = f"https://query1.finance.yahoo.com/v1/finance/search?q={query}&quotesCount=5&newsCount=0"
-    body = http_get(url)
-    if not body:
-        return None
-    try:
-        data = json.loads(body)
-        for q in (data.get("quotes") or []):
-            sym = q.get("symbol", "")
-            exchange = q.get("exchange", "")
-            # Prefer NSE, then BSE
-            if sym.endswith(".NS") or exchange in ("NSE", "NSI"):
-                return sym
-        for q in (data.get("quotes") or []):
-            sym = q.get("symbol", "")
-            if sym.endswith(".BO"):
-                return sym
-    except Exception:
-        pass
-    return None
 
 
 def parse_float(val: str) -> float | None:
@@ -215,39 +103,56 @@ def normalize_stock(row: dict, tier: str) -> dict:
     """Convert a raw Screener CSV row into our standard stock dict."""
     name = (row.get("Name") or "").strip()
 
-    # Look up Yahoo symbol
-    symbol = NAME_TO_SYMBOL.get(name)
+    # Use NSE Code directly from Screener — far more reliable than name lookup
+    nse_code = str(row.get('NSE Code', '') or '').strip()
+    bse_code = str(row.get('BSE Code', '') or '').strip()
 
-    # Derive a clean ticker from the name map or company name
-    ticker = symbol.split(".")[0] if symbol else name.upper()[:12].replace(" ", "")
+    if nse_code and nse_code not in ('nan', '0', ''):
+        symbol = nse_code + '.NS'
+        ticker = nse_code
+        symbol_resolved = True
+    elif bse_code and bse_code not in ('nan', '0', ''):
+        symbol = bse_code + '.BO'
+        ticker = bse_code
+        symbol_resolved = True
+    else:
+        symbol = None
+        ticker = name.upper()[:12].replace(' ', '')
+        symbol_resolved = False
 
-    # Parse all the fundamentals Screener provides
     stock = {
         "name":           name,
         "ticker":         ticker,
-        "symbol":         symbol,           # May be None if not in map
+        "symbol":         symbol,
         "tier":           tier,
-        "sector":         None,             # Screener doesn't export sector in default view
+        "sector":         row.get('Industry', None) or row.get('Industry Group', None),
         # Current metrics
-        "price":          parse_float(row.get("CMP Rs.")),
-        "pe":             parse_float(row.get("P/E")),
-        "market_cap_cr":  parse_float(row.get("Mar Cap Rs.Cr.")),
-        "div_yield":      parse_float(row.get("Div Yld %")),
+        "price":          parse_float(row.get("Current Price")),
+        "pe":             parse_float(row.get("Price to Earning")),
+        "market_cap_cr":  parse_float(row.get("Market Capitalization")),
+        "div_yield":      parse_float(row.get("Dividend yield")),
         # Profitability
-        "net_profit_qtr": parse_float(row.get("NP Qtr Rs.Cr.")),
-        "profit_growth_qtr": parse_float(row.get("Qtr Profit Var %")),
-        "sales_qtr":      parse_float(row.get("Sales Qtr Rs.Cr.")),
-        "sales_growth_qtr": parse_float(row.get("Qtr Sales Var %")),
-        # ROCE (varies by screen — some have 5yr, some 3yr)
-        "roce":           parse_float(row.get("ROCE %")),
-        "roce_5yr":       parse_float(row.get("ROCE 5Yr %")),
-        "roce_3yr":       parse_float(row.get("ROCE 3Yr %")),
-        "price_to_book":  parse_float(row.get("CMP / BV")),
+        "net_profit_qtr":    parse_float(row.get("Net Profit latest quarter")),
+        "profit_growth_qtr": parse_float(row.get("YOY Quarterly profit growth")),
+        "sales_qtr":         parse_float(row.get("Sales latest quarter")),
+        "sales_growth_qtr":  parse_float(row.get("YOY Quarterly sales growth")),
+        # ROCE
+        "roce":           parse_float(row.get("Return on capital employed")),
+        "roce_5yr":       parse_float(row.get("Average return on capital employed 5Years")),
+        # EPS
+        "eps_ttm":        parse_float(row.get("EPS")),
+        "eps_latest_qtr": parse_float(row.get("EPS latest quarter")),
+        "eps_growth_3yr": parse_float(row.get("EPS growth 3Years")),
+        "ttm_result_date": row.get("TTM Result Date", None),
+        # Growth
+        "sales_growth":      parse_float(row.get("Sales growth")),
+        "profit_growth":     parse_float(row.get("Profit growth")),
+        "op_profit_growth":  parse_float(row.get("Operating profit growth")),
         # Status flags
-        "is_red_flagged": False,            # Set later by cross-reference
-        "status":         "CLEAN",
-        "caution_note":   STRUCTURAL_CAUTION.get(symbol, None),
-        "symbol_resolved": symbol is not None,
+        "is_red_flagged":  False,
+        "status":          "CLEAN",
+        "caution_note":    None,
+        "symbol_resolved": symbol_resolved,
     }
 
     return stock
@@ -276,29 +181,6 @@ def build_red_flag_names(screens_dir: Path) -> set[str]:
     return names
 
 
-def resolve_missing_symbols(stocks: list[dict]) -> list[dict]:
-    """
-    For stocks where we couldn't find the Yahoo symbol from our map,
-    try Yahoo's search API. Rate-limited — only called for unknowns.
-    """
-    unresolved = [s for s in stocks if not s["symbol_resolved"]]
-    if not unresolved:
-        return stocks
-
-    print(f"  → resolving {len(unresolved)} unknown symbols via Yahoo search...")
-    for s in unresolved:
-        sym = yahoo_search_symbol(s["name"])
-        if sym:
-            s["symbol"] = sym
-            s["ticker"] = sym.split(".")[0]
-            s["symbol_resolved"] = True
-            print(f"    ✓ {s['name']} → {sym}")
-        else:
-            print(f"    ! {s['name']} → symbol not found, will skip price fetch")
-        time.sleep(0.3)  # polite
-
-    return stocks
-
 
 # -----------------------------------------------------------------------
 # MAIN
@@ -316,14 +198,18 @@ def main():
 
     # 2. Read positive screens
     print("\n--- Reading Screens ---")
-    raw_compounders     = read_csv_screen(SCREENS_DIR / "screen_1_compounders.csv")
-    raw_multibaggers    = read_csv_screen(SCREENS_DIR / "screen_2_multibaggers.csv")
-    raw_special         = read_csv_screen(SCREENS_DIR / "screen_3_special_situations.csv")
+    raw_compounders      = read_csv_screen(SCREENS_DIR / "screen_1_compounders.csv")
+    raw_multibaggers     = read_csv_screen(SCREENS_DIR / "screen_2_multibaggers.csv")
+    raw_special          = read_csv_screen(SCREENS_DIR / "screen_3_special_situations.csv")
+    raw_early_quality    = read_csv_screen(SCREENS_DIR / "screen_5_early_quality.csv")
+    raw_emerging         = read_csv_screen(SCREENS_DIR / "screen_6_emerging_compounders.csv")
+    raw_inflection       = read_csv_screen(SCREENS_DIR / "screen_7_inflection_watch.csv")
 
     # 3. Normalize each stock
     print("\n--- Normalizing ---")
     seen_names = set()
     compounders, multibaggers, special = [], [], []
+    early_quality, emerging, inflection = [], [], []
 
     for raw in raw_compounders:
         s = normalize_stock(raw, "COMPOUNDER")
@@ -336,7 +222,7 @@ def main():
     for raw in raw_multibaggers:
         s = normalize_stock(raw, "MULTIBAGGER")
         if s["name"] in seen_names:
-            continue  # already in compounders, higher tier wins
+            continue
         if s["name"] in red_flag_names:
             s["is_red_flagged"] = True
             s["status"] = "AVOID_RED_FLAG"
@@ -353,16 +239,45 @@ def main():
         seen_names.add(s["name"])
         special.append(s)
 
-    all_stocks = compounders + multibaggers + special
+    for raw in raw_early_quality:
+        s = normalize_stock(raw, "EARLY_QUALITY")
+        if s["name"] in seen_names:
+            continue
+        if s["name"] in red_flag_names:
+            s["is_red_flagged"] = True
+            s["status"] = "AVOID_RED_FLAG"
+        seen_names.add(s["name"])
+        early_quality.append(s)
 
-    # 4. Resolve missing symbols
-    print("\n--- Resolving Symbols ---")
-    all_stocks = resolve_missing_symbols(all_stocks)
+    for raw in raw_emerging:
+        s = normalize_stock(raw, "EMERGING_COMPOUNDER")
+        if s["name"] in seen_names:
+            continue
+        if s["name"] in red_flag_names:
+            s["is_red_flagged"] = True
+            s["status"] = "AVOID_RED_FLAG"
+        seen_names.add(s["name"])
+        emerging.append(s)
 
-    # Re-split back into tiers after symbol resolution
-    compounders = [s for s in all_stocks if s["tier"] == "COMPOUNDER"]
-    multibaggers = [s for s in all_stocks if s["tier"] == "MULTIBAGGER"]
-    special = [s for s in all_stocks if s["tier"] == "SPECIAL_SITUATION"]
+    for raw in raw_inflection:
+        s = normalize_stock(raw, "INFLECTION")
+        if s["name"] in seen_names:
+            continue
+        if s["name"] in red_flag_names:
+            s["is_red_flagged"] = True
+            s["status"] = "AVOID_RED_FLAG"
+        seen_names.add(s["name"])
+        inflection.append(s)
+
+    all_stocks = compounders + multibaggers + special + early_quality + emerging + inflection
+
+    # Re-split back into tiers
+    compounders   = [s for s in all_stocks if s["tier"] == "COMPOUNDER"]
+    multibaggers  = [s for s in all_stocks if s["tier"] == "MULTIBAGGER"]
+    special       = [s for s in all_stocks if s["tier"] == "SPECIAL_SITUATION"]
+    early_quality = [s for s in all_stocks if s["tier"] == "EARLY_QUALITY"]
+    emerging      = [s for s in all_stocks if s["tier"] == "EMERGING_COMPOUNDER"]
+    inflection    = [s for s in all_stocks if s["tier"] == "INFLECTION"]
 
     # 5. Stats
     total = len(all_stocks)
@@ -371,11 +286,14 @@ def main():
     unresolved_sym = sum(1 for s in all_stocks if not s["symbol_resolved"])
 
     print(f"\n--- Summary ---")
-    print(f"  Compounders:        {len(compounders):3d}  ({sum(1 for s in compounders if s['is_red_flagged'])} red-flagged)")
-    print(f"  Multibaggers:       {len(multibaggers):3d}  ({sum(1 for s in multibaggers if s['is_red_flagged'])} red-flagged)")
-    print(f"  Special Situations: {len(special):3d}  ({sum(1 for s in special if s['is_red_flagged'])} red-flagged)")
-    print(f"  Total:              {total:3d}  | Clean: {clean} | Flagged: {flagged}")
-    print(f"  Unresolved symbols: {unresolved_sym}")
+    print(f"  Compounders:           {len(compounders):3d}")
+    print(f"  Multibaggers:          {len(multibaggers):3d}")
+    print(f"  Special Situations:    {len(special):3d}")
+    print(f"  Early Quality:         {len(early_quality):3d}")
+    print(f"  Emerging Compounders:  {len(emerging):3d}")
+    print(f"  Inflection Watch:      {len(inflection):3d}")
+    print(f"  Total:                 {total:3d} | Clean: {clean} | Flagged: {flagged}")
+    print(f"  Unresolved symbols:    {unresolved_sym}")
 
     # 6. Write output
     output = {
@@ -386,14 +304,20 @@ def main():
             "clean": clean,
             "flagged": flagged,
             "unresolved_symbols": unresolved_sym,
-            "compounders_count": len(compounders),
-            "multibaggers_count": len(multibaggers),
-            "special_situations_count": len(special),
+            "compounders_count":          len(compounders),
+            "multibaggers_count":         len(multibaggers),
+            "special_situations_count":   len(special),
+            "early_quality_count":        len(early_quality),
+            "emerging_compounders_count": len(emerging),
+            "inflection_count":           len(inflection),
         },
         "universe": {
-            "compounders": compounders,
-            "multibaggers": multibaggers,
-            "special_situations": special,
+            "compounders":          compounders,
+            "multibaggers":         multibaggers,
+            "special_situations":   special,
+            "early_quality":        early_quality,
+            "emerging_compounders": emerging,
+            "inflection_watch":     inflection,
         },
     }
 

@@ -304,6 +304,19 @@ def fmt_fundamentals(s: dict, q: dict | None) -> str:
         parts.append(r)
     if s.get("pe") is not None:
         parts.append(f"P/E {s['pe']:.1f}x")
+    # EPS — actual reported, used for exit target calculations
+    if s.get('eps_ttm') is not None and s['eps_ttm'] > 0:
+        eps_str = f"EPS ₹{s['eps_ttm']:.2f} (TTM)"
+        g = s.get('eps_growth_3yr')
+        if g is not None:
+            eps_str += f" | EPS 3yr CAGR {g:+.1f}%"
+        parts.append(eps_str)
+    # Sector from Screener (more accurate than our tags)
+    if s.get('sector'):
+        parts.append(f"Sector: {s['sector']}")
+    # TTM result date — tells Claude how fresh the data is
+    if s.get('ttm_result_date'):
+        parts.append(f"Results: {s['ttm_result_date']}")
     if s.get("price_to_book") is not None:
         parts.append(f"P/B {s['price_to_book']:.1f}x")
     if s.get("div_yield") is not None and s["div_yield"] > 0:
@@ -368,10 +381,28 @@ Return ONLY this JSON:
       "risk": "One sentence — most important risk.",
       "horizon": "e.g. 3-5 yrs",
       "quality_flag": "QUALITY|CAUTION|AVOID",
-      "flag_reason": null
+      "flag_reason": null,
+      "exit_targets": {{
+        "entry_zone_max": <₹ price for entry>,
+        "entry_note": "<one line on current vs entry zone>",
+        "fair_value": <₹ intrinsic value estimate>,
+        "target_1": <₹ first partial exit>,
+        "target_2": <₹ second partial exit>,
+        "full_exit": <₹ full position close>,
+        "margin_of_safety_pct": <integer>,
+        "upside_to_t1_pct": <integer>,
+        "thesis_break_triggers": ["<specific condition 1>", "<condition 2>", "<condition 3>"]
+      }}
     }}
   ]
 }}
+
+Exit target guide:
+- fair_value: normalized earnings × sector P/E (compounders 22-30×, growth 25-35×, value 12-18×)
+- entry_zone_max: fair_value × 0.75 (compounders) or × 0.65 (small-caps)
+- target_1: fair_value × 1.20 | target_2: fair_value × 1.40 | full_exit: fair_value × 1.65
+- thesis_break_triggers: SPECIFIC and MEASURABLE only
+- For AVOID quality_flag stocks: set all exit_targets values to null
 Output ONLY the JSON object, no prose."""
 
 
@@ -396,29 +427,53 @@ STOCK LISTS REQUIRED:
   conviction (8-12 picks), longBets (6-10), highPromise (3-6),
   watchClose (4-7), trimAvoid (3-6)
 
-Each stock needs: symbol, ticker, name, sector, thesis, catalysts (list),
-risks (list), fundamentals (pe, pb, roe, div, mcap), horizon, conviction, verdict.
+Each stock needs these exact fields:
+  symbol, ticker, name, sector, thesis, catalysts (list of strings),
+  risks (list of strings), fundamentals (pe, pb, roe, div, mcap),
+  horizon, conviction, verdict,
+  exit_targets (object — see schema below)
 
-macroNarrative: 3 sentences on current Indian-equity environment.
-whispers: 5-7 themes/catalysts being tracked.
-earnings: next 7-10 results calendar entries.
+EXIT TARGETS SCHEMA — required for every stock in conviction, longBets, highPromise:
+{
+  "entry_zone_max": <price in ₹ — max you would pay for a new position>,
+  "entry_note": <one line — e.g. "Attractive below ₹820, at fair value now">,
+  "fair_value": <your intrinsic value estimate in ₹>,
+  "target_1": <₹ — first partial exit, 25% of position, typically fair_value × 1.20>,
+  "target_2": <₹ — second partial exit, another 25%, typically fair_value × 1.40>,
+  "full_exit": <₹ — close the position entirely, typically fair_value × 1.65>,
+  "margin_of_safety_pct": <integer — ((entry_zone_max - current_price) / current_price) × 100. Positive = cheap, negative = above entry zone>,
+  "upside_to_t1_pct": <integer — ((target_1 - current_price) / current_price) × 100>,
+  "thesis_break_triggers": [
+    "<specific measurable condition that would invalidate the thesis>",
+    "<second condition>",
+    "<third condition>"
+  ]
+}
+
+EXIT TARGET CALCULATION GUIDE:
+- fair_value: Use actual EPS (TTM) provided in fundamentals × sector P/E.
+  If EPS TTM is provided, use it directly. If not, estimate as Price / P/E.
+  Compounders (ROCE>20%): 22-30× EPS. Growth stocks: 25-35× EPS. Value: 12-18× EPS.
+  For banks/financials: use P/B (quality private banks: 2.5-3.5× book).
+  For multibaggers: project EPS forward using EPS 3yr CAGR provided.
+    Forward EPS (3yr) = EPS_TTM × (1 + eps_growth_3yr/100)^3
+    Fair Value = Forward EPS × exit_multiple (use conservative 25-30×)
+    Present Value = Fair Value / (1.15)^3   [discounting at 15% required return]
+- entry_zone_max: fair_value × 0.75 for compounders (25% margin of safety).
+  For higher-risk small caps: fair_value × 0.65.
+- target_1: fair_value × 1.20
+- target_2: fair_value × 1.40
+- full_exit: fair_value × 1.65 OR when thesis fundamentally changes
+- thesis_break_triggers: must be SPECIFIC and MEASURABLE (e.g. "ROCE falls below 15% for 2 consecutive quarters", not "business deteriorates")
+
+For watchClose and trimAvoid: exit_targets may be null.
 
 SECTOR BALANCE — CRITICAL RULE:
-The sectors list must have exactly 12 sectors with stance: pos/neu/neg and a one-line note.
+sectors list needs exactly 12 sectors, stance: pos/neu/neg.
+Expected: 4-6 constructive, 3-5 selective, 1-3 cautious. Never all cautious.
+Constructive candidates: Defence, Private Banking, Specialty Chemicals, Capital Goods, Healthcare, Renewables.
 
-Stance definitions:
-- pos (Constructive): Clear tailwinds, acceptable valuations, earnings momentum
-- neu (Selective): Mixed signals — some good stocks but sector is range-bound
-- neg (Cautious): Structural headwinds, overvaluation, or deteriorating earnings
-
-IMPORTANT: In virtually every market environment, sectors are differentiated.
-A reading of ALL sectors as cautious is almost always wrong.
-Expected distribution in a normal Indian market: 4-6 constructive, 3-5 selective, 1-3 cautious.
-If you find yourself writing more than 4 cautious sectors, stop and reconsider each one independently.
-
-Current constructive candidates to evaluate honestly:
-Defence & Aerospace, Private Banking, Specialty Chemicals, Capital Goods,
-Healthcare/Pharma, Renewable Energy. These have structural tailwinds regardless of index level."""
+macroNarrative: 3 sentences. whispers: 5-7 themes. earnings: 7-10 entries."""
 
 
 USER_TEMPLATE = """Today is {today_pretty} IST.
@@ -453,47 +508,7 @@ Process:
 Keep verdicts stable when fundamentals are stable.
 Update when: earnings surprise, management change, structural sector shift, valuation re-rating.
 
-== REQUIRED JSON SCHEMA (output EXACTLY this structure) ==
-{{
-  "edition": "June 2026 · Daily Refresh — 1 Jun",
-  "lastUpdated": "2026-06-01T07:30:00+05:30",
-  "macroNarrative": "3-sentence macro view here.",
-  "stocks": {{
-    "conviction": [
-      {{"symbol": "RELIANCE.NS", "ticker": "RELIANCE", "name": "Reliance Industries", "sector": "Conglomerate",
-        "thesis": "2-3 sentence thesis.", "catalysts": ["catalyst 1", "catalyst 2", "catalyst 3"],
-        "risks": ["risk 1", "risk 2", "risk 3"],
-        "fundamentals": {{"pe": 24.5, "pb": 2.1, "roe": 14.2, "div": 0.4, "mcap": "18.5L Cr"}},
-        "horizon": "5-7 years", "conviction": "High", "verdict": "Buy"}}
-    ],
-    "longBets": [ /* same stock object structure */ ],
-    "highPromise": [ /* same stock object structure */ ],
-    "watchClose": [ /* same stock object structure */ ],
-    "trimAvoid": [ /* same stock object structure */ ]
-  }},
-  "sectors": [
-    {{"name": "Private Banking", "stance": "pos", "note": "One-line rationale."}},
-    {{"name": "IT Services", "stance": "neu", "note": "One-line rationale."}},
-    {{"name": "Defence & Aerospace", "stance": "pos", "note": "One-line rationale."}},
-    {{"name": "Specialty Chemicals", "stance": "pos", "note": "One-line rationale."}},
-    {{"name": "Capital Goods", "stance": "pos", "note": "One-line rationale."}},
-    {{"name": "Healthcare & Pharma", "stance": "neu", "note": "One-line rationale."}},
-    {{"name": "Auto & EV", "stance": "neu", "note": "One-line rationale."}},
-    {{"name": "FMCG & Consumer", "stance": "neu", "note": "One-line rationale."}},
-    {{"name": "Infrastructure", "stance": "pos", "note": "One-line rationale."}},
-    {{"name": "Real Estate", "stance": "neu", "note": "One-line rationale."}},
-    {{"name": "Telecom & Media", "stance": "neg", "note": "One-line rationale."}},
-    {{"name": "Commodities & Steel", "stance": "neu", "note": "One-line rationale."}}
-  ],
-  "earnings": [
-    {{"company": "TCS", "date": "2026-07-10", "expectation": "One line."}}
-  ],
-  "whispers": [
-    {{"theme": "Theme title", "note": "One line."}}
-  ]
-}}
-
-Output ONLY the JSON object. No prose before or after. No code fences."""
+Output the complete data.json JSON object."""
 
 
 TIER_SYSTEM_PROMPT = """You are the research analyst for "The Heritage Ledger". \
@@ -545,14 +560,19 @@ def main():
     prev = load_existing_data()
     prev_summary = compress_prev_data(prev)
 
-    universe_stocks = universe.get("universe", {})
-    compounders  = universe_stocks.get("compounders", [])
-    multibaggers = universe_stocks.get("multibaggers", [])
-    special      = universe_stocks.get("special_situations", [])
-    all_stocks   = compounders + multibaggers + special
+    universe_stocks  = universe.get("universe", {})
+    compounders      = universe_stocks.get("compounders", [])
+    multibaggers     = universe_stocks.get("multibaggers", [])
+    special          = universe_stocks.get("special_situations", [])
+    early_quality    = universe_stocks.get("early_quality", [])
+    emerging         = universe_stocks.get("emerging_compounders", [])
+    inflection       = universe_stocks.get("inflection_watch", [])
+    all_stocks       = compounders + multibaggers + special + early_quality + emerging + inflection
 
-    print(f"  ✓ Universe: {len(compounders)} compounders, {len(multibaggers)} multibaggers, {len(special)} special")
-    print(f"  ✓ Prev summary: {len(prev_summary)} chars (vs {len(json.dumps(prev))} chars full JSON)")
+    print(f"  ✓ Universe: {len(compounders)} compounders | {len(multibaggers)} multibaggers | "
+          f"{len(special)} special | {len(early_quality)} early-quality | "
+          f"{len(emerging)} emerging | {len(inflection)} inflection")
+    print(f"  ✓ Total: {len(all_stocks)} stocks")
 
     # --- 4. Live prices — staggered, multi-source ---
     print(f"\n[4/6] Fetching prices for {len(all_stocks)} stocks (Yahoo → NSE fallback)...")
@@ -595,16 +615,14 @@ def main():
         news_block=news_block,
         prev_summary=prev_summary,
     )
-    # Streaming required by Anthropic SDK for max_tokens > ~21k
-    with client.messages.stream(
+    resp = client.messages.create(
         model=MODEL,
         max_tokens=MAX_TOKENS_LEDGER,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": ledger_msg}],
-    ) as stream:
-        ledger_text = stream.get_final_text()
-        final_msg   = stream.get_final_message()
-    print(f"  ✓ {len(ledger_text)} chars | in={final_msg.usage.input_tokens} out={final_msg.usage.output_tokens}")
+    )
+    ledger_text = "".join(b.text for b in resp.content if hasattr(b, "text"))
+    print(f"  ✓ {len(ledger_text)} chars | in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
 
     try:
         new_data = extract_json_block(ledger_text)
@@ -623,9 +641,12 @@ def main():
     # --- 6b. Tier analysis ---
     print(f"\n[6/6] Claude — Tier Analysis ({len(all_stocks)} stocks, batches of {BATCH_SIZE})...")
     tier_configs = [
-        ("compounders",        "Tier 1 — Compounders",           compounders),
-        ("multibaggers",       "Tier 2 — Multibagger Candidates", multibaggers),
-        ("special_situations", "Tier 3 — Special Situations",     special),
+        ("compounders",          "Tier 1 — Compounders",           compounders),
+        ("multibaggers",         "Tier 2 — Multibagger Candidates", multibaggers),
+        ("special_situations",   "Tier 3 — Special Situations",     special),
+        ("early_quality",        "Tier 4 — Early Quality",          early_quality),
+        ("emerging_compounders", "Tier 5 — Emerging Compounders",   emerging),
+        ("inflection_watch",     "Tier 6 — Inflection Watch",       inflection),
     ]
     tiers_output = {}
 
@@ -640,16 +661,13 @@ def main():
         for batch_num, batch in enumerate(batches):
             prompt = build_tier_prompt(tier_key, tier_label, batch, price_lookup, macro_block, today_pretty)
             try:
-                # Streaming required by Anthropic SDK for large max_tokens requests
-                with client.messages.stream(
+                resp = client.messages.create(
                     model=MODEL,
                     max_tokens=MAX_TOKENS_TIER,
                     system=TIER_SYSTEM_PROMPT,
                     messages=[{"role": "user", "content": prompt}],
-                ) as stream:
-                    text     = stream.get_final_text()
-                    tier_msg = stream.get_final_message()
-
+                )
+                text = "".join(b.text for b in resp.content if hasattr(b, "text"))
                 parsed = extract_json_block(text)
                 batch_stocks = parsed.get("stocks", [])
 
@@ -666,7 +684,7 @@ def main():
                         ]
                     }
                 tier_results.extend(batch_stocks)
-                print(f"    ✓ Batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | in={tier_msg.usage.input_tokens} out={tier_msg.usage.output_tokens}")
+                print(f"    ✓ Batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
                 time.sleep(1)
             except Exception as e:
                 print(f"    ! Batch {batch_num+1} failed: {e}", file=sys.stderr)
@@ -689,7 +707,10 @@ def main():
         json.dump(new_data, f, indent=2, ensure_ascii=False)
 
     ledger_counts = {k: len(new_data["stocks"].get(k, [])) for k in required_lists}
-    tier_counts   = {k: len(tiers_output.get(k, [])) for k in ["compounders", "multibaggers", "special_situations"]}
+    tier_counts = {k: len(tiers_output.get(k, [])) for k in [
+        "compounders", "multibaggers", "special_situations",
+        "early_quality", "emerging_compounders", "inflection_watch"
+    ]}
     print(f"\n  ✓ Written: {DATA_PATH}")
     print(f"    Edition: {new_data.get('edition')}")
     print(f"    Ledger: {ledger_counts}")
