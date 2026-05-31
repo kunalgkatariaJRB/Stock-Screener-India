@@ -74,14 +74,71 @@ def http_get(url: str, timeout: int = 20) -> str:
         return ""
 
 
+def http_get_nse(path: str, timeout: int = 15) -> str:
+    """
+    NSE India requires a valid session cookie — we get one by hitting the
+    homepage first, then use that cookie for the API call.
+    """
+    import urllib.request, http.cookiejar
+    jar = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "application/json",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.nseindia.com/",
+    }
+    try:
+        # Establish session
+        req0 = urllib.request.Request("https://www.nseindia.com/", headers=headers)
+        opener.open(req0, timeout=timeout)
+        time.sleep(0.5)
+        # Hit the actual API
+        req1 = urllib.request.Request(
+            f"https://www.nseindia.com/api/{path}",
+            headers=headers
+        )
+        with opener.open(req1, timeout=timeout) as r:
+            return r.read().decode("utf-8", errors="replace")
+    except Exception as e:
+        return ""
+
+
+def nse_quote(nse_symbol: str) -> dict | None:
+    """Fetch quote from NSE India's official API. Handles .NS suffix."""
+    sym = nse_symbol.replace(".NS", "").upper()
+    body = http_get_nse(f"quote-equity?symbol={quote(sym)}")
+    if not body:
+        return None
+    try:
+        j = json.loads(body)
+        pd = j.get("priceInfo", {})
+        price = pd.get("lastPrice")
+        prev  = pd.get("previousClose")
+        if price is None or prev is None:
+            return None
+        wk52 = pd.get("weekHighLow", {})
+        return {
+            "price":            round(float(price), 2),
+            "prev_close":       round(float(prev), 2),
+            "change_pct":       round((float(price) - float(prev)) / float(prev) * 100, 2),
+            "currency":         "INR",
+            "fifty_two_w_high": wk52.get("max"),
+            "fifty_two_w_low":  wk52.get("min"),
+            "market_state":     "REGULAR",
+            "source":           "NSE",
+        }
+    except Exception:
+        return None
+
+
 def yahoo_quote(symbol: str) -> dict | None:
-    # Try both Yahoo Finance endpoints — query2 works better from CI environments
-    endpoints = [
-        f"https://query2.finance.yahoo.com/v8/finance/chart/{quote(symbol)}?interval=1d&range=5d",
+    """Try Yahoo Finance with two endpoint variants."""
+    for endpoint in [
         f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(symbol)}?interval=1d&range=5d",
-    ]
-    for url in endpoints:
-        body = http_get(url)
+        f"https://query2.finance.yahoo.com/v8/finance/chart/{quote(symbol)}?interval=1d&range=5d",
+    ]:
+        body = http_get(endpoint)
         if not body:
             continue
         try:
@@ -100,9 +157,31 @@ def yahoo_quote(symbol: str) -> dict | None:
                 "fifty_two_w_high": m.get("fiftyTwoWeekHigh"),
                 "fifty_two_w_low":  m.get("fiftyTwoWeekLow"),
                 "market_state":     m.get("marketState", "UNKNOWN"),
+                "source":           "Yahoo",
             }
         except Exception:
             continue
+    return None
+
+
+def fetch_quote_with_fallback(symbol: str) -> dict | None:
+    """
+    Waterfall: Yahoo (query1) → Yahoo (query2) → NSE direct.
+    NSE direct only works for .NS symbols.
+    Adds small random jitter between calls to reduce rate-limit risk.
+    """
+    # Try Yahoo first
+    q = yahoo_quote(symbol)
+    if q:
+        return q
+
+    # Fallback to NSE for Indian stocks
+    if symbol.endswith(".NS"):
+        time.sleep(0.3 + (hash(symbol) % 7) * 0.1)  # jitter 0.3–1.0s
+        q = nse_quote(symbol)
+        if q:
+            return q
+
     return None
 
 
@@ -328,11 +407,21 @@ because nothing fundamental has changed, you keep them steady.
 You output ONE valid JSON object matching the previous data.json schema.
 No prose, no code fences. The dashboard parses this directly.
 
-INVESTMENT FRAMEWORK (apply to every verdict):
+CRITICAL — SECTOR BALANCE RULE:
+Even in weak markets, sectors do NOT all move together. You MUST differentiate.
+A blanket "all cautious" reading is almost always wrong. Use this guide:
+- "pos" (Constructive): Sector has clear tailwinds, valuations acceptable, earnings momentum
+- "neu" (Selective): Mixed signals — good stocks within the sector but sector itself is range-bound
+- "neg" (Cautious): Structural headwinds, overvaluation, earnings deteriorating
+
+In a typical Indian market, expect roughly: 4-6 constructive, 3-5 selective, 1-3 cautious.
+If you are outputting more than 4 cautious sectors, pause and reconsider — you are likely
+being overly pessimistic or repeating the previous reading without independent thought.
+
+INVESTMENT FRAMEWORK:
 Tier 1 Compounders: ROCE >18% sustained, clean balance sheet, durable moat, 5-10yr hold
 Tier 2 Multibaggers: Small/mid-cap, high growth, improving quality, 3-5yr horizon
 Tier 3 Special Situations: Deep value with specific catalyst, 12-24 month thesis
-Macro Plays: Sector/theme positions driven by macro regime shifts
 
 Stock lists must include:
   conviction (8-12 large/mid-cap high-conviction picks),
@@ -476,13 +565,13 @@ def main():
     print("\n[1/6] Fetching macro data...")
     macro_lines = []
     for sym, label in MACRO_TICKERS.items():
-        q = yahoo_quote(sym)
-        time.sleep(0.3)
+        q = fetch_quote_with_fallback(sym)
+        time.sleep(0.5)
         if q:
             macro_lines.append(
                 f"  {label}: ₹{q['price']:,.2f} ({q['change_pct']:+.2f}%)"
                 f"  | 52w {q.get('fifty_two_w_low','?')}–{q.get('fifty_two_w_high','?')}"
-                f"  | state={q['market_state']}"
+                f"  | src={q.get('source','?')}"
             )
         else:
             macro_lines.append(f"  {label}: unavailable")
@@ -514,14 +603,27 @@ def main():
     # --- 4. Fetch live prices for all universe stocks ---
     print(f"\n[4/6] Fetching live prices for {len(all_tier_stocks)} universe stocks...")
     price_lookup = {}
-    for s in all_tier_stocks:
+    yahoo_ok, nse_ok, missing = 0, 0, 0
+    for i, s in enumerate(all_tier_stocks):
         sym = s.get("symbol")
-        if sym and s.get("symbol_resolved"):
-            q = yahoo_quote(sym)
-            if q:
-                price_lookup[sym] = q
-            time.sleep(0.12)
-    print(f"  ✓ Prices fetched: {len(price_lookup)}/{len(all_tier_stocks)}")
+        if not sym or not s.get("symbol_resolved"):
+            missing += 1
+            continue
+        q = fetch_quote_with_fallback(sym)
+        if q:
+            price_lookup[sym] = q
+            if q.get("source") == "NSE":
+                nse_ok += 1
+            else:
+                yahoo_ok += 1
+        else:
+            missing += 1
+        # Staggered sleep — group of 10 gets a longer pause to avoid rate limits
+        if (i + 1) % 10 == 0:
+            time.sleep(2.0)
+        else:
+            time.sleep(0.2)
+    print(f"  ✓ Prices: Yahoo={yahoo_ok} NSE={nse_ok} missing={missing} / {len(all_tier_stocks)}")
 
     # --- 5. API client ---
     api_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -539,16 +641,14 @@ def main():
         news_block=news_block,
         prev_summary=prev_summary,
     )
-    # Streaming is required by the Anthropic SDK for large max_tokens requests
-    with client.messages.stream(
+    resp = client.messages.create(
         model=MODEL,
         max_tokens=MAX_TOKENS_LEDGER,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": ledger_msg}],
-    ) as stream:
-        ledger_text = stream.get_final_text()
-        final_msg   = stream.get_final_message()
-    print(f"  ✓ Ledger response: {len(ledger_text)} chars | tokens in={final_msg.usage.input_tokens} out={final_msg.usage.output_tokens}")
+    )
+    ledger_text = "".join(b.text for b in resp.content if hasattr(b, "text"))
+    print(f"  ✓ Ledger response: {len(ledger_text)} chars | tokens in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
 
     try:
         new_data = extract_json_block(ledger_text)
@@ -592,16 +692,13 @@ def main():
                 price_lookup, macro_block, today_pretty
             )
             try:
-                # Use streaming — required for large max_tokens requests
-                with client.messages.stream(
+                resp = client.messages.create(
                     model=MODEL,
                     max_tokens=MAX_TOKENS_TIER,
                     system=TIER_SYSTEM_PROMPT,
                     messages=[{"role": "user", "content": prompt}],
-                ) as stream:
-                    text     = stream.get_final_text()
-                    tier_msg = stream.get_final_message()
-
+                )
+                text = "".join(b.text for b in resp.content if hasattr(b, "text"))
                 parsed = extract_json_block(text)
                 batch_stocks = parsed.get("stocks", [])
 
@@ -618,7 +715,7 @@ def main():
                     }
 
                 tier_results.extend(batch_stocks)
-                print(f"    ✓ Batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | tokens in={tier_msg.usage.input_tokens} out={tier_msg.usage.output_tokens}")
+                print(f"    ✓ Batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | tokens in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
                 time.sleep(1)  # brief pause between calls
 
             except Exception as e:
