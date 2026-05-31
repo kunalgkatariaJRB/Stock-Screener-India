@@ -616,17 +616,22 @@ def main():
         prev_summary=prev_summary,
     )
     try:
-        resp = client.messages.create(
+        ledger_text = ""
+        with client.messages.stream(
             model=MODEL,
             max_tokens=MAX_TOKENS_LEDGER,
             system=SYSTEM_PROMPT,
             messages=[{"role": "user", "content": ledger_msg}],
-        )
-        ledger_text = "".join(b.text for b in resp.content if hasattr(b, "text"))
-        stop_reason = resp.stop_reason
-        print(f"  ✓ {len(ledger_text)} chars | stop={stop_reason} | in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
+        ) as stream:
+            for chunk in stream.text_stream:
+                ledger_text += chunk
+            final = stream.get_final_message()
+            stop_reason = final.stop_reason
+            in_tok = final.usage.input_tokens
+            out_tok = final.usage.output_tokens
+        print(f"  ✓ {len(ledger_text)} chars | stop={stop_reason} | in={in_tok} out={out_tok}")
         if stop_reason == "max_tokens":
-            print("  ✗ Response truncated — hit max_tokens limit. Increase MAX_TOKENS_LEDGER or reduce prompt.", file=sys.stderr)
+            print("  ✗ Response truncated — hit max_tokens limit.", file=sys.stderr)
             sys.exit(1)
     except Exception as e:
         print(f"  ✗ Claude API call failed: {e}", file=sys.stderr)
@@ -672,13 +677,18 @@ def main():
         for batch_num, batch in enumerate(batches):
             prompt = build_tier_prompt(tier_key, tier_label, batch, price_lookup, macro_block, today_pretty)
             try:
-                resp = client.messages.create(
+                text = ""
+                with client.messages.stream(
                     model=MODEL,
                     max_tokens=MAX_TOKENS_TIER,
                     system=TIER_SYSTEM_PROMPT,
                     messages=[{"role": "user", "content": prompt}],
-                )
-                text = "".join(b.text for b in resp.content if hasattr(b, "text"))
+                ) as stream:
+                    for chunk in stream.text_stream:
+                        text += chunk
+                    final = stream.get_final_message()
+                    in_tok = final.usage.input_tokens
+                    out_tok = final.usage.output_tokens
                 parsed = extract_json_block(text)
                 batch_stocks = parsed.get("stocks", [])
 
@@ -695,7 +705,7 @@ def main():
                         ]
                     }
                 tier_results.extend(batch_stocks)
-                print(f"    ✓ Batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
+                print(f"    ✓ Batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | in={in_tok} out={out_tok}")
                 time.sleep(1)
             except Exception as e:
                 print(f"    ! Batch {batch_num+1} failed: {e}", file=sys.stderr)
