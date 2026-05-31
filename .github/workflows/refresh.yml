@@ -5,13 +5,6 @@ on:
     # 7:30 AM IST = 02:00 UTC daily
     - cron: '0 2 * * *'
   workflow_dispatch:
-    inputs:
-      run_ingest:
-        description: 'Also run data ingest (re-process Screener CSVs)?'
-        required: false
-        default: 'false'
-        type: choice
-        options: ['true', 'false']
 
 permissions:
   contents: write
@@ -19,55 +12,38 @@ permissions:
 jobs:
 
   # -----------------------------------------------------------------------
-  # JOB 1: Data Ingest
-  # Runs when you manually upload new Screener CSVs to data/screens/
-  # Also runs daily before the refresh (reads latest CSVs if they changed)
+  # JOB 1: Process Screener CSVs → build master_universe.json
   # -----------------------------------------------------------------------
   data_ingest:
     name: Process Screener CSVs
     runs-on: ubuntu-latest
-    outputs:
-      universe_updated: ${{ steps.check.outputs.changed }}
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Check if CSVs exist
-        id: check
-        run: |
-          if [ -d "data/screens" ] && [ "$(ls -A data/screens/*.csv 2>/dev/null | wc -l)" -gt "0" ]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "CSVs found: $(ls data/screens/*.csv | wc -l) files"
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-            echo "No CSVs found in data/screens/ — skipping ingest"
-          fi
-
       - name: Run data ingest
-        if: steps.check.outputs.changed == 'true'
-        run: python data_ingest.py
+        run: |
+          mkdir -p data/processed
+          python data_ingest.py
 
       - name: Commit processed universe
-        if: steps.check.outputs.changed == 'true'
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "Heritage Bot"
-          git add data/processed/
-          if git diff --staged --quiet; then
-            echo "Universe unchanged — no commit needed"
-          else
-            git commit -m "📊 Universe updated from Screener CSVs — $(date -u +'%Y-%m-%d') [skip ci]"
-            git push
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "Heritage Bot"
+          git add data/processed/ || true
+          git diff --staged --quiet && echo "No changes to commit" || git commit -m "📊 Universe updated [skip ci]"
+          git push origin main || echo "Push skipped"
 
   # -----------------------------------------------------------------------
-  # JOB 2: Daily Editorial Refresh
-  # Runs every morning at 7:30 AM IST after data_ingest completes
+  # JOB 2: Daily Claude Analysis
   # -----------------------------------------------------------------------
   daily_refresh:
     name: Daily Claude Refresh
@@ -78,7 +54,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          # Pull latest (including any universe updates from data_ingest job)
+          token: ${{ secrets.GITHUB_TOKEN }}
           ref: main
 
       - name: Set up Python 3.11
@@ -97,11 +73,8 @@ jobs:
 
       - name: Commit updated data.json
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "Heritage Bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "Heritage Bot"
           git add data.json
-          if git diff --staged --quiet; then
-            echo "data.json unchanged — nothing to commit"
-          else
-            git commit -m "🤖 Daily refresh: $(date -u +'%Y-%m-%d %H:%M') UTC [skip ci]"
-            git push
+          git diff --staged --quiet && echo "No changes to commit" || git commit -m "🤖 Daily refresh: $(date -u +'%Y-%m-%d') [skip ci]"
+          git push origin main || echo "Push skipped"
