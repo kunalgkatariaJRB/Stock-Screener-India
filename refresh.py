@@ -75,29 +75,35 @@ def http_get(url: str, timeout: int = 20) -> str:
 
 
 def yahoo_quote(symbol: str) -> dict | None:
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(symbol)}?interval=1d&range=5d"
-    body = http_get(url)
-    if not body:
-        return None
-    try:
-        j = json.loads(body)
-        r = j["chart"]["result"][0]
-        m = r["meta"]
-        price = m.get("regularMarketPrice")
-        prev  = m.get("chartPreviousClose") or m.get("previousClose")
-        if price is None or prev is None:
-            return None
-        return {
-            "price":          round(price, 2),
-            "prev_close":     round(prev, 2),
-            "change_pct":     round((price - prev) / prev * 100, 2),
-            "currency":       m.get("currency", "INR"),
-            "fifty_two_w_high": m.get("fiftyTwoWeekHigh"),
-            "fifty_two_w_low":  m.get("fiftyTwoWeekLow"),
-            "market_state":   m.get("marketState", "UNKNOWN"),
-        }
-    except Exception:
-        return None
+    # Try both Yahoo Finance endpoints — query2 works better from CI environments
+    endpoints = [
+        f"https://query2.finance.yahoo.com/v8/finance/chart/{quote(symbol)}?interval=1d&range=5d",
+        f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(symbol)}?interval=1d&range=5d",
+    ]
+    for url in endpoints:
+        body = http_get(url)
+        if not body:
+            continue
+        try:
+            j = json.loads(body)
+            r = j["chart"]["result"][0]
+            m = r["meta"]
+            price = m.get("regularMarketPrice")
+            prev  = m.get("chartPreviousClose") or m.get("previousClose")
+            if price is None or prev is None:
+                continue
+            return {
+                "price":            round(price, 2),
+                "prev_close":       round(prev, 2),
+                "change_pct":       round((price - prev) / prev * 100, 2),
+                "currency":         m.get("currency", "INR"),
+                "fifty_two_w_high": m.get("fiftyTwoWeekHigh"),
+                "fifty_two_w_low":  m.get("fiftyTwoWeekLow"),
+                "market_state":     m.get("marketState", "UNKNOWN"),
+            }
+        except Exception:
+            continue
+    return None
 
 
 def fetch_news() -> list[dict]:
@@ -533,14 +539,16 @@ def main():
         news_block=news_block,
         prev_summary=prev_summary,
     )
-    resp = client.messages.create(
+    # Streaming is required by the Anthropic SDK for large max_tokens requests
+    with client.messages.stream(
         model=MODEL,
         max_tokens=MAX_TOKENS_LEDGER,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": ledger_msg}],
-    )
-    ledger_text = "".join(b.text for b in resp.content if hasattr(b, "text"))
-    print(f"  ✓ Ledger response: {len(ledger_text)} chars | tokens in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
+    ) as stream:
+        ledger_text = stream.get_final_text()
+        final_msg   = stream.get_final_message()
+    print(f"  ✓ Ledger response: {len(ledger_text)} chars | tokens in={final_msg.usage.input_tokens} out={final_msg.usage.output_tokens}")
 
     try:
         new_data = extract_json_block(ledger_text)
@@ -584,13 +592,16 @@ def main():
                 price_lookup, macro_block, today_pretty
             )
             try:
-                resp = client.messages.create(
+                # Use streaming — required for large max_tokens requests
+                with client.messages.stream(
                     model=MODEL,
                     max_tokens=MAX_TOKENS_TIER,
                     system=TIER_SYSTEM_PROMPT,
                     messages=[{"role": "user", "content": prompt}],
-                )
-                text = "".join(b.text for b in resp.content if hasattr(b, "text"))
+                ) as stream:
+                    text     = stream.get_final_text()
+                    tier_msg = stream.get_final_message()
+
                 parsed = extract_json_block(text)
                 batch_stocks = parsed.get("stocks", [])
 
@@ -607,7 +618,7 @@ def main():
                     }
 
                 tier_results.extend(batch_stocks)
-                print(f"    ✓ Batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | tokens in={resp.usage.input_tokens} out={resp.usage.output_tokens}")
+                print(f"    ✓ Batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | tokens in={tier_msg.usage.input_tokens} out={tier_msg.usage.output_tokens}")
                 time.sleep(1)  # brief pause between calls
 
             except Exception as e:
