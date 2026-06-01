@@ -474,34 +474,11 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
 .colophon{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--text-faint);letter-spacing:0.06em;padding-top:20px;border-top:1px solid var(--border);}
 .colophon .right{font-family:'JetBrains Mono',monospace;}
 
-/* ===== STOCK MODAL ===== */
-.stock-modal{position:fixed;inset:0;z-index:1000;display:flex;justify-content:flex-end;animation:fadeIn 0.2s ease;}
-@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);cursor:pointer;}
-.modal-drawer{
-  position:relative;width:min(640px,95vw);height:100%;
-  background:var(--void-2);border-left:1px solid var(--border-bright);
-  overflow-y:auto;box-shadow:-20px 0 60px rgba(0,0,0,0.7),0 0 40px rgba(0,212,255,0.05);
-  animation:slideIn 0.3s cubic-bezier(0.16,1,0.3,1);
-}
-@keyframes slideIn{from{transform:translateX(100%);}to{transform:translateX(0);}}
-.modal-header{
-  padding:24px 28px 18px;border-bottom:1px solid var(--border);
-  display:flex;justify-content:space-between;align-items:flex-start;gap:14px;
-  position:sticky;top:0;background:var(--void-2);z-index:10;
-}
-.modal-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--electric),transparent);opacity:0.5;}
+/* ===== STOCK MODAL (centered overlay — see new CSS block below) ===== */
 .modal-title-block{flex:1;min-width:0;}
 .kicker{font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);margin-bottom:6px;font-weight:700;}
 #modal-name,.modal-name{font-family:'Orbitron',monospace;font-weight:700;font-size:20px;margin:4px 0;color:var(--text);line-height:1.2;letter-spacing:0.02em;}
 .modal-ticker{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.1em;color:var(--text-faint);}
-.modal-close{
-  background:none;border:1px solid var(--border);color:var(--text-dim);
-  width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;
-  transition:all 0.2s;display:flex;align-items:center;justify-content:center;flex-shrink:0;
-}
-.modal-close:hover{border-color:var(--electric);color:var(--electric);box-shadow:0 0 10px var(--electric-glow);}
-.modal-content{padding:24px 28px 50px;}
 .modal-section{margin-bottom:22px;}
 .modal-section h4{
   font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
@@ -589,14 +566,21 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
 }
 #mobile-search-results{flex:1;overflow-y:auto;}
 
-/* ===== NEW COMPACT STOCK CARDS ===== */
+/* ===== COMPACT STOCK CARDS — BOX GRID ===== */
 .stock-grid{
-  display:flex;flex-direction:column;gap:1px;
-  background:var(--border);border:1px solid var(--border);
+  display:grid;grid-template-columns:1fr;gap:12px;
+  background:transparent;border:none;
 }
+@media(min-width:768px){.stock-grid{grid-template-columns:repeat(2,1fr);gap:14px;}}
 .stock-card{
-  background:var(--void-2);position:relative;
+  position:relative;
+  background:rgba(8,18,38,0.98);
+  border:1px solid rgba(0,212,255,0.22);
+  padding:0;
+  transition:border-color 0.25s ease,box-shadow 0.25s ease;
+  cursor:pointer;
 }
+.stock-card:hover{border-color:rgba(0,212,255,0.55);box-shadow:0 0 20px rgba(0,212,255,0.08);}
 .stock-card-collapsed{
   padding:14px 16px;min-height:72px;
   display:flex;flex-direction:column;justify-content:center;gap:6px;
@@ -637,8 +621,33 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
   box-shadow:-2px -2px 8px rgba(255,215,0,0.3);pointer-events:none;
 }
 .stock-card.avoid-card{border-left:2px solid var(--down);}
-/* ===== MACRO TILE GLOW ===== */
-.macro-cell{position:relative;}
+/* ===== MACRO TILE FIX ===== */
+.macro-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:8px;background:transparent;border:none;
+}
+@media(min-width:480px){.macro-grid{grid-template-columns:repeat(4,1fr);}}
+@media(min-width:900px){.macro-grid{grid-template-columns:repeat(8,1fr);}}
+.macro-cell{
+  position:relative;padding:14px 12px;min-height:90px;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;
+  background:rgba(8,18,38,0.98);border:1px solid rgba(0,212,255,0.18);
+  transition:background 0.2s;
+}
+.macro-cell:hover{background:rgba(0,212,255,0.05);}
+.macro-cell::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--electric),transparent);opacity:0.4;
+}
+.macro-cell .label{font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-faint);font-weight:500;margin-bottom:4px;}
+.macro-cell .val{
+  font-family:'JetBrains Mono',monospace;font-weight:900;
+  font-size:20px;color:var(--text);line-height:1.1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+@media(min-width:768px){.macro-cell .val{font-size:22px;}}
+@media(min-width:1200px){.macro-cell .val{font-size:26px;}}
+.macro-cell .delta{font-size:11px;margin-top:4px;letter-spacing:0.02em;}
 .macro-cell.positive::after{
   content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
   background:var(--up);box-shadow:0 0 8px var(--up);
@@ -647,14 +656,49 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
   content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
   background:var(--down);box-shadow:0 0 8px var(--down);
 }
-.macro-cell .label{font-size:8px;letter-spacing:0.2em;}
-.macro-cell .val{font-size:26px;font-weight:900;}
-@media(min-width:768px){.macro-cell .val{font-size:32px;}}
+/* ===== WATCHLIST STYLES ===== */
+.watchlist-card{
+  background:rgba(8,18,38,0.98);border:1px solid rgba(0,212,255,0.22);
+  padding:16px;margin-bottom:0;
+}
+.watchlist-stale{font-size:9px;color:var(--text-faint);letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;}
+.watchlist-snippet{font-family:'Fraunces',serif;font-size:12px;line-height:1.5;color:var(--text-dim);font-style:italic;margin:8px 0;}
+.watchlist-actions{display:flex;gap:8px;margin-top:10px;}
+.watchlist-empty{padding:40px;text-align:center;color:var(--text-dim);font-family:'Fraunces',serif;font-style:italic;font-size:14px;}
+/* ===== CENTERED MODAL ===== */
+.stock-modal{
+  position:fixed;inset:0;z-index:2000;
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
+  background:rgba(5,10,24,0.92);backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:opacity 0.25s ease;
+}
+.stock-modal.active{opacity:1;pointer-events:all;}
+.stock-modal-inner{
+  background:var(--void-2);border:1px solid var(--border-bright);
+  width:100%;max-width:640px;max-height:88vh;overflow-y:auto;
+  position:relative;animation:modal-in 0.2s ease;
+}
+@keyframes modal-in{from{transform:translateY(12px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+/* keep old drawer-style classes as fallback aliases */
+.modal-header{
+  padding:24px 28px 18px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:flex-start;gap:14px;
+  position:sticky;top:0;background:var(--void-2);z-index:10;
+}
+.modal-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--electric),transparent);opacity:0.5;}
+.modal-close{
+  position:absolute;top:16px;right:16px;
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-dim);font-family:'JetBrains Mono',monospace;
+  font-size:11px;padding:4px 10px;cursor:pointer;letter-spacing:0.1em;
+  text-transform:uppercase;transition:all 0.2s;z-index:20;
+}
+.modal-close:hover{border-color:var(--electric);color:var(--electric);}
+.modal-content{padding:24px 28px 50px;}
 /* ===== RESPONSIVE ===== */
 @media(max-width:1100px){
-  .macro-grid{grid-template-columns:repeat(4,1fr);}
   .compass-grid{grid-template-columns:repeat(2,1fr);}
-  .stock-grid{grid-template-columns:1fr;}
   .princ-grid{grid-template-columns:1fr;gap:32px;}
 }
 @media(max-width:760px){
@@ -662,9 +706,6 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
   #topbar{padding:0 16px;gap:12px;}
   .topbar-search{display:none;}
   #mobile-search-btn{display:inline-flex;}
-  .macro-grid{grid-template-columns:repeat(2,1fr);}
-  .macro-cell{padding:12px 14px;}
-  .macro-cell .val{font-size:18px;}
   .compass-grid{grid-template-columns:1fr;}
   .verdict-tab{padding:10px 14px;font-size:10px;}
   .card{padding:18px 18px 16px;}
@@ -729,18 +770,6 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
   </div>
 </section>
 
-<!-- SECTOR COMPASS -->
-<section id="compass">
-  <div class="wrap">
-    <div class="hud-section-head">
-      <div class="hud-label">◈ Sector Compass</div>
-      <div class="compass-summary" id="compass-summary"></div>
-    </div>
-    <div class="compass-rose" id="compass-rose"></div>
-    <div class="compass-grid" id="compass-grid"></div>
-  </div>
-</section>
-
 <!-- MACRO PULSE -->
 <section id="macro">
   <div class="wrap">
@@ -769,6 +798,18 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
     </div>
     <input type="file" id="portfolio-file" accept=".csv" style="display:none;" />
     <div id="portfolio-results"></div>
+  </div>
+</section>
+
+<!-- SECTOR COMPASS -->
+<section id="compass">
+  <div class="wrap">
+    <div class="hud-section-head">
+      <div class="hud-label">◈ Sector Compass</div>
+      <div class="compass-summary" id="compass-summary"></div>
+    </div>
+    <div class="compass-rose" id="compass-rose"></div>
+    <div class="compass-grid" id="compass-grid"></div>
   </div>
 </section>
 
@@ -804,16 +845,15 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
 </details>
 
 <!-- STOCK MODAL -->
-<div id="stock-modal" class="stock-modal" style="display:none;">
-  <div class="modal-overlay" id="modal-overlay"></div>
-  <div class="modal-drawer">
-    <div class="modal-header">
+<div id="stock-modal" class="stock-modal">
+  <div class="stock-modal-inner" id="modal-inner">
+    <button class="modal-close" id="modal-close" aria-label="Close">✕ CLOSE</button>
+    <div class="modal-header" style="padding-right:80px;">
       <div class="modal-title-block">
         <div class="kicker" id="modal-status">Loading...</div>
         <h2 id="modal-name">—</h2>
         <div class="modal-ticker" id="modal-ticker">—</div>
       </div>
-      <button class="modal-close" id="modal-close" aria-label="Close">×</button>
     </div>
     <div class="modal-content" id="modal-content"></div>
   </div>
@@ -1387,37 +1427,116 @@ function renderPortfolioResults(holdings) {
 }
 
 /* =========================================================
+   WATCHLIST
+   ========================================================= */
+const WATCHLIST_KEY = 'heritage_watchlist';
+const WATCHLIST_MAX = 20;
+
+function getWatchlist() {
+  try { return JSON.parse(localStorage.getItem(WATCHLIST_KEY) || '[]'); } catch { return []; }
+}
+
+function saveToWatchlist(item) {
+  let wl = getWatchlist();
+  const idx = wl.findIndex(x => x.ticker === item.ticker);
+  if (idx >= 0) { wl[idx] = item; } else {
+    if (wl.length >= WATCHLIST_MAX) wl.shift();
+    wl.push(item);
+  }
+  localStorage.setItem(WATCHLIST_KEY, JSON.stringify(wl));
+  updateWatchlistBadge();
+}
+
+function removeFromWatchlist(ticker) {
+  let wl = getWatchlist().filter(x => x.ticker !== ticker);
+  localStorage.setItem(WATCHLIST_KEY, JSON.stringify(wl));
+  updateWatchlistBadge();
+  renderWatchlistTab();
+}
+
+function isInWatchlist(ticker) {
+  return getWatchlist().some(x => x.ticker === ticker);
+}
+
+function updateWatchlistBadge() {
+  const badge = document.querySelector('[data-tab="watchlist"] .count');
+  if (badge) badge.textContent = getWatchlist().length;
+}
+
+function renderWatchlistTab() {
+  const grid = document.getElementById('stock-grid');
+  const wl = getWatchlist();
+  if (!wl.length) {
+    grid.innerHTML = '<div class="watchlist-empty">No stocks saved yet.<br>Search any stock, get AI analysis, and save HIGH conviction picks here.</div>';
+    return;
+  }
+  grid.innerHTML = wl.map(item => {
+    const tagClass = (item.verdict || '').toLowerCase().includes('buy') || (item.verdict || '').toLowerCase().includes('long') ? 'tag-buy' :
+      (item.verdict || '').toLowerCase().includes('avoid') || (item.verdict || '').toLowerCase().includes('trim') ? 'tag-sell' : 'tag-watch';
+    return `<div class="watchlist-card stock-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px;">
+        <div>
+          <div style="font-family:'Orbitron',monospace;font-weight:700;font-size:14px;color:var(--text);">${escHtml(item.name)}</div>
+          <div style="font-size:10px;color:var(--text-faint);letter-spacing:0.08em;margin-top:2px;">${escHtml(item.ticker)}</div>
+        </div>
+        <span class="verdict-tag ${tagClass}" style="margin:0;flex-shrink:0;">${escHtml(item.verdict || '—')}</span>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text);">
+        ${item.current_price != null ? '₹ ' + fmtN(item.current_price) : '—'}
+        <span class="watchlist-stale">price at time of analysis</span>
+      </div>
+      <p class="watchlist-snippet">${escHtml((item.thesis_snippet || '').slice(0, 150))}…</p>
+      <div class="watchlist-actions">
+        <button class="hud-btn" onclick="openStockModal('${escHtml(item.ticker)}','${escHtml(item.name)}')">⚡ Re-analyse</button>
+        <button class="hud-btn" style="border-color:rgba(255,56,96,0.4);color:var(--down);" onclick="removeFromWatchlist('${escHtml(item.ticker)}')">✕ Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* =========================================================
    RENDER: TABS + STOCKS
    ========================================================= */
-const TAB_DEFS_EXTRA = [...TAB_DEFS, { id: 'universe', label: 'Universe', stripe: 'watch', tag: 'tag-watch', verdictWord: 'Tier', accent: 'TIER' }];
+const TAB_DEFS_EXTRA = [
+  ...TAB_DEFS,
+  { id: 'universe',  label: 'Universe',  stripe: 'watch', tag: 'tag-watch', verdictWord: 'Tier',  accent: 'TIER' },
+  { id: 'watchlist', label: 'Watchlist', stripe: 'watch', tag: 'tag-watch', verdictWord: 'Watch', accent: 'WATCH' }
+];
 
 function renderTabs() {
   const tabs = document.getElementById('verdict-tabs');
   tabs.innerHTML = TAB_DEFS_EXTRA.map(d => {
-    const list = d.id === 'universe' ? (DATA?.tiers || []) : ((DATA?.stocks?.[d.id]) || []);
+    let count;
+    if (d.id === 'universe') count = (DATA?.tiers || []).length;
+    else if (d.id === 'watchlist') count = getWatchlist().length;
+    else count = ((DATA?.stocks?.[d.id]) || []).length;
     return `<button class="verdict-tab ${activeTab===d.id?'active':''}" data-tab="${d.id}">
-      <span>${d.label}</span><span class="count">${list.length}</span>
+      <span>${d.label}</span><span class="count">${count}</span>
     </button>`;
   }).join('');
   tabs.querySelectorAll('.verdict-tab').forEach(b => {
     b.addEventListener('click', () => {
       activeTab = b.dataset.tab;
       renderTabs();
+      const grid = document.getElementById('stock-grid');
+      const uc = document.getElementById('universe-container');
       if (activeTab === 'universe') {
-        document.getElementById('stock-grid').style.display = 'none';
-        document.getElementById('universe-container').style.display = 'block';
+        grid.style.display = 'none'; uc.style.display = 'block';
         renderUniverse();
         document.getElementById('verdict-count').textContent = `${(DATA?.tiers || []).length} stocks`;
+      } else if (activeTab === 'watchlist') {
+        grid.style.display = ''; uc.style.display = 'none';
+        renderWatchlistTab();
+        document.getElementById('verdict-count').textContent = `${getWatchlist().length} saved`;
       } else {
-        document.getElementById('stock-grid').style.display = '';
-        document.getElementById('universe-container').style.display = 'none';
+        grid.style.display = ''; uc.style.display = 'none';
         renderStocks();
         const total = ((DATA?.stocks?.[activeTab]) || []).length;
         document.getElementById('verdict-count').textContent = `${total} ${activeTab === 'trimAvoid' ? 'cautions' : 'positions'}`;
       }
     });
   });
-  if (activeTab !== 'universe') {
+  if (activeTab !== 'universe' && activeTab !== 'watchlist') {
     const total = ((DATA?.stocks?.[activeTab]) || []).length;
     document.getElementById('verdict-count').textContent = `${total} ${activeTab === 'trimAvoid' ? 'cautions' : 'positions'}`;
   }
@@ -1470,7 +1589,12 @@ function renderStocks() {
             <div class="dd-section"><h5>What could go wrong</h5><ul>${(s.risks||[]).map(r => `<li>${escHtml(r)}</li>`).join('')}</ul></div>
           </div>
           ${renderExitTargets(s, null)}
-          <button class="hud-btn" style="margin-top:12px;width:100%;justify-content:center;" onclick="openStockModal('${s.symbol}','${escHtml(s.name)}')">⚡ Full AI Analysis</button>
+          <div id="card-ai-slot-${s.symbol}" style="margin-top:12px;">
+            <div class="ai-section" style="text-align:left;">
+              <div class="ai-section-title" style="font-size:12px;margin-bottom:6px;">Get AI analysis for ${escHtml(s.name)}</div>
+              <button class="ai-button" onclick="event.stopPropagation();requestCardAIAnalysis('${escHtml(s.symbol)}','${escHtml(s.name)}')"><span>⚡</span>Kunal's AI</button>
+            </div>
+          </div>
         </div>
       </div>
     </article>`;
@@ -1487,6 +1611,52 @@ function toggleDeep(sym) {
   const el = document.getElementById('dd-' + sym);
   if (!el) return;
   el.classList.toggle('open');
+}
+
+async function requestCardAIAnalysis(symbol, name) {
+  const slot = document.getElementById('card-ai-slot-' + symbol);
+  if (!slot) return;
+  const rateInfo = checkAIRateLimit();
+  const cached = getAICacheEntry(symbol);
+  if (cached) {
+    slot.innerHTML = renderCardAIHtml(cached, symbol, name);
+    return;
+  }
+  if (!rateInfo.allowed) {
+    slot.innerHTML = `<div class="ai-section ai-section-blocked" style="text-align:left;"><div class="ai-section-title">Daily limit reached (${rateInfo.used}/${rateInfo.limit})</div></div>`;
+    return;
+  }
+  slot.innerHTML = `<div class="ai-section ai-section-loading" style="text-align:left;"><div class="ai-loader"><div class="ai-loader-dot"></div><div class="ai-loader-dot"></div><div class="ai-loader-dot"></div></div><div class="ai-section-title">Scanning the tape…</div></div>`;
+  const q = await fetchQuote(symbol);
+  const payload = { symbol, name: name || symbol, sector: q?.exchangeName || 'Indian equity', price: q?.price || null, change_pct: q?.changePct || null, fifty_two_w_high: q?.fiftyTwoWeekHigh || null, fifty_two_w_low: q?.fiftyTwoWeekLow || null };
+  try {
+    const res = await fetch(AI_WORKER_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    if (!res.ok) throw new Error('Worker ' + res.status);
+    const data = await res.json();
+    if (!data.success || !data.analysis) throw new Error(data.error || 'Invalid response');
+    incrementAIUsage();
+    setAICacheEntry(symbol, name, data.analysis);
+    slot.innerHTML = renderCardAIHtml(getAICacheEntry(symbol), symbol, name);
+  } catch (err) {
+    slot.innerHTML = `<div class="ai-section ai-section-error" style="text-align:left;"><div class="ai-section-title">AI unavailable</div><div class="ai-section-desc" style="font-size:11px;">${escHtml(err.message)}</div><button class="ai-button" style="margin-top:8px;" onclick="event.stopPropagation();requestCardAIAnalysis('${escHtml(symbol)}','${escHtml(name)}')">↻ Retry</button></div>`;
+  }
+}
+
+function renderCardAIHtml(entry, symbol, name) {
+  const a = entry.analysis || {};
+  const stanceMap = { 'pos': 'tag-buy', 'neu': 'tag-hold', 'neg': 'tag-sell' };
+  const tagClass = stanceMap[a.stance] || 'tag-hold';
+  const ageHours = (Date.now() - entry.timestamp) / (1000 * 60 * 60);
+  const ageStr = ageHours < 1 ? Math.round(ageHours * 60) + ' min ago' : Math.round(ageHours) + 'h ago';
+  const currentPrice = PRICE_CACHE.get(symbol)?.price || null;
+  return `<div class="modal-verdict-box ai-verdict-box" style="margin-top:12px;">
+    <div class="ai-badge">⚡ KUNAL'S AI · ${ageStr}</div>
+    <span class="modal-verdict-tag ${tagClass}">${escHtml(a.conviction || 'Watching')}</span>
+    <p class="modal-thesis" style="font-size:13px;">${escHtml(a.thesis || '')}</p>
+    <p class="modal-algo-note">${escHtml(a.confidence_note || '')}</p>
+    ${a.catalyst ? `<div style="margin-top:8px;font-size:11px;color:var(--text-dim);"><span style="color:var(--up);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;font-size:9px;">↑ RIGHT</span> ${escHtml(a.catalyst)}</div>` : ''}
+    ${a.risk ? `<div style="margin-top:6px;font-size:11px;color:var(--text-dim);"><span style="color:var(--down);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;font-size:9px;">↓ WRONG</span> ${escHtml(a.risk)}</div>` : ''}
+  </div>`;
 }
 
 async function refreshStockPrices() {
@@ -1636,16 +1806,18 @@ function initPrinciplesToggle() {
 /* =========================================================
    STOCK MODAL
    ========================================================= */
+function closeStockModal() {
+  const modal = document.getElementById('stock-modal');
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
 function initStockModal() {
   const modal = document.getElementById('stock-modal');
-  const overlay = document.getElementById('modal-overlay');
   const closeBtn = document.getElementById('modal-close');
-  function close() { modal.style.display = 'none'; document.body.style.overflow = ''; }
-  overlay.addEventListener('click', close);
-  closeBtn.addEventListener('click', close);
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.style.display !== 'none') close();
-  });
+  closeBtn.addEventListener('click', closeStockModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeStockModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('active')) closeStockModal(); });
 }
 
 function findStockInUniverse(symbol) {
@@ -1740,7 +1912,7 @@ async function openStockModal(symbol, displayName) {
   const nameEl = document.getElementById('modal-name');
   const tickerEl = document.getElementById('modal-ticker');
   const contentEl = document.getElementById('modal-content');
-  modal.style.display = 'flex';
+  modal.classList.add('active');
   document.body.style.overflow = 'hidden';
   const found = findStockInUniverse(symbol);
   const foundExt = found ? null : findStockInExtendedUniverse(symbol);
@@ -1823,7 +1995,7 @@ function renderOutsideLedgerModal(contentEl, symbol, displayName, q) {
   const cached = getAICacheEntry(symbol);
   let aiSection;
   if (cached) {
-    aiSection = renderAIVerdictHtml(cached);
+    aiSection = renderAIVerdictHtml(cached) + buildWatchlistSaveBtn(cached, symbol, displayName || symbol);
   } else if (!rateInfo.allowed) {
     aiSection = `<div class="ai-section ai-section-blocked"><div class="ai-section-icon">⏸</div><div class="ai-section-title">Daily limit reached</div><div class="ai-section-desc">You've used all 20 AI analyses for today. Limit resets at midnight IST.<br/><span style="font-size:11px;color:var(--text-faint);">USAGE: ${rateInfo.used} / ${rateInfo.limit}</span></div></div>`;
   } else {
@@ -1938,11 +2110,30 @@ async function requestAIAnalysis(symbol, name) {
     incrementAIUsage();
     setAICacheEntry(symbol, name, data.analysis);
     const cached = getAICacheEntry(symbol);
-    slot.innerHTML = renderAIVerdictHtml(cached);
+    slot.innerHTML = renderAIVerdictHtml(cached) + buildWatchlistSaveBtn(cached, symbol, name);
   } catch (err) {
     console.error('AI analysis failed:', err);
     slot.innerHTML = `<div class="ai-section ai-section-error"><div class="ai-section-icon">⚠</div><div class="ai-section-title">Could not reach Kunal's AI</div><div class="ai-section-desc">Try again in a moment.<br/><span style="font-size:10px;color:var(--text-faint);">${escHtml(err.message || 'Unknown error')}</span></div><button class="ai-button" onclick="requestAIAnalysis('${escHtml(symbol)}', '${escHtml(name)}')" style="margin-top:14px;"><span>↻</span> Try again</button></div>`;
   }
+}
+
+function buildWatchlistSaveBtn(entry, symbol, name) {
+  if (!entry || !entry.analysis) return '';
+  const a = entry.analysis;
+  const isHigh = (a.conviction || '').toUpperCase().includes('HIGH');
+  if (!isHigh) return '';
+  const already = isInWatchlist(symbol);
+  if (already) return `<div style="margin-top:10px;font-size:11px;color:var(--up);letter-spacing:0.1em;text-transform:uppercase;">✓ SAVED TO WATCHLIST</div>`;
+  const q = PRICE_CACHE.get(symbol);
+  const item = {
+    ticker: symbol, name: name || symbol,
+    verdict: a.conviction || '',
+    analysed_at: new Date().toISOString(),
+    thesis_snippet: (a.thesis || '').slice(0, 150),
+    current_price: q ? q.price : null
+  };
+  const itemJson = escHtml(JSON.stringify(item));
+  return `<button class="hud-btn" style="margin-top:10px;border-color:var(--gold);color:var(--gold);" onclick="saveToWatchlist(${itemJson});this.textContent='SAVED ✓';this.disabled=true;">★ Save to Watchlist</button>`;
 }
 </script>
 </body>
