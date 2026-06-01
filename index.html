@@ -627,7 +627,7 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
   gap:8px;background:transparent;border:none;
 }
 @media(min-width:480px){.macro-grid{grid-template-columns:repeat(4,1fr);}}
-@media(min-width:900px){.macro-grid{grid-template-columns:repeat(8,1fr);}}
+@media(min-width:900px){.macro-grid{grid-template-columns:repeat(8,minmax(100px,1fr));}}
 .macro-cell{
   position:relative;padding:14px 12px;min-height:90px;overflow:hidden;
   display:flex;flex-direction:column;justify-content:space-between;
@@ -642,11 +642,9 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
 .macro-cell .label{font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-faint);font-weight:500;margin-bottom:4px;}
 .macro-cell .val{
   font-family:'JetBrains Mono',monospace;font-weight:900;
-  font-size:20px;color:var(--text);line-height:1.1;
+  font-size:clamp(14px,2vw,24px);color:var(--text);line-height:1.1;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-@media(min-width:768px){.macro-cell .val{font-size:22px;}}
-@media(min-width:1200px){.macro-cell .val{font-size:26px;}}
 .macro-cell .delta{font-size:11px;margin-top:4px;letter-spacing:0.02em;}
 .macro-cell.positive::after{
   content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
@@ -757,6 +755,17 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
   </div>
 </div>
 
+<!-- MACRO PULSE -->
+<section id="macro">
+  <div class="wrap">
+    <div class="hud-section-head">
+      <div class="hud-label">◈ Macro Pulse</div>
+      <div style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);text-transform:uppercase;">Updated live</div>
+    </div>
+    <div class="macro-grid" id="macro-grid"></div>
+  </div>
+</section>
+
 <!-- VERDICTS -->
 <section id="verdicts">
   <div class="wrap">
@@ -767,20 +776,6 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
     <div class="verdict-tabs" role="tablist" id="verdict-tabs"></div>
     <div class="stock-grid" id="stock-grid"></div>
     <div id="universe-container"></div>
-  </div>
-</section>
-
-<!-- MACRO PULSE -->
-<section id="macro">
-  <div class="wrap">
-    <div class="hud-section-head">
-      <div>
-        <div class="hud-label">◈ Macro Pulse</div>
-        <p class="macro-narrative-text" id="macro-narrative">—</p>
-      </div>
-      <div style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);text-transform:uppercase;">Updated live</div>
-    </div>
-    <div class="macro-grid" id="macro-grid"></div>
   </div>
 </section>
 
@@ -1749,7 +1744,7 @@ async function loadData() {
     if (!r.ok) throw new Error('fetch failed');
     DATA = await r.json();
     const narr = document.getElementById('macro-narrative');
-    if (narr) narr.textContent = DATA.macroNarrative || '';
+    // if (narr) narr.textContent = DATA.macroNarrative || ''; // narrative removed from UI
   } catch (e) {
     console.error('Failed to load data.json', e);
     const narr = document.getElementById('macro-narrative');
