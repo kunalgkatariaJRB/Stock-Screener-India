@@ -720,6 +720,63 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
   .brand .mark-sym{font-size:16px;}
   #topbar{height:52px;}
 }
+
+@keyframes flash-green {
+  0% { color:var(--up); text-shadow:0 0 12px var(--up); }
+  100% { color:var(--text); text-shadow:none; }
+}
+@keyframes flash-red {
+  0% { color:var(--down); text-shadow:0 0 12px var(--down); }
+  100% { color:var(--text); text-shadow:none; }
+}
+.price-flash-up { animation:flash-green 1.2s ease-out forwards; }
+.price-flash-down { animation:flash-red 1.2s ease-out forwards; }
+
+@keyframes gold-breathe {
+  0%,100% { box-shadow:0 0 8px rgba(255,215,0,0.2),inset 0 0 8px rgba(255,215,0,0.05); }
+  50% { box-shadow:0 0 24px rgba(255,215,0,0.5),inset 0 0 16px rgba(255,215,0,0.1); }
+}
+.stock-card.conviction-card { animation:gold-breathe 3s ease-in-out infinite; }
+
+@keyframes grid-pulse {
+  0%,100% { opacity:0.4; }
+  50% { opacity:0.9; }
+}
+.macro-section { position:relative; overflow:hidden; }
+.macro-section::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.05) 1px, transparent 1px);
+  background-size:30px 30px;
+  animation:grid-pulse 4s ease-in-out infinite;
+  pointer-events:none;
+  z-index:0;
+}
+.macro-grid { position:relative; z-index:1; }
+
+@keyframes count-up {
+  from { opacity:0; transform:translateY(4px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.macro-cell .val { animation:count-up 0.4s ease; }
+
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.07) 2px,
+    rgba(0,0,0,0.07) 4px
+  );
+  pointer-events:none;
+  z-index:9998;
+}
 </style>
 </head>
 <body>
@@ -1154,7 +1211,7 @@ async function refreshMacro() {
     const q = await fetchQuote(t.key);
     if (!q) { valEl.innerHTML = '—'; dltEl.textContent = 'unavailable'; dltEl.className = 'delta flat'; return; }
     const unit = t.unit ? `${t.unit} ` : '';
-    valEl.textContent = `${unit}${fmtN(q.price)}`;
+    animateValue(valEl, q.price, unit);
     dltEl.textContent = fmtChange(q.change, q.changePct);
     dltEl.className = `delta ${toneClass(q.change)}`;
     const cell = valEl.closest('.macro-cell');
@@ -1557,7 +1614,7 @@ function renderStocks() {
           <span class="verdict-tag ${def.tag}" style="margin:0;flex-shrink:0;">${def.accent} · ${escHtml(s.conviction)}</span>
         </div>
         <div class="card-line-2">
-          <span class="card-price" id="px-${s.symbol}"><span class="skel" style="width:80px;height:18px;"></span></span>
+          <span class="card-price" id="px-${s.symbol}">${s.lastPrice != null ? '₹' + fmtN(s.lastPrice) : '—'}</span>
           <span class="card-chg" id="dlt-${s.symbol}">—</span>
           ${s.yoyChange != null ? `<span class="card-yoy">${escHtml(String(s.yoyChange))}</span>` : ''}
         </div>
@@ -1654,30 +1711,65 @@ function renderCardAIHtml(entry, symbol, name) {
   </div>`;
 }
 
-async function refreshStockPrices() {
-  const allLists = ['conviction','longBets','watchClose','trimAvoid','highPromise'];
-  const all = allLists.flatMap(k => (DATA?.stocks?.[k]) || []);
-  const chunk = 5;
-  for (let i=0; i<all.length; i+=chunk) {
-    const slice = all.slice(i, i+chunk);
-    await Promise.all(slice.map(async s => {
-      const q = await fetchQuote(s.symbol);
-      const px = document.getElementById('px-'+s.symbol);
-      const dl = document.getElementById('dlt-'+s.symbol);
-      const st = document.getElementById('st-'+s.symbol);
-      if (!px) return;
-      if (!q) { px.textContent = '—'; if (dl) dl.textContent = 'unavailable'; return; }
-      px.textContent = `₹ ${fmtN(q.price)}`;
-      if (dl) {
-        const sign = q.changePct > 0 ? '+' : '';
-        dl.textContent = `${sign}${q.changePct != null ? q.changePct.toFixed(2) : '—'}%`;
-        dl.className = 'card-chg ' + (q.change > 0 ? 'up' : q.change < 0 ? 'down' : '');
-      }
-      if (st && q.marketState && (q.marketState === 'POST' || q.marketState === 'POSTPOST' || q.marketState === 'CLOSED')) {
-        st.textContent = 'as of last close';
-      } else if (st) { st.textContent = ''; }
-    }));
+function animateValue(el, target, prefix='', decimals=2) {
+  const duration = 600;
+  const start = performance.now();
+  const update = (now) => {
+    const p = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = prefix + (eased * target).toLocaleString('en-IN',
+      {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+    if (p < 1) requestAnimationFrame(update);
+  };
+  requestAnimationFrame(update);
+}
+
+function updatePriceElement(el, newPrice, oldPrice) {
+  el.textContent = '₹' + newPrice.toLocaleString('en-IN',
+    {minimumFractionDigits:2, maximumFractionDigits:2});
+  const cls = newPrice >= oldPrice ? 'price-flash-up' : 'price-flash-down';
+  el.classList.remove('price-flash-up', 'price-flash-down');
+  void el.offsetWidth;
+  el.classList.add(cls);
+  setTimeout(() => el.classList.remove(cls), 1200);
+}
+
+async function fetchAndUpdateSinglePrice(s) {
+  const q = await fetchQuote(s.symbol);
+  const px = document.getElementById('px-' + s.symbol);
+  const dl = document.getElementById('dlt-' + s.symbol);
+  if (!px) return;
+  if (!q) { px.textContent = '—'; if (dl) dl.textContent = 'unavailable'; return; }
+  const currentText = px.textContent.trim();
+  const isFirstLoad = currentText === '—' || currentText === '';
+  const oldPrice = isFirstLoad ? q.price : (parseFloat(currentText.replace(/[₹,\s]/g, '')) || q.price);
+  if (isFirstLoad) {
+    animateValue(px, q.price, '₹');
+  } else {
+    updatePriceElement(px, q.price, oldPrice);
   }
+  if (dl) {
+    const sign = q.changePct > 0 ? '+' : '';
+    dl.textContent = `${sign}${q.changePct != null ? q.changePct.toFixed(2) : '—'}%`;
+    dl.className = 'card-chg ' + (q.change > 0 ? 'up' : q.change < 0 ? 'down' : '');
+  }
+}
+
+async function fetchAllPricesInBatches(stocks) {
+  const BATCH = 5;
+  for (let i = 0; i < stocks.length; i += BATCH) {
+    const batch = stocks.slice(i, i + BATCH);
+    await Promise.all(batch.map(s => fetchAndUpdateSinglePrice(s)));
+    if (i + BATCH < stocks.length) {
+      await new Promise(r => setTimeout(r, 400));
+    }
+  }
+}
+
+async function refreshStockPrices() {
+  const allLists = ['conviction', 'longBets', 'watchClose', 'trimAvoid', 'highPromise'];
+  const all = allLists.flatMap(k => (DATA?.stocks?.[k]) || []);
+  await fetchAllPricesInBatches(all);
 }
 
 /* =========================================================
