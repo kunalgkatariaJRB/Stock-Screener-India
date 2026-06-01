@@ -968,41 +968,20 @@ const CORS_PROXIES = [
 const PRICE_CACHE = new Map();
 
 async function fetchQuote(symbol) {
-  const yahoo = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=2d`;
-  for (const wrap of CORS_PROXIES) {
-    try {
-      const res = await fetch(wrap(yahoo), { cache: 'no-cache' });
-      if (!res.ok) continue;
-      const txt = await res.text();
-      let json;
-      try { json = JSON.parse(txt); } catch { continue; }
-      const r = json && json.chart && json.chart.result && json.chart.result[0];
-      if (!r || !r.meta) continue;
-      const m = r.meta;
-      const price = m.regularMarketPrice ?? null;
-      const prev = m.chartPreviousClose ?? m.previousClose ?? null;
-      if (price == null || prev == null) continue;
-      const out = {
-        price, prevClose: prev,
-        change: price - prev,
-        changePct: ((price - prev) / prev) * 100,
-        currency: m.currency || 'INR',
-        marketState: m.marketState || 'UNKNOWN',
-        fiftyTwoWeekHigh: m.fiftyTwoWeekHigh ?? null,
-        fiftyTwoWeekLow: m.fiftyTwoWeekLow ?? null,
-        regularMarketDayHigh: m.regularMarketDayHigh ?? null,
-        regularMarketDayLow: m.regularMarketDayLow ?? null,
-        regularMarketVolume: m.regularMarketVolume ?? null,
-        exchangeName: m.exchangeName ?? null,
-        instrumentType: m.instrumentType ?? null,
-        symbol: m.symbol ?? symbol,
-        ts: Date.now()
-      };
-      PRICE_CACHE.set(symbol, out);
-      return out;
-    } catch (e) { /* try next proxy */ }
+  try {
+    const res = await fetch(
+      `${AI_WORKER_URL}/quote?symbol=${encodeURIComponent(symbol)}`,
+      { cache: 'no-cache' }
+    );
+    if (!res.ok) throw new Error('Worker ' + res.status);
+    const out = await res.json();
+    if (out.error) throw new Error(out.error);
+    out.ts = Date.now();
+    PRICE_CACHE.set(symbol, out);
+    return out;
+  } catch (e) {
+    return PRICE_CACHE.get(symbol) || null;
   }
-  return PRICE_CACHE.get(symbol) || null;
 }
 
 const fmtN = (n, d=2) => {
