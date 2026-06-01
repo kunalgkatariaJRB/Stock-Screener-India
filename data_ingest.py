@@ -106,6 +106,11 @@ def normalize_stock(row: dict, tier: str) -> dict:
     # Use NSE Code directly from Screener — far more reliable than name lookup
     nse_code = str(row.get('NSE Code', '') or '').strip()
     bse_code = str(row.get('BSE Code', '') or '').strip()
+    if bse_code and bse_code not in ('nan', '0', ''):
+        try:
+            bse_code = str(int(float(bse_code))).zfill(6)
+        except (ValueError, TypeError):
+            pass
 
     if nse_code and nse_code not in ('nan', '0', ''):
         symbol = nse_code + '.NS'
@@ -154,6 +159,29 @@ def normalize_stock(row: dict, tier: str) -> dict:
         "caution_note":    None,
         "symbol_resolved": symbol_resolved,
     }
+
+    # Fix B — TTM staleness flag
+    stale = False
+    if stock.get('ttm_result_date'):
+        try:
+            import datetime as _dt
+            date_str = str(int(float(str(stock['ttm_result_date'])))).zfill(6)
+            year, month = int(date_str[:4]), int(date_str[4:6])
+            result_date = _dt.date(year, month, 1)
+            stale = (_dt.date.today() - result_date).days > 180
+        except Exception:
+            pass
+    stock['data_stale'] = stale
+
+    # Fix C — EPS deterioration flag
+    eps_det = False
+    if stock.get('eps_ttm') and stock.get('eps_latest_qtr'):
+        try:
+            if float(stock['eps_latest_qtr']) < (float(stock['eps_ttm']) / 4) * 0.7:
+                eps_det = True
+        except Exception:
+            pass
+    stock['eps_deteriorating'] = eps_det
 
     return stock
 
