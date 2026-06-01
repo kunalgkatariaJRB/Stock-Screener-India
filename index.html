@@ -78,6 +78,10 @@ body::before{
   text-shadow:0 0 20px var(--electric-glow);
 }
 .brand .mark-sym{color:var(--gold);font-size:20px;text-shadow:0 0 15px var(--gold-glow);}
+.logo-symbol{color:var(--electric);text-shadow:0 0 12px rgba(0,212,255,0.8);margin-right:8px;}
+.cursor-blink{animation:blink 1.2s step-end infinite;color:var(--electric);display:none;}
+@media(min-width:768px){.cursor-blink{display:inline;}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
 .topbar-search{
   flex:1;min-width:0;max-width:400px;position:relative;
 }
@@ -585,6 +589,67 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
 }
 #mobile-search-results{flex:1;overflow-y:auto;}
 
+/* ===== NEW COMPACT STOCK CARDS ===== */
+.stock-grid{
+  display:flex;flex-direction:column;gap:1px;
+  background:var(--border);border:1px solid var(--border);
+}
+.stock-card{
+  background:var(--void-2);position:relative;
+}
+.stock-card-collapsed{
+  padding:14px 16px;min-height:72px;
+  display:flex;flex-direction:column;justify-content:center;gap:6px;
+  cursor:pointer;
+}
+.card-line-1{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.card-line-2{display:flex;align-items:center;gap:12px;}
+.card-sector-tag{
+  font-family:'Orbitron',monospace;font-size:8px;letter-spacing:0.15em;
+  color:var(--electric);text-transform:uppercase;margin-right:6px;flex-shrink:0;
+}
+.card-title{
+  font-family:'Orbitron',monospace;font-size:15px;font-weight:700;color:var(--text);
+  flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.card-price{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:var(--text);}
+.card-chg{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;}
+.card-chg.up{color:var(--up);}
+.card-chg.down{color:var(--down);}
+.card-yoy{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-faint);margin-left:auto;}
+.card-expand-btn{
+  position:absolute;bottom:8px;right:12px;font-size:10px;color:var(--text-faint);
+  background:transparent;border:none;cursor:pointer;font-family:'Orbitron',monospace;
+  letter-spacing:0.05em;padding:0;transition:color 0.2s;
+}
+.card-expand-btn:hover{color:var(--electric);}
+.stock-card.expanded .card-expand-btn{color:var(--electric);}
+.card-detail{
+  display:none;padding:0 16px 16px;
+  border-top:1px solid var(--border);margin-top:8px;
+}
+.stock-card.expanded .card-detail{display:block;}
+/* Conviction/avoid left border */
+.stock-card.conviction-card{border-left:2px solid var(--gold);}
+.stock-card.conviction-card .stock-card-collapsed::before{
+  content:'';position:absolute;top:0;left:0;width:20px;height:20px;
+  border-top:2.5px solid var(--gold);border-left:2.5px solid var(--gold);
+  box-shadow:-2px -2px 8px rgba(255,215,0,0.3);pointer-events:none;
+}
+.stock-card.avoid-card{border-left:2px solid var(--down);}
+/* ===== MACRO TILE GLOW ===== */
+.macro-cell{position:relative;}
+.macro-cell.positive::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--up);box-shadow:0 0 8px var(--up);
+}
+.macro-cell.negative::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--down);box-shadow:0 0 8px var(--down);
+}
+.macro-cell .label{font-size:8px;letter-spacing:0.2em;}
+.macro-cell .val{font-size:26px;font-weight:900;}
+@media(min-width:768px){.macro-cell .val{font-size:32px;}}
 /* ===== RESPONSIVE ===== */
 @media(max-width:1100px){
   .macro-grid{grid-template-columns:repeat(4,1fr);}
@@ -622,8 +687,8 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
 <!-- TOPBAR -->
 <div id="topbar">
   <div class="brand">
-    <span class="mark-sym">◈</span>
-    <span>Heritage Ledger</span>
+    <span class="mark-sym logo-symbol">◈</span>
+    <span>THE HERITAGE LEDGER<span class="cursor-blink">_</span></span>
   </div>
   <div class="topbar-search">
     <span class="search-icon">⌕</span>
@@ -651,20 +716,6 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
   </div>
 </div>
 
-<!-- MACRO PULSE -->
-<section id="macro">
-  <div class="wrap">
-    <div class="hud-section-head">
-      <div>
-        <div class="hud-label">◈ Macro Pulse</div>
-        <p class="macro-narrative-text" id="macro-narrative">—</p>
-      </div>
-      <div style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);text-transform:uppercase;">Updated live</div>
-    </div>
-    <div class="macro-grid" id="macro-grid"></div>
-  </div>
-</section>
-
 <!-- VERDICTS -->
 <section id="verdicts">
   <div class="wrap">
@@ -687,6 +738,20 @@ footer{padding:40px 0 60px;border-top:1px solid var(--border);}
     </div>
     <div class="compass-rose" id="compass-rose"></div>
     <div class="compass-grid" id="compass-grid"></div>
+  </div>
+</section>
+
+<!-- MACRO PULSE -->
+<section id="macro">
+  <div class="wrap">
+    <div class="hud-section-head">
+      <div>
+        <div class="hud-label">◈ Macro Pulse</div>
+        <p class="macro-narrative-text" id="macro-narrative">—</p>
+      </div>
+      <div style="font-size:9px;letter-spacing:0.18em;color:var(--text-faint);text-transform:uppercase;">Updated live</div>
+    </div>
+    <div class="macro-grid" id="macro-grid"></div>
   </div>
 </section>
 
@@ -1057,6 +1122,8 @@ async function refreshMacro() {
     valEl.textContent = `${unit}${fmtN(q.price)}`;
     dltEl.textContent = fmtChange(q.change, q.changePct);
     dltEl.className = `delta ${toneClass(q.change)}`;
+    const cell = valEl.closest('.macro-cell');
+    if (cell) { cell.classList.toggle('positive', q.change > 0); cell.classList.toggle('negative', q.change < 0); }
   }));
   const nifty = PRICE_CACHE.get('^NSEI');
   const dot = document.getElementById('market-dot');
@@ -1361,45 +1428,59 @@ function renderStocks() {
   const def = TAB_DEFS.find(d => d.id === activeTab);
   if (!def) return;
   const list = (DATA?.stocks?.[activeTab]) || [];
+  const isConviction = def.id === 'conviction';
+  const isAvoid = def.id === 'trimAvoid';
   grid.innerHTML = list.map(s => {
     const f = s.fundamentals || {};
     const rsiVal = DATA?.rsi?.[s.symbol] ?? null;
+    const cardClass = isConviction ? 'conviction-card' : isAvoid ? 'avoid-card' : '';
     return `
-    <article class="card" data-symbol="${s.symbol}" onclick="openStockModal('${s.symbol}','${escHtml(s.name)}')">
-      <div class="card-stripe stripe-${def.stripe}"></div>
-      <div class="card-head">
-        <div>
-          <div class="card-sector">${s.sector}</div>
-          <h3 class="card-name">${s.name}</h3>
-          <div class="card-ticker">${s.ticker} · NSE</div>
+    <article class="stock-card ${cardClass}" data-symbol="${s.symbol}">
+      <div class="stock-card-collapsed" onclick="toggleCard('${s.symbol}')">
+        <div class="card-line-1">
+          <span class="card-sector-tag">${escHtml(s.sector)}</span>
+          <span class="card-title">${escHtml(s.name)}</span>
+          <span class="verdict-tag ${def.tag}" style="margin:0;flex-shrink:0;">${def.accent} · ${escHtml(s.conviction)}</span>
         </div>
-        <div class="price-block">
-          <div class="price-main" id="px-${s.symbol}"><span class="skel"></span></div>
-          <div class="price-delta flat" id="dlt-${s.symbol}">—</div>
-          <div class="price-stale" id="st-${s.symbol}"></div>
+        <div class="card-line-2">
+          <span class="card-price" id="px-${s.symbol}"><span class="skel" style="width:80px;height:18px;"></span></span>
+          <span class="card-chg" id="dlt-${s.symbol}">—</span>
+          ${s.yoyChange != null ? `<span class="card-yoy">${escHtml(String(s.yoyChange))}</span>` : ''}
         </div>
       </div>
-      <span class="verdict-tag ${def.tag}">${def.accent} · ${s.conviction}</span>
-      <p class="thesis">${s.thesis}</p>
-      <div class="fundamentals">
-        <div class="fund-cell"><div class="lbl">P/E</div><div class="v">${typeof f.pe === 'number' ? fmtN(f.pe, 1) : (f.pe || '—')}</div></div>
-        <div class="fund-cell"><div class="lbl">P/B</div><div class="v">${typeof f.pb === 'number' ? fmtN(f.pb, 1) : (f.pb || '—')}</div></div>
-        <div class="fund-cell"><div class="lbl">ROE</div><div class="v">${typeof f.roe === 'number' ? fmtN(f.roe, 1) + '%' : (f.roe || '—')}</div></div>
-        <div class="fund-cell"><div class="lbl">Div Yld</div><div class="v">${typeof f.div === 'number' ? fmtN(f.div, 1) + '%' : (f.div || '—')}</div></div>
+      <button class="card-expand-btn" onclick="toggleCard('${s.symbol}')">▶ MORE</button>
+      <div class="card-detail" id="cd-${s.symbol}">
+        <div style="padding-top:12px;">
+          <div class="card-ticker" style="font-size:10px;color:var(--text-faint);letter-spacing:0.08em;margin-bottom:10px;">${escHtml(s.ticker)} · NSE</div>
+          <p class="thesis">${escHtml(s.thesis)}</p>
+          <div class="fundamentals">
+            <div class="fund-cell"><div class="lbl">P/E</div><div class="v">${typeof f.pe === 'number' ? fmtN(f.pe, 1) : (f.pe || '—')}</div></div>
+            <div class="fund-cell"><div class="lbl">P/B</div><div class="v">${typeof f.pb === 'number' ? fmtN(f.pb, 1) : (f.pb || '—')}</div></div>
+            <div class="fund-cell"><div class="lbl">ROE</div><div class="v">${typeof f.roe === 'number' ? fmtN(f.roe, 1) + '%' : (f.roe || '—')}</div></div>
+            <div class="fund-cell"><div class="lbl">Div Yld</div><div class="v">${typeof f.div === 'number' ? fmtN(f.div, 1) + '%' : (f.div || '—')}</div></div>
+          </div>
+          <div class="card-foot">
+            <span class="foot-pill"><span class="dot"></span>Mcap · ${f.mcap || '—'}</span>
+            <span class="foot-pill"><span class="dot"></span>Horizon · ${s.horizon || '—'}</span>
+            ${renderRSIGauge(rsiVal)}
+          </div>
+          <button class="expand-toggle" onclick="event.stopPropagation();toggleDeep('${s.symbol}')">▶ Full thesis</button>
+          <div class="deep-dive" id="dd-${s.symbol}">
+            <div class="dd-section"><h5>What could go right</h5><ul>${(s.catalysts||[]).map(c => `<li>${escHtml(c)}</li>`).join('')}</ul></div>
+            <div class="dd-section"><h5>What could go wrong</h5><ul>${(s.risks||[]).map(r => `<li>${escHtml(r)}</li>`).join('')}</ul></div>
+          </div>
+          ${renderExitTargets(s, null)}
+          <button class="hud-btn" style="margin-top:12px;width:100%;justify-content:center;" onclick="openStockModal('${s.symbol}','${escHtml(s.name)}')">⚡ Full AI Analysis</button>
+        </div>
       </div>
-      <div class="card-foot">
-        <span class="foot-pill"><span class="dot"></span>Mcap · ${f.mcap || '—'}</span>
-        <span class="foot-pill"><span class="dot"></span>Horizon · ${s.horizon || '—'}</span>
-        ${renderRSIGauge(rsiVal)}
-      </div>
-      <button class="expand-toggle" onclick="event.stopPropagation();toggleDeep('${s.symbol}')">▶ Full thesis</button>
-      <div class="deep-dive" id="dd-${s.symbol}">
-        <div class="dd-section"><h5>What could go right</h5><ul>${(s.catalysts||[]).map(c => `<li>${c}</li>`).join('')}</ul></div>
-        <div class="dd-section"><h5>What could go wrong</h5><ul>${(s.risks||[]).map(r => `<li>${r}</li>`).join('')}</ul></div>
-      </div>
-      ${renderExitTargets(s, null)}
     </article>`;
   }).join('');
+}
+
+function toggleCard(sym) {
+  const card = document.querySelector(`.stock-card[data-symbol="${sym}"]`);
+  if (!card) return;
+  card.classList.toggle('expanded');
 }
 
 function toggleDeep(sym) {
@@ -1420,9 +1501,13 @@ async function refreshStockPrices() {
       const dl = document.getElementById('dlt-'+s.symbol);
       const st = document.getElementById('st-'+s.symbol);
       if (!px) return;
-      if (!q) { px.textContent = '—'; if (dl) dl.textContent = 'live data unavailable'; return; }
+      if (!q) { px.textContent = '—'; if (dl) dl.textContent = 'unavailable'; return; }
       px.textContent = `₹ ${fmtN(q.price)}`;
-      if (dl) { dl.textContent = fmtChange(q.change, q.changePct); dl.className = 'price-delta ' + toneClass(q.change); }
+      if (dl) {
+        const sign = q.changePct > 0 ? '+' : '';
+        dl.textContent = `${sign}${q.changePct != null ? q.changePct.toFixed(2) : '—'}%`;
+        dl.className = 'card-chg ' + (q.change > 0 ? 'up' : q.change < 0 ? 'down' : '');
+      }
       if (st && q.marketState && (q.marketState === 'POST' || q.marketState === 'POSTPOST' || q.marketState === 'CLOSED')) {
         st.textContent = 'as of last close';
       } else if (st) { st.textContent = ''; }
@@ -1522,6 +1607,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initStockModal();
   initMobileSearch();
   initPortfolioUpload();
+  setInterval(stamp, 60000);
   setInterval(() => {
     if (document.visibilityState === 'visible') refreshAll();
   }, 5 * 60 * 1000);
