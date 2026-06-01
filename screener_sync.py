@@ -26,9 +26,9 @@ SCREEN_MAP = {
     "screen_4b_leverage.csv":            "3695223",
     "screen_4c_declining.csv":           "3695224",
     "screen_4d_promoter.csv":            "3695226",
-    "screen_5_early_quality.csv":        "REPLACE_WITH_SCREEN_5_ID",
-    "screen_6_emerging_compounders.csv": "REPLACE_WITH_SCREEN_6_ID",
-    "screen_7_inflection_watch.csv":     "REPLACE_WITH_SCREEN_7_ID",
+    "screen_5_early_quality.csv":        "3696139",
+    "screen_6_emerging_compounders.csv": "3696145",
+    "screen_7_inflection_watch.csv":     "3696147",
 }
 
 
