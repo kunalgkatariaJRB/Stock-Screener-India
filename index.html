@@ -1454,33 +1454,60 @@ function splitCSVLine(line) {
 }
 
 function parseHoldingsCSV(text) {
-  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
-  if (lines.length < 2) return [];
-  const headerFields = splitCSVLine(lines[0]).map(c => c.toLowerCase());
+  const allLines = text.trim().split(/\r?\n/);
+
+  /* Find the actual header row — first row with 2+ non-empty fields
+     that contains at least one recognisable column keyword.
+     This skips broker title rows, blank rows, and leading empty rows. */
+  const NAME_WORDS = ['name','stock','scrip','instrument','symbol'];
+  const QTY_WORDS  = ['qty','quantity','shares','units'];
+  const PRICE_WORDS = ['avg','average','cost','rate','purchase','price'];
+
+  let headerIdx = -1;
   let ni = -1, qi = -1, pi = -1;
-  headerFields.forEach((c, i) => {
-    if (ni < 0 && (c.includes('name') || c.includes('stock') ||
-      c.includes('scrip') || c.includes('instrument') || c.includes('symbol'))) ni = i;
-    if (qi < 0 && (c.includes('qty') || c.includes('quantity') ||
-      c.includes('shares') || c.includes('units'))) qi = i;
-    if (pi < 0 && (c.includes('avg') || c.includes('cost') ||
-      c.includes('rate') || c.includes('purchase'))) pi = i;
-    /* fallback: "price" header only if avg/cost not found */
-  });
-  /* second pass for 'price' if pi still not found */
-  if (pi < 0) headerFields.forEach((c, i) => {
-    if (pi < 0 && c.includes('price')) pi = i;
-  });
-  if (ni < 0) ni = 0;
-  if (qi < 0) qi = 1;
-  if (pi < 0) pi = 2;
-  return lines.slice(1).map(line => {
+
+  for (let li = 0; li < allLines.length; li++) {
+    const fields = splitCSVLine(allLines[li]).map(c => c.toLowerCase().trim());
+    const nonEmpty = fields.filter(f => f.length > 0);
+    if (nonEmpty.length < 2) continue;           // skip blank / single-field rows
+
+    /* Check if this row looks like a header */
+    let tmpNi = -1, tmpQi = -1, tmpPi = -1;
+    fields.forEach((c, i) => {
+      if (tmpNi < 0 && NAME_WORDS.some(w => c.includes(w)))  tmpNi = i;
+      if (tmpQi < 0 && QTY_WORDS.some(w => c.includes(w)))   tmpQi = i;
+      if (tmpPi < 0 && PRICE_WORDS.some(w => c.includes(w))) tmpPi = i;
+    });
+
+    /* Accept this row as header if at least 2 of 3 columns were found */
+    if ([tmpNi, tmpQi, tmpPi].filter(x => x >= 0).length >= 2) {
+      headerIdx = li;
+      ni = tmpNi; qi = tmpQi; pi = tmpPi;
+      break;
+    }
+  }
+
+  /* No header found — nothing useful to parse */
+  if (headerIdx < 0) return [];
+
+  /* Apply positional fallbacks only for the non-header columns,
+     relative to the first non-empty column in the header row. */
+  const headerFields = splitCSVLine(allLines[headerIdx]).map(c => c.trim());
+  const firstNonEmpty = headerFields.findIndex(f => f.length > 0);
+  const base = firstNonEmpty >= 0 ? firstNonEmpty : 0;
+  if (ni < 0) ni = base;
+  if (qi < 0) qi = base + 1;
+  if (pi < 0) pi = base + 2;
+
+  /* Parse data rows */
+  return allLines.slice(headerIdx + 1).map(line => {
+    if (!line.trim()) return null;
     const p = splitCSVLine(line);
-    const name = (p[ni] || '').replace(/"/g, '').trim();
+    const name = (p[ni] || '').trim();
     const qty  = parseFloat((p[qi] || '0').replace(/[^0-9.]/g, '')) || 0;
     const avg  = parseFloat((p[pi] || '0').replace(/[^0-9.]/g, '')) || 0;
     return { name, qty, avgPrice: avg };
-  }).filter(h => h.name && h.name.length > 1 && h.qty > 0);
+  }).filter(h => h && h.name && h.name.length > 1 && h.qty > 0);
 }
 function parseCSVPortfolio(text) { return parseHoldingsCSV(text); }
 
