@@ -171,6 +171,62 @@ def fetch_quote(symbol: str) -> dict | None:
     return None
 
 
+def fetch_ledger_stock(symbol: str) -> tuple:
+    """
+    Single Yahoo Finance call returning (price_dict, rsi14) for a ledger stock.
+    Uses the 30d chart endpoint so one HTTP call yields both price and RSI.
+    NEVER passed to Claude — stored in data.json for frontend display only.
+    """
+    for host in ["query1", "query2"]:
+        url = (f"https://{host}.finance.yahoo.com/v8/finance/chart/"
+               f"{quote(symbol)}?interval=1d&range=30d")
+        body = http_get(url)
+        if not body:
+            continue
+        try:
+            j = json.loads(body)
+            r = j["chart"]["result"][0]
+            m = r["meta"]
+
+            # Price from meta
+            price = m.get("regularMarketPrice")
+            prev  = m.get("chartPreviousClose") or m.get("previousClose")
+            price_dict = None
+            if price is not None and prev is not None:
+                change     = float(price) - float(prev)
+                change_pct = change / float(prev) * 100
+                price_dict = {
+                    "price":      round(float(price), 2),
+                    "change":     round(change, 2),
+                    "change_pct": round(change_pct, 2),
+                    "prev_close": round(float(prev), 2),
+                    "source":     f"Yahoo/{host}",
+                }
+
+            # RSI-14 from 30d closes
+            closes = r["indicators"]["quote"][0]["close"]
+            closes = [c for c in closes if c is not None][-15:]
+            rsi_val = None
+            if len(closes) >= 14:
+                gains, losses = [], []
+                for i in range(1, len(closes)):
+                    d = closes[i] - closes[i - 1]
+                    gains.append(max(d, 0))
+                    losses.append(max(-d, 0))
+                avg_gain = sum(gains) / len(gains) if gains else 0
+                avg_loss = sum(losses) / len(losses) if losses else 0
+                if avg_loss == 0:
+                    rsi_val = 100.0
+                else:
+                    rs = avg_gain / avg_loss
+                    rsi_val = round(100 - (100 / (1 + rs)), 1)
+
+            return price_dict, rsi_val
+        except Exception:
+            continue
+    return None, None
+
+
 def fetch_rsi14(symbol: str) -> float | None:
     """
     Calculate RSI-14 from last 15 daily closes via Yahoo Finance.
@@ -667,10 +723,25 @@ STOCK LISTS REQUIRED
 conviction (8-12), longBets (6-10), highPromise (3-6),
 watchClose (4-7), trimAvoid (3-6)
 
-Each stock needs: symbol, ticker, name, sector, thesis, catalysts (list),
-risks (list), fundamentals (pe, pb, roe, div, mcap), horizon,
-conviction, verdict, exit_targets, position_size, trigger_alert,
-selection_rationale (conviction and longBets only)
+Each stock MUST include ALL of these fields (no exceptions):
+  symbol, ticker, name, sector,
+  stance (REQUIRED — "pos" | "neu" | "neg"),
+  thesis, catalysts (list), risks (list),
+  fundamentals {{pe, pb, roe, div, mcap}},
+  horizon, conviction, verdict,
+  exit_targets (REQUIRED for conviction + longBets — never empty {{}}),
+  position_size (REQUIRED for conviction + longBets),
+  trigger_alert,
+  selection_rationale (conviction and longBets only)
+
+stance drives the frontend badge color — it is MANDATORY:
+  pos = you are constructive / buying
+  neg = you are avoiding / trimming
+  neu = you are watching / holding
+
+exit_targets for conviction/longBets must have:
+  entry_zone_max, fair_value, target_1, target_2, full_exit (all as ₹ numbers)
+  Set to null only if quality_flag is AVOID.
 
 macroNarrative: 3 sentences.
 whispers: 5-7 themes including benchmark comparison once weekly.
@@ -819,9 +890,10 @@ def main():
     total_fetched = yahoo_ok + nse_ok
     print(f"  ✓ Prices: {total_fetched}/{len(price_stocks)} | Yahoo={yahoo_ok} NSE={nse_ok} skipped={skipped}")
 
-    # --- 4b. RSI fetch — ledger stocks only (NEVER goes into Claude prompts) ---
-    print(f"\n  Fetching RSI for ledger stocks only (faster)...")
+    # --- 4b. Price + RSI for ledger stocks — single HTTP call per stock ---
+    print(f"\n  Fetching price + RSI for ledger stocks (1 API call each)...")
     rsi_lookup = {}
+    ledger_price_lookup = {}
     ledger_stocks = []
     for bucket in ['conviction', 'longBets', 'highPromise', 'watchClose', 'trimAvoid']:
         ledger_stocks.extend(prev.get('stocks', {}).get(bucket, []))
@@ -830,15 +902,22 @@ def main():
         sym = s.get('symbol') or (s.get('ticker', '') + '.NS')
         if not sym:
             continue
-        rsi = fetch_rsi14(sym)
-        if rsi is not None:
-            rsi_lookup[sym] = rsi
-            rsi_lookup[sym.replace('.NS', '').replace('.BO', '')] = rsi
+        price_dict, rsi_val = fetch_ledger_stock(sym)
+        bare = sym.replace('.NS', '').replace('.BO', '')
+        if price_dict:
+            ledger_price_lookup[sym]  = price_dict
+            ledger_price_lookup[bare] = price_dict
+        if rsi_val is not None:
+            rsi_lookup[sym]  = rsi_val
+            rsi_lookup[bare] = rsi_val
         if (i + 1) % 10 == 0:
             time.sleep(1.0)
         else:
-            time.sleep(0.2)
-    print(f"  ✓ RSI: {len(rsi_lookup)} values fetched ({len(ledger_stocks)} ledger stocks)")
+            time.sleep(0.3)
+
+    price_hits = len([k for k in ledger_price_lookup if '.' in k])
+    rsi_hits   = len([k for k in rsi_lookup if '.' in k])
+    print(f"  ✓ Ledger prices: {price_hits}/{len(ledger_stocks)} | RSI: {rsi_hits}/{len(ledger_stocks)}")
 
     # --- 5. Claude client ---
     api_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -976,7 +1055,16 @@ def main():
     # --- 7. Write ---
     new_data["lastUpdated"] = today.isoformat()
     new_data["stocks"]["extendedUniverse"] = []
-    new_data["rsi"] = rsi_lookup   # frontend display only — never in Claude prompts
+    new_data["rsi"] = rsi_lookup           # frontend RSI display only
+    new_data["ledger_prices"] = ledger_price_lookup   # immediate price display for ledger cards
+    new_data["tier_prices"] = {            # prices for universe tab (already fetched, free)
+        sym: {
+            "price":      q["price"],
+            "change_pct": q.get("change_pct", 0),
+            "source":     q.get("source", "?"),
+        }
+        for sym, q in price_lookup.items()
+    }
     new_data["tiers"] = {
         "last_updated": today.isoformat(),
         "universe_source": "Screener.in Premium",

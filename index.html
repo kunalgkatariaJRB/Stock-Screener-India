@@ -1374,16 +1374,32 @@ function renderUniverse() {
     return Object.assign({}, item.s, { _tier: item.tier });
   });
 
+  const tp = DATA?.tier_prices || {};
+
   const rows = all.map(function(s) {
     const sd = s.screener_data || {}, et = s.exit_targets || {},
           f  = s.fundamentals  || {};
     const stance = s.stance || 'neu';
     const sc = stance === 'pos' ? 'var(--up)' :
                stance === 'neg' ? 'var(--down)' : 'var(--electric)';
-    const sym = (sd.symbol || s.symbol || '').replace(/'/g, "\\'");
-    const nm  = (s.name || '').replace(/'/g, "\\'");
+    const rawSym = sd.symbol || s.symbol || '';
+    const sym  = rawSym.replace(/'/g, "\\'");
+    const nm   = (s.name || '').replace(/'/g, "\\'");
+    const bare = rawSym.replace('.NS','').replace('.BO','');
     const roce = sd.roce || f.roe || '';
     const pe   = sd.pe   || f.pe  || '';
+    // Live price from tier_prices (free — already fetched during refresh)
+    const tpData = tp[rawSym] || tp[bare] || null;
+    const priceStr = tpData
+      ? '₹' + Number(tpData.price).toLocaleString('en-IN')
+      : '—';
+    const chgColor = tpData
+      ? (tpData.change_pct > 0 ? 'var(--up)' : tpData.change_pct < 0 ? 'var(--down)' : '#A0B4C8')
+      : '#6B7FA8';
+    const chgStr = tpData && tpData.change_pct != null
+      ? ' <span style="font-size:10px;color:' + chgColor + '">' +
+        (tpData.change_pct > 0 ? '+' : '') + Number(tpData.change_pct).toFixed(1) + '%</span>'
+      : '';
     return '<div style="display:grid;grid-template-columns:1fr auto;' +
       'gap:12px;align-items:center;padding:12px 16px;' +
       'border-bottom:1px solid rgba(0,212,255,0.08);' +
@@ -1407,13 +1423,14 @@ function renderUniverse() {
         '<span style="color:' + sc + ';font-family:var(--font-display);' +
           'font-size:10px;flex-shrink:0">' + stance.toUpperCase() + '</span>' +
       '</div>' +
-      '<div style="display:flex;gap:20px;flex-shrink:0;' +
-        'font-family:var(--font-data);font-size:12px;color:#A0B4C8">' +
+      '<div style="display:flex;gap:16px;flex-shrink:0;' +
+        'font-family:var(--font-data);font-size:12px;color:#A0B4C8;align-items:center">' +
         '<span>' + (roce ? Number(roce).toFixed(1) + '%' : '—') + '</span>' +
         '<span>' + (pe   ? Number(pe).toFixed(1)   + '×' : '—') + '</span>' +
-        '<span style="color:' + (et.entry_zone_max ? '#E8F4FD' : '#6B7FA8') + '">' +
+        '<span style="color:' + (tpData ? '#E8F4FD' : '#6B7FA8') + '">' + priceStr + chgStr + '</span>' +
+        '<span style="color:#4A5A78;font-size:10px">' +
           (et.entry_zone_max ?
-            '₹' + Number(et.entry_zone_max).toLocaleString('en-IN') : '—') +
+            'ENTRY ₹' + Number(et.entry_zone_max).toLocaleString('en-IN') : '—') +
         '</span>' +
       '</div>' +
     '</div>';
@@ -1427,8 +1444,8 @@ function renderUniverse() {
     '<div style="font-family:var(--font-display);font-size:9px;' +
     'letter-spacing:0.15em;color:#6B7FA8">STOCK / TIER / STANCE</div>' +
     '<div style="font-family:var(--font-display);font-size:9px;' +
-    'letter-spacing:0.15em;color:#6B7FA8;display:flex;gap:20px">' +
-    '<span>ROCE</span><span>P/E</span><span>ENTRY</span></div></div>' +
+    'letter-spacing:0.15em;color:#6B7FA8;display:flex;gap:16px">' +
+    '<span>ROCE</span><span>P/E</span><span>PRICE</span><span>ENTRY</span></div></div>' +
     rows + '</div>';
 }
 
@@ -1793,9 +1810,15 @@ function renderWatchlistTab() {
 /* =========================================================
    BADGE HELPERS (Fix 4)
    ========================================================= */
-function buildBadgeText(stock) {
+function buildBadgeText(stock, bucket) {
   const v = (stock.verdict || '').trim();
   const conviction = (stock.conviction || '').trim();
+
+  // For conviction/longBets: always lead with BUY
+  if (bucket === 'conviction' || bucket === 'longBets') {
+    const conv = conviction ? conviction.toUpperCase() : '';
+    return conv ? 'BUY · ' + conv : 'BUY';
+  }
 
   if (v && !v.includes('undefined') && !v.includes('null')) {
     const parts = v.split(/[\s·\-]+/).filter(Boolean);
@@ -1809,9 +1832,17 @@ function buildBadgeText(stock) {
   return conviction ? label + ' · ' + conviction.toUpperCase() : label;
 }
 
-function buildBadgeClass(stock) {
+function buildBadgeClass(stock, bucket) {
   const v = (stock.verdict || '').toLowerCase();
   const stance = stock.stance || 'neu';
+
+  // Conviction/longBets: minimum badge-buy, upgrade to conviction if warranted
+  if (bucket === 'conviction' || bucket === 'longBets') {
+    const conv = (stock.conviction || '').toUpperCase();
+    if (conv.includes('HIGH') || v.includes('conviction')) return 'badge-conviction';
+    return 'badge-buy';
+  }
+
   if (v.includes('conviction') || (stance === 'pos' && v.includes('high')))
     return 'badge-conviction';
   if (stance === 'pos' || v.includes('buy') || v.includes('constructive'))
@@ -1875,6 +1906,24 @@ function renderTabs() {
   }
 }
 
+function findStockInTiers(stockName, stockTicker) {
+  const tiers = DATA?.tiers || {};
+  const nameLow   = (stockName   || '').toLowerCase().trim();
+  const tickerLow = (stockTicker || '').toLowerCase().trim();
+  for (const key of ['compounders','multibaggers','special_situations',
+                      'early_quality','emerging_compounders','inflection_watch']) {
+    const arr = tiers[key] || [];
+    const match = arr.find(s => {
+      const sn = (s.name || '').toLowerCase();
+      const st = (s.screener_data?.ticker || s.ticker || '').toLowerCase();
+      return (nameLow && sn.includes(nameLow.slice(0,8))) ||
+             (tickerLow && st === tickerLow);
+    });
+    if (match) return match;
+  }
+  return null;
+}
+
 function renderStocks() {
   const grid = document.getElementById('stock-grid');
   const def = TAB_DEFS.find(d => d.id === activeTab);
@@ -1883,32 +1932,58 @@ function renderStocks() {
   grid.innerHTML = list.map(s => {
     const f = s.fundamentals || {};
     const sd = s.screener_data || {};
+
+    // Lookup stored price from last refresh (shows immediately, no API needed)
+    const lp = DATA?.ledger_prices;
+    const symKey = s.symbol || '';
+    const bareKey = symKey.replace('.NS','').replace('.BO','');
+    const lpData = lp ? (lp[symKey] || lp[bareKey] || null) : null;
+    const initPrice = lpData?.price || s.currentPrice || f.price || null;
+    const initChangePct = lpData?.change_pct ?? null;
+
+    // Tier cross-reference for exit_targets (conviction/longBets often lack them)
+    const tierMatch = findStockInTiers(s.name, s.ticker || sd.ticker);
+    const et = (s.exit_targets && Object.keys(s.exit_targets).length > 0)
+      ? s.exit_targets
+      : (tierMatch?.exit_targets || {});
+
+    // Price-vs-entry zone indicator
+    let zoneIndicator = '';
+    if (initPrice && et.entry_zone_max) {
+      if (initPrice <= et.entry_zone_max) {
+        zoneIndicator = '<span title="Price ≤ entry zone — buy zone ✓" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--up);box-shadow:0 0 5px var(--up);flex-shrink:0"></span>';
+      } else if (et.target_1 && initPrice >= et.target_1) {
+        zoneIndicator = '<span title="Price ≥ T1 — above target, caution" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--down);box-shadow:0 0 5px var(--down);flex-shrink:0"></span>';
+      } else {
+        zoneIndicator = '<span title="Hold zone (between entry and T1)" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px var(--gold);flex-shrink:0"></span>';
+      }
+    }
+
     const isConviction =
       (s.conviction||'').toUpperCase().includes('HIGH') &&
       (s.stance === 'pos' ||
        (s.verdict||'').toLowerCase().includes('buy') ||
-       (s.verdict||'').toLowerCase().includes('conviction'));
+       (s.verdict||'').toLowerCase().includes('conviction') ||
+       activeTab === 'conviction');
     const isAvoid =
       s.stance === 'neg' ||
       (s.verdict||'').toLowerCase().includes('avoid') ||
       (s.verdict||'').toLowerCase().includes('trim');
     const cardClass = (isConviction ? 'conviction-card' : '') +
                       (isAvoid ? ' avoid-card' : '');
-    const initPrice = s.currentPrice ||
-      (f.price || f.cmp || f.ltp) ||
-      s.price || s.cmp || s.ltp || null;
     return `
     <article class="stock-card ${cardClass}" data-symbol="${s.symbol}">
       <div class="stock-card-collapsed" onclick="toggleCard('${s.symbol}')">
         <div class="card-line-1">
           <span class="card-sector-tag">${escHtml(s.sector)}</span>
           <span class="card-title">${escHtml(s.name)}</span>
-          <span class="badge ${buildBadgeClass(s)}" style="margin:0;flex-shrink:0;">${buildBadgeText(s)}</span>
+          <span class="badge ${buildBadgeClass(s, activeTab)}" style="margin:0;flex-shrink:0;">${buildBadgeText(s, activeTab)}</span>
         </div>
         <div class="card-line-2">
+          ${zoneIndicator}
           <span class="card-price" id="px-${s.symbol}">${initPrice != null ? '₹' + fmtN(initPrice) : '—'}</span>
-          <span class="card-chg" id="dlt-${s.symbol}">—</span>
-          ${s.yoyChange != null ? `<span class="card-yoy">${escHtml(String(s.yoyChange))}</span>` : ''}
+          <span class="card-chg ${initChangePct != null ? (initChangePct > 0 ? 'up' : 'down') : ''}" id="dlt-${s.symbol}">${initChangePct != null ? (initChangePct > 0 ? '+' : '') + initChangePct.toFixed(2) + '%' : '—'}</span>
+          ${et.entry_zone_max ? `<span class="card-yoy" style="color:var(--text-faint);font-size:10px">ENTRY ₹${Number(et.entry_zone_max).toLocaleString('en-IN')}</span>` : ''}
         </div>
       </div>
       <button class="card-expand-btn" onclick="toggleCard('${s.symbol}')">▶ MORE</button>
@@ -1933,7 +2008,7 @@ function renderStocks() {
             <div class="dd-section"><h5>What could go wrong</h5><ul>${(s.risks||[]).map(r => `<li>${escHtml(r)}</li>`).join('')}</ul></div>
           </div>
           ${s.selection_rationale ? `<div style="margin-top:12px;padding:12px;background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.15);border-left:3px solid var(--gold)"><div style="font-family:var(--font-display);font-size:9px;letter-spacing:0.15em;color:var(--gold);margin-bottom:8px">◈ WHY THIS VERDICT</div><div style="font-family:var(--font-prose);font-size:13px;color:#A0B4C8;line-height:1.6;font-style:italic">${escHtml(s.selection_rationale)}</div></div>` : ''}
-          ${renderExitTargets(s, null)}
+          ${renderExitTargets({...s, exit_targets: et}, initPrice)}
           <div id="card-ai-slot-${s.symbol}" style="margin-top:12px;">
             <div class="ai-section" style="text-align:left;">
               <div class="ai-section-title" style="font-size:12px;margin-bottom:6px;">Get AI analysis for ${escHtml(s.name)}</div>
@@ -2060,9 +2135,13 @@ async function fetchAllPricesInBatches(stocks) {
 }
 
 async function refreshStockPrices() {
+  // Active tab first — these cards are visible, load them immediately
+  const activeLedger = (DATA?.stocks?.[activeTab]) || [];
+  await fetchAllPricesInBatches(activeLedger);
+  // Background-fetch the rest (no await — don't block)
   const allLists = ['conviction', 'longBets', 'watchClose', 'trimAvoid', 'highPromise'];
-  const all = allLists.flatMap(k => (DATA?.stocks?.[k]) || []);
-  await fetchAllPricesInBatches(all);
+  const rest = allLists.filter(k => k !== activeTab).flatMap(k => (DATA?.stocks?.[k]) || []);
+  fetchAllPricesInBatches(rest);
 }
 
 /* =========================================================
