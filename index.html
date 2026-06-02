@@ -1605,41 +1605,49 @@ function renderWatchlistTab() {
     const v = (item.verdict || '').toLowerCase();
     const isBuy  = v.includes('buy') || v.includes('long') || v.includes('high');
     const isSell = v.includes('avoid') || v.includes('trim') || v.includes('neg');
-    const tagClass  = isBuy ? 'tag-buy' : isSell ? 'tag-sell' : 'tag-watch';
-    const stripe    = isBuy ? 'stripe-buy' : isSell ? 'stripe-sell' : 'stripe-watch';
+    const tagClass = isBuy ? 'tag-buy' : isSell ? 'tag-sell' : 'tag-watch';
+    const stripe   = isBuy ? 'stripe-buy' : isSell ? 'stripe-sell' : 'stripe-watch';
     const cardClass = isBuy ? 'conviction-card' : '';
+    const accent    = isBuy ? 'BUY' : isSell ? 'TRIM' : 'WATCH';
     const et = item.exit_targets || {};
+    /* use a stable key for toggleCard — wl-0, wl-1, etc */
+    const key = 'wl-' + idx;
+    const sym = escHtml(item.ticker || '');
+    const nm  = escHtml(item.name  || '');
     const savedAt = item.analysed_at || item.saved_at || '';
     const ageStr = savedAt ? (() => {
       const h = (Date.now() - new Date(savedAt).getTime()) / 3600000;
-      return h < 24 ? Math.round(h) + 'h ago' : Math.round(h/24) + 'd ago';
+      return h < 1 ? 'just now' : h < 24 ? Math.round(h) + 'h ago' : Math.round(h/24) + 'd ago';
     })() : '';
-    const sym = escHtml(item.ticker || '');
-    const nm  = escHtml(item.name  || '');
-    return `<article class="stock-card ${cardClass}">
+    return `<article class="stock-card ${cardClass}" data-symbol="${key}">
       <div class="card-stripe ${stripe}"></div>
-      <div class="stock-card-collapsed" onclick="openStockModal('${sym}','${nm}')">
+      <div class="stock-card-collapsed" onclick="toggleCard('${key}')">
         <div class="card-line-1">
-          <span class="card-sector-tag">${escHtml(item.sector||'WATCHLIST')}</span>
+          <span class="card-sector-tag">${escHtml(item.sector || 'WATCHLIST')}</span>
           <span class="card-title">${nm}</span>
-          <span class="verdict-tag ${tagClass}" style="margin:0;flex-shrink:0;">${escHtml(item.verdict||'WATCH')}</span>
+          <span class="verdict-tag ${tagClass}" style="margin:0;flex-shrink:0;">${accent} · ${escHtml(item.verdict || 'WATCH')}</span>
         </div>
         <div class="card-line-2">
-          <span class="card-price">${item.current_price != null ? '₹'+fmtN(item.current_price) : '—'}</span>
-          <span style="font-size:10px;color:var(--text-faint);letter-spacing:0.06em;">saved price${ageStr?' · '+ageStr:''}</span>
+          <span class="card-price">${item.current_price != null ? '₹' + fmtN(item.current_price) : '—'}</span>
+          <span class="card-chg" style="color:var(--text-faint);">${ageStr ? 'saved ' + ageStr : 'saved price'}</span>
         </div>
       </div>
-      <button class="card-expand-btn" onclick="openStockModal('${sym}','${nm}')">▶ MORE</button>
-      <div class="card-detail" style="display:block;padding:0 16px 14px;">
-        <p class="thesis" style="margin:10px 0 10px;">${escHtml((item.thesis_snippet||'').slice(0,200))}${(item.thesis_snippet||'').length>=200?'…':''}</p>
-        ${et.entry_zone_max ? `<div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-faint);margin-bottom:12px;">
-          ENTRY ₹${Number(et.entry_zone_max).toLocaleString('en-IN')}
-          ${et.target_1?' · T1 ₹'+Number(et.target_1).toLocaleString('en-IN'):''}
-          ${et.target_2?' · T2 ₹'+Number(et.target_2).toLocaleString('en-IN'):''}
-        </div>` : ''}
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button class="hud-btn" style="border-color:var(--electric);color:var(--electric);" onclick="openStockModal('${sym}','${nm}')">⚡ Re-analyse</button>
-          <button class="hud-btn" style="border-color:rgba(255,56,96,0.4);color:var(--down);" onclick="removeFromWatchlist('${sym}');renderWatchlistTab();">✕ Remove</button>
+      <button class="card-expand-btn" onclick="toggleCard('${key}')">▶ MORE</button>
+      <div class="card-detail" id="cd-${key}">
+        <div style="padding-top:12px;">
+          <div class="card-ticker" style="font-size:10px;color:var(--text-faint);letter-spacing:0.08em;margin-bottom:10px;">${sym} · WATCHLIST${ageStr ? ' · saved ' + ageStr : ''}</div>
+          <p class="thesis">${escHtml((item.thesis_snippet || '').slice(0, 240))}${(item.thesis_snippet || '').length >= 240 ? '…' : ''}</p>
+          ${et.entry_zone_max ? `
+          <div class="fundamentals">
+            <div class="fund-cell"><div class="lbl">Entry</div><div class="v">₹${Number(et.entry_zone_max).toLocaleString('en-IN')}</div></div>
+            <div class="fund-cell"><div class="lbl">T1</div><div class="v">${et.target_1 ? '₹' + Number(et.target_1).toLocaleString('en-IN') : '—'}</div></div>
+            <div class="fund-cell"><div class="lbl">T2</div><div class="v">${et.target_2 ? '₹' + Number(et.target_2).toLocaleString('en-IN') : '—'}</div></div>
+            <div class="fund-cell"><div class="lbl">Exit</div><div class="v">${et.full_exit ? '₹' + Number(et.full_exit).toLocaleString('en-IN') : '—'}</div></div>
+          </div>` : ''}
+          <div class="card-foot" style="margin-top:12px;">
+            <button class="expand-toggle" onclick="event.stopPropagation();openStockModal('${sym}','${nm}')">⚡ Re-analyse</button>
+            <button class="expand-toggle" style="color:var(--down);border-color:rgba(255,56,96,0.3);margin-left:12px;" onclick="event.stopPropagation();removeFromWatchlist('${sym}');renderWatchlistTab();">✕ Remove</button>
+          </div>
         </div>
       </div>
     </article>`;
