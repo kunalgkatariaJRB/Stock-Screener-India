@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-06-01T16:30:24.293857+05:30",
+  "last_updated": "2026-06-02T11:52:17.282535+05:30",
   "source": "Screener.in Premium CSV exports",
   "stats": {
     "total": 396,
@@ -41,7 +41,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Anthem Bioscienc",
@@ -69,7 +71,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Atlanta Electric",
@@ -97,7 +101,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Bikaji Foods",
@@ -125,7 +131,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Caplin Point Lab",
@@ -153,7 +161,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Coal India",
@@ -181,7 +191,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Eicher Motors",
@@ -209,7 +221,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Force Motors",
@@ -237,7 +251,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "GE Vernova T&D",
@@ -265,7 +281,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "HBL Engineering",
@@ -293,7 +311,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "HDFC AMC",
@@ -321,7 +341,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Hexaware Tech.",
@@ -349,7 +371,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Hitachi Energy",
@@ -377,7 +401,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "ICICI AMC",
@@ -405,7 +431,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "International Ge",
@@ -433,7 +461,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Inventurus Knowl",
@@ -461,7 +491,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "KPIT Technologi.",
@@ -489,7 +521,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "L&T Technology",
@@ -517,7 +551,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "LTM",
@@ -545,7 +581,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Natl. Aluminium",
@@ -573,7 +611,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Netweb Technol.",
@@ -601,7 +641,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Nippon Life Ind.",
@@ -629,7 +671,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Page Industries",
@@ -657,7 +701,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Pidilite Inds.",
@@ -685,7 +731,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Polycab India",
@@ -713,7 +761,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Schaeffler India",
@@ -741,7 +791,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Tata Technolog.",
@@ -769,7 +821,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Travel Food",
@@ -797,7 +851,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Trent",
@@ -825,7 +881,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Varun Beverages",
@@ -853,7 +911,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       }
     ],
     "multibaggers": [
@@ -883,7 +943,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Arrow Greentech",
@@ -911,7 +973,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "BLS Internat.",
@@ -939,7 +1003,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Canara Robeco",
@@ -967,7 +1033,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Crizac",
@@ -995,7 +1063,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Dynacons Sys.",
@@ -1023,7 +1093,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": false
       },
       {
         "name": "Dynamic Cables",
@@ -1051,7 +1123,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "EPack PrefabTech",
@@ -1079,7 +1153,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Jaro Institute",
@@ -1107,7 +1183,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Krishna Defence",
@@ -1135,7 +1213,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Manorama Indust.",
@@ -1163,7 +1243,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Network People",
@@ -1191,7 +1273,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Piccadily Agro",
@@ -1219,7 +1303,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Rajoo Engineers",
@@ -1247,7 +1333,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Sambhv Steel",
@@ -1275,7 +1363,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sandur Manganese",
@@ -1303,7 +1393,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "SRM Contractors",
@@ -1331,7 +1423,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Supriya Lifesci.",
@@ -1359,7 +1453,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Syncom Formul.",
@@ -1387,7 +1483,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Tips Music",
@@ -1415,7 +1513,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Transrail Light",
@@ -1443,7 +1543,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Unified Data",
@@ -1471,7 +1573,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Venus Pipes",
@@ -1499,7 +1603,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       }
     ],
     "special_situations": [
@@ -1529,7 +1635,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Ashoka Buildcon",
@@ -1557,7 +1665,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Balmer Law. Inv.",
@@ -1585,7 +1695,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Bhansali Engg.",
@@ -1613,7 +1725,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "C P C L",
@@ -1641,7 +1755,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Chamanlal Setia",
@@ -1669,7 +1785,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "D B Corp",
@@ -1697,7 +1815,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Deep Industries",
@@ -1725,7 +1845,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Dolat Algotech",
@@ -1753,7 +1875,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Dollar Industrie",
@@ -1781,7 +1905,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Expleo Solutions",
@@ -1809,7 +1935,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Federal-Mogul Go",
@@ -1837,7 +1965,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Filatex India",
@@ -1865,7 +1995,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "GNA Axles",
@@ -1893,7 +2025,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "HMA Agro Inds.",
@@ -1921,7 +2055,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Indraprastha Gas",
@@ -1949,7 +2085,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Jindal Drilling",
@@ -1977,7 +2115,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Jindal Poly Inve",
@@ -2005,7 +2145,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": false
       },
       {
         "name": "JK Tyre & Indust",
@@ -2033,7 +2175,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Kalyani Steels",
@@ -2061,7 +2205,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Kama Holdings",
@@ -2089,7 +2235,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "KRBL",
@@ -2117,7 +2265,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Lincoln Pharma.",
@@ -2145,7 +2295,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Mah. Seamless",
@@ -2173,7 +2325,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Monte Carlo Fas.",
@@ -2201,7 +2355,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Natco Pharma",
@@ -2229,7 +2385,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Nucleus Soft.",
@@ -2257,7 +2415,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Panama Petrochem",
@@ -2285,7 +2445,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": false
       },
       {
         "name": "Petronet LNG",
@@ -2313,7 +2475,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Rashi Peripheral",
@@ -2341,7 +2505,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Route Mobile",
@@ -2369,7 +2535,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "S P I C",
@@ -2397,7 +2565,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Sai Silks",
@@ -2425,7 +2595,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Saksoft",
@@ -2453,7 +2625,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Siyaram Silk",
@@ -2481,7 +2655,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "The Bombay Burmah",
@@ -2509,7 +2685,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Vaibhav Global",
@@ -2537,7 +2715,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Veedol Corporat",
@@ -2565,7 +2745,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Zensar Tech.",
@@ -2593,7 +2775,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       }
     ],
     "early_quality": [
@@ -2623,7 +2807,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Adani Ports",
@@ -2651,7 +2837,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Adcounty Media.",
@@ -2679,7 +2867,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Aditya Infotech",
@@ -2707,7 +2897,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Aditya Vision",
@@ -2735,7 +2927,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Aether Industri.",
@@ -2763,7 +2957,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Affle 3i",
@@ -2791,7 +2987,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Agarwal Toughene",
@@ -2819,7 +3017,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Ajmera Realty",
@@ -2847,7 +3047,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Algoquant Fin",
@@ -2875,7 +3077,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Amic Forging",
@@ -2903,7 +3107,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": false
       },
       {
         "name": "Anand Rathi Shar",
@@ -2931,7 +3137,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Anand Rathi Wea.",
@@ -2959,7 +3167,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Anlon Tech",
@@ -2987,7 +3197,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Antelopus Selan",
@@ -3015,7 +3227,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Apsis Aerocom",
@@ -3043,7 +3257,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Aries Agro",
@@ -3071,7 +3287,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Asarfi Hospital",
@@ -3099,7 +3317,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Ashapura Minech.",
@@ -3127,7 +3347,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Asian Energy",
@@ -3155,7 +3377,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "ASK Automotive",
@@ -3183,7 +3407,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Authum Invest",
@@ -3211,7 +3437,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Bajaj Auto",
@@ -3239,7 +3467,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Balu Forge",
@@ -3267,7 +3497,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Banco Products",
@@ -3295,7 +3527,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Bansal Wire Inds",
@@ -3323,7 +3557,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Bharat Electron",
@@ -3351,7 +3587,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Bharat Seats",
@@ -3379,7 +3617,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Bhatia Communic.",
@@ -3407,7 +3647,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "BLS E-Services",
@@ -3435,7 +3677,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Bondada Engineer",
@@ -3463,7 +3707,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Borana Weaves",
@@ -3491,7 +3737,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Borosil Renew.",
@@ -3519,7 +3767,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Carysil",
@@ -3547,7 +3797,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Ceinsys Tech",
@@ -3575,7 +3827,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Cellecor Gadgets",
@@ -3603,7 +3857,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Cemindia Project",
@@ -3631,7 +3887,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Central Mine Pla",
@@ -3659,7 +3917,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Chalet Hotels",
@@ -3687,7 +3947,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "CIAN Agro",
@@ -3715,7 +3977,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Cords Cable",
@@ -3743,7 +4007,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Corona Remedies",
@@ -3771,7 +4037,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Cummins India",
@@ -3799,7 +4067,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Cupid",
@@ -3827,7 +4097,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "CWD",
@@ -3855,7 +4127,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Data Pattern",
@@ -3883,7 +4157,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Dharmaj Crop",
@@ -3911,7 +4187,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Diffusion Eng",
@@ -3939,7 +4217,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Eco Recyc.",
@@ -3967,7 +4247,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Ellen.Indl.Gas",
@@ -3995,7 +4277,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Emcure Pharma",
@@ -4023,7 +4307,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Emmvee Photovol.",
@@ -4051,7 +4337,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Encompass Design",
@@ -4079,7 +4367,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Endurance Tech.",
@@ -4107,7 +4397,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Exhicon Events",
@@ -4135,7 +4427,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Fiem Industries",
@@ -4163,7 +4457,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Frontier Springs",
@@ -4191,7 +4487,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "FSN E-Commerce",
@@ -4219,7 +4517,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Gala Precis. Eng",
@@ -4247,7 +4547,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Ganesh Green",
@@ -4275,7 +4577,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Garuda Cons",
@@ -4303,7 +4607,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Gaudium IVF",
@@ -4331,7 +4637,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "GK Energy",
@@ -4359,7 +4667,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Go Digit General",
@@ -4387,7 +4697,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Godfrey Phillips",
@@ -4415,7 +4727,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Gokul Agro",
@@ -4443,7 +4757,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "GP Eco Solutions",
@@ -4471,7 +4787,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "GPT Infraproject",
@@ -4499,7 +4817,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Gravita India",
@@ -4527,7 +4847,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Gulshan Polyols",
@@ -4555,7 +4877,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Hindustan Copper",
@@ -4583,7 +4907,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Hindustan Foods",
@@ -4611,7 +4937,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "India Glycols",
@@ -4639,7 +4967,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "India Nipp.Elec.",
@@ -4667,7 +4997,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Innova Captab",
@@ -4695,7 +5027,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Ipca Labs.",
@@ -4723,7 +5057,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Jeena Sikho",
@@ -4751,7 +5087,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": false
       },
       {
         "name": "JSW Infrast",
@@ -4779,7 +5117,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Jupiter Life Lin",
@@ -4807,7 +5147,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "K.P. Energy",
@@ -4835,7 +5177,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Kalyan Jewellers",
@@ -4863,7 +5207,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Kilitch Drugs",
@@ -4891,7 +5237,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "KMC Speciality",
@@ -4919,7 +5267,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "KP Green Engg.",
@@ -4947,7 +5297,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Kwality Pharma",
@@ -4975,7 +5327,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Lehar Footwears",
@@ -5003,7 +5357,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Lloyds Metals",
@@ -5031,7 +5387,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Lodha Developers",
@@ -5059,7 +5417,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Lupin",
@@ -5087,7 +5447,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Macpower CNC",
@@ -5115,7 +5477,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Mafatlal Inds.",
@@ -5143,7 +5507,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Man Industries",
@@ -5171,7 +5537,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Manaksia Steels",
@@ -5199,7 +5567,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Mangalam Global",
@@ -5227,7 +5597,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Mangalam World.",
@@ -5255,7 +5627,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Marine Electric.",
@@ -5283,7 +5657,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Marsons",
@@ -5311,7 +5687,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Maruti Suzuki",
@@ -5339,7 +5717,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Master Trust",
@@ -5367,7 +5747,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "MMP Industries",
@@ -5395,7 +5777,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Modern Insulator",
@@ -5423,7 +5807,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Monarch Networth",
@@ -5451,7 +5837,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Msafe Equipments",
@@ -5479,7 +5867,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Neetu Yoshi",
@@ -5507,7 +5897,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": false
       },
       {
         "name": "Nephrocare Health Services",
@@ -5535,7 +5927,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Newgen Software",
@@ -5563,7 +5957,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Olectra Greentec",
@@ -5591,7 +5987,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Omax Autos",
@@ -5619,7 +6017,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Oriana Power Ltd",
@@ -5647,7 +6047,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Paradeep Pari.",
@@ -5675,7 +6077,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Paras Defence",
@@ -5703,7 +6107,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Pearl Global Ind",
@@ -5731,7 +6137,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Pitti Engg.",
@@ -5759,7 +6167,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Poly Medicure",
@@ -5787,7 +6197,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Power Mech Proj.",
@@ -5815,7 +6227,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Prec. Wires (I)",
@@ -5843,7 +6257,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Prem. Explosives",
@@ -5871,7 +6287,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Premier Energies",
@@ -5899,7 +6317,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Privi Speci.",
@@ -5927,7 +6347,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Prudent Corp.",
@@ -5955,7 +6377,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Pushpa Jewellers",
@@ -5983,7 +6407,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Quality Power El",
@@ -6011,7 +6437,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "R R Kabel",
@@ -6039,7 +6467,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "R&B Denims",
@@ -6067,7 +6497,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Radico Khaitan",
@@ -6095,7 +6527,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Raghav Product.",
@@ -6123,7 +6557,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Railtel Corpn.",
@@ -6151,7 +6587,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Rategain Travel",
@@ -6179,7 +6617,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Recode Studios",
@@ -6207,7 +6647,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "RMC Switchgears",
@@ -6235,7 +6677,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": false
       },
       {
         "name": "Rubicon Research",
@@ -6263,7 +6707,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sagility",
@@ -6291,7 +6737,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sakar Healthcare",
@@ -6319,7 +6767,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Samvardh. Mothe.",
@@ -6347,7 +6797,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sandhar Tech",
@@ -6375,7 +6827,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sanghvi Movers",
@@ -6403,7 +6857,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sarveshwar Foods",
@@ -6431,7 +6887,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": false
       },
       {
         "name": "Schneider Elect.",
@@ -6459,7 +6917,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Scoda Tubes",
@@ -6487,7 +6947,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "SEAMEC Ltd",
@@ -6515,7 +6977,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Senores Pharma.",
@@ -6543,7 +7007,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Shaily Engineer.",
@@ -6571,7 +7037,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Shakti Pumps",
@@ -6599,7 +7067,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Shankara Buildpro",
@@ -6627,7 +7097,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sharat Industrie",
@@ -6655,7 +7127,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Shree Refrigerat",
@@ -6683,7 +7157,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Shriram Pistons",
@@ -6711,7 +7187,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sigma Solve",
@@ -6739,7 +7217,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Silver Touch",
@@ -6767,7 +7247,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Simplex Castings",
@@ -6795,7 +7277,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Skipper",
@@ -6823,7 +7307,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "SML Mahindra",
@@ -6851,7 +7337,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "SMS Pharma.",
@@ -6879,7 +7367,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Spunweb Nonwoven",
@@ -6907,7 +7397,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Supreme Power",
@@ -6935,7 +7427,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Swaraj Suiting",
@@ -6963,7 +7457,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Syrma SGS Tech.",
@@ -6991,7 +7487,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Syschem (India)",
@@ -7019,7 +7517,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Systango Tech",
@@ -7047,7 +7547,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Tara Chand Infra",
@@ -7075,7 +7577,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Taurian MPS",
@@ -7103,7 +7607,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Thangamayil Jew.",
@@ -7131,7 +7637,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Thomas Cook (I)",
@@ -7159,7 +7667,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Thyrocare Tech.",
@@ -7187,7 +7697,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Tinna Rubber",
@@ -7215,7 +7727,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "TIPCO Engineering",
@@ -7243,7 +7757,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "TPL Plastech",
@@ -7271,7 +7787,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Trident Lifeline",
@@ -7299,7 +7817,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Triveni Turbine",
@@ -7327,7 +7847,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Uno Minda",
@@ -7355,7 +7877,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "V-Marc India",
@@ -7383,7 +7907,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Vertoz",
@@ -7411,7 +7937,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Vesuvius India",
@@ -7439,7 +7967,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Vijaya Diagnost.",
@@ -7467,7 +7997,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Vikram Solar",
@@ -7495,7 +8027,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Vinsys IT Serv.",
@@ -7523,7 +8057,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Virtual Galaxy",
@@ -7551,7 +8087,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Virtuoso Optoel.",
@@ -7579,7 +8117,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": false
       },
       {
         "name": "Vishal Mega Mart",
@@ -7607,7 +8147,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Viviana Power",
@@ -7635,7 +8177,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Vivid Electromech",
@@ -7663,7 +8207,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Viyash Scientific",
@@ -7691,7 +8237,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Waaree Energies",
@@ -7719,7 +8267,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Waaree Renewab.",
@@ -7747,7 +8297,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Wealth First Por",
@@ -7775,7 +8327,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Welspun Corp",
@@ -7803,7 +8357,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Wise Travel",
@@ -7831,7 +8387,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Yash Highvoltage",
@@ -7859,7 +8417,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Yatharth Hospit.",
@@ -7887,7 +8447,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Zen Technologies",
@@ -7915,7 +8477,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Zydus Lifesci.",
@@ -7943,7 +8507,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       }
     ],
     "emerging_compounders": [
@@ -7973,7 +8539,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "AWL Agri Busine.",
@@ -8001,7 +8569,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Bosch",
@@ -8029,7 +8599,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Campus Activewe.",
@@ -8057,7 +8629,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Carraro India",
@@ -8085,7 +8659,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "eClerx Services",
@@ -8113,7 +8689,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Gallantt Ispat L",
@@ -8141,7 +8719,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Garware Hi Tech",
@@ -8169,7 +8749,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Havells India",
@@ -8197,7 +8779,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "InfoBeans Tech.",
@@ -8225,7 +8809,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "J B Chemicals &",
@@ -8253,7 +8839,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Jamna Auto Inds.",
@@ -8281,7 +8869,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Latent View",
@@ -8309,7 +8899,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Saint-Gob. Sekur",
@@ -8337,7 +8929,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sarda Energy",
@@ -8365,7 +8959,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Savita Oil Tech",
@@ -8393,7 +8989,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sharda Cropchem",
@@ -8421,7 +9019,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Star Cement",
@@ -8449,7 +9049,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Time Technoplast",
@@ -8477,7 +9079,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Timex Group",
@@ -8505,7 +9109,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "V-Guard Industri",
@@ -8533,7 +9139,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Vinati Organics",
@@ -8561,7 +9169,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       }
     ],
     "inflection_watch": [
@@ -8591,7 +9201,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "AB Cotspin",
@@ -8619,7 +9231,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Accent Microcell",
@@ -8647,7 +9261,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Aegis Vopak Term",
@@ -8675,7 +9291,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Aelea Commoditi.",
@@ -8703,7 +9321,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Airfloa Rail",
@@ -8731,7 +9351,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Alpex Solar",
@@ -8759,7 +9381,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Anant Raj",
@@ -8787,7 +9411,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Apollo Micro Sys",
@@ -8815,7 +9441,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Aptus Pharma",
@@ -8843,7 +9471,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Arkade",
@@ -8871,7 +9501,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Arvind SmartSp.",
@@ -8899,7 +9531,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Ashiana Housing",
@@ -8927,7 +9561,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "ASM Technologies",
@@ -8955,7 +9591,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Australian Prem",
@@ -8983,7 +9621,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Azad Engineering",
@@ -9011,7 +9651,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Bhageria Indust.",
@@ -9039,7 +9681,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Captain Polyplas",
@@ -9067,7 +9711,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "CFF Fluid",
@@ -9095,7 +9741,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Choice Intl.",
@@ -9123,7 +9771,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Connplex Cinemas",
@@ -9151,7 +9801,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "DEE Development",
@@ -9179,7 +9831,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Delton Cables",
@@ -9207,7 +9861,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Effwa Infra",
@@ -9235,7 +9891,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Entero Healthcar",
@@ -9263,7 +9921,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Enviro Infra",
@@ -9291,7 +9951,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Fedders Holding",
@@ -9319,7 +9981,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": false
       },
       {
         "name": "Fischer Medical",
@@ -9347,7 +10011,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Fujiyama Power",
@@ -9375,7 +10041,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Garden Reach Sh.",
@@ -9403,7 +10071,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "GNG Electronics",
@@ -9431,7 +10101,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Godrej Propert.",
@@ -9459,7 +10131,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Indo SMC",
@@ -9487,7 +10161,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Indo Tech.Trans.",
@@ -9515,7 +10191,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Indo Thai Sec.",
@@ -9543,7 +10221,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Innovision",
@@ -9571,7 +10251,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Jain Resource",
@@ -9599,7 +10281,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Jaykay Enter.",
@@ -9627,7 +10311,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "JD Cables",
@@ -9655,7 +10341,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": true
       },
       {
         "name": "Jyoti CNC Auto.",
@@ -9683,7 +10371,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Kaynes Tech",
@@ -9711,7 +10401,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Khazanchi Jewell",
@@ -9739,7 +10431,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "KSH Internationa",
@@ -9767,7 +10461,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "L. T. Elevator",
@@ -9795,7 +10491,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Leela Palaces Hotels",
@@ -9823,7 +10521,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Lloyds Enterpris",
@@ -9851,7 +10551,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Mahindra Life.",
@@ -9879,7 +10581,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Mercury EV-Tech",
@@ -9907,7 +10611,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": true
       },
       {
         "name": "Modison",
@@ -9935,7 +10641,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "MOS Utility",
@@ -9963,7 +10671,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Nila Infrastruct",
@@ -9991,7 +10701,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Nila Spaces",
@@ -10019,7 +10731,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Nisus Finance",
@@ -10047,7 +10761,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Niva Bupa Health",
@@ -10075,7 +10791,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Nurture Well Industries",
@@ -10103,7 +10821,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "OBSC Perfection",
@@ -10131,7 +10851,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Om Power Transmission",
@@ -10159,7 +10881,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "One Point One",
@@ -10187,7 +10911,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Oriental Rail",
@@ -10215,7 +10941,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "OSEL Devices",
@@ -10243,7 +10971,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Oswal Pumps",
@@ -10271,7 +11001,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "P N Gadgil Jewe.",
@@ -10299,7 +11031,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Pace Digitek",
@@ -10327,7 +11061,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Panache Digilife",
@@ -10355,7 +11091,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Parmeshwar Metal",
@@ -10383,7 +11121,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Parth Electrical",
@@ -10411,7 +11151,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Rajesh Power",
@@ -10439,7 +11181,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "RDB Infrastruc.",
@@ -10467,7 +11211,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Saatvik Green",
@@ -10495,7 +11241,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       },
       {
         "name": "Sathlokhar Sys.",
@@ -10523,7 +11271,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Savy Infra",
@@ -10551,7 +11301,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": false
       },
       {
         "name": "Servotech Renew",
@@ -10579,7 +11331,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Shanti Gold",
@@ -10607,7 +11361,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Shringar House",
@@ -10635,7 +11391,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sigma Advanced System",
@@ -10663,7 +11421,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sky Gold & Diam.",
@@ -10691,7 +11451,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Solarworld Ene.",
@@ -10719,7 +11481,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "South West Pinn.",
@@ -10747,7 +11511,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "SPARC",
@@ -10775,7 +11541,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sri Lotus",
@@ -10803,7 +11571,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Sunteck Realty",
@@ -10831,7 +11601,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Suraj Estate",
@@ -10859,7 +11631,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": true,
+        "eps_deteriorating": false
       },
       {
         "name": "Swan Corp",
@@ -10887,7 +11661,9 @@
         "is_red_flagged": true,
         "status": "AVOID_RED_FLAG",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Swelect Energy",
@@ -10915,7 +11691,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "T R I L",
@@ -10943,7 +11721,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Thomas Scott",
@@ -10971,7 +11751,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "True Colors",
@@ -10999,7 +11781,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Utssav CZ Gold",
@@ -11027,7 +11811,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Welspun Special.",
@@ -11055,7 +11841,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Workmates Core2",
@@ -11083,7 +11871,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": false
       },
       {
         "name": "Yatra Online",
@@ -11111,7 +11901,9 @@
         "is_red_flagged": false,
         "status": "CLEAN",
         "caution_note": null,
-        "symbol_resolved": true
+        "symbol_resolved": true,
+        "data_stale": false,
+        "eps_deteriorating": true
       }
     ]
   }
