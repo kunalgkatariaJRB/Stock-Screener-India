@@ -646,6 +646,22 @@ This keeps the family aware of what passive investing would have returned
 and whether active stock picking is adding value.
 
 ════════════════════════
+SELECTION RATIONALE — CONVICTION & LONGBETS REQUIRED
+════════════════════════
+Every stock in conviction and longBets must include:
+"selection_rationale": "2-3 sentences explaining WHY this specific
+  stock was selected over other stocks that also passed the screens.
+  Reference the specific principle (Graham/Buffett/Munger/Naval)
+  that drove selection, the quantitative threshold that stood out,
+  and what edge or insight distinguishes this stock from its peers.
+  Example: Selected on Buffett's wonderful-business principle —
+  5yr ROCE of 34% signals durable competitive advantage. Chosen
+  over sector peers because promoter holding at 71% with zero
+  pledging shows exceptional alignment. Current P/E of 24x is
+  a 15% discount to its own 5yr median of 28x, providing
+  Graham's margin of safety."
+
+════════════════════════
 STOCK LISTS REQUIRED
 ════════════════════════
 conviction (8-12), longBets (6-10), highPromise (3-6),
@@ -653,7 +669,8 @@ watchClose (4-7), trimAvoid (3-6)
 
 Each stock needs: symbol, ticker, name, sector, thesis, catalysts (list),
 risks (list), fundamentals (pe, pb, roe, div, mcap), horizon,
-conviction, verdict, exit_targets, position_size, trigger_alert
+conviction, verdict, exit_targets, position_size, trigger_alert,
+selection_rationale (conviction and longBets only)
 
 macroNarrative: 3 sentences.
 whispers: 5-7 themes including benchmark comparison once weekly.
@@ -797,21 +814,26 @@ def main():
     total_fetched = yahoo_ok + nse_ok
     print(f"  ✓ Prices: {total_fetched}/{len(all_stocks)} | Yahoo={yahoo_ok} NSE={nse_ok} skipped={skipped}")
 
-    # --- 4b. RSI fetch — NEVER goes into Claude prompts, frontend display only ---
-    print(f"\n  Fetching RSI for universe stocks...")
+    # --- 4b. RSI fetch — ledger stocks only (NEVER goes into Claude prompts) ---
+    print(f"\n  Fetching RSI for ledger stocks only (faster)...")
     rsi_lookup = {}
-    for i, s in enumerate(all_stocks):
-        sym = s.get("symbol")
-        if not sym or not s.get("symbol_resolved"):
+    ledger_stocks = []
+    for bucket in ['conviction', 'longBets', 'highPromise', 'watchClose', 'trimAvoid']:
+        ledger_stocks.extend(prev.get('stocks', {}).get(bucket, []))
+
+    for i, s in enumerate(ledger_stocks):
+        sym = s.get('symbol') or (s.get('ticker', '') + '.NS')
+        if not sym:
             continue
         rsi = fetch_rsi14(sym)
         if rsi is not None:
             rsi_lookup[sym] = rsi
-        if (i + 1) % 15 == 0:
-            time.sleep(2.0)
+            rsi_lookup[sym.replace('.NS', '').replace('.BO', '')] = rsi
+        if (i + 1) % 10 == 0:
+            time.sleep(1.0)
         else:
             time.sleep(0.2)
-    print(f"  ✓ RSI: {len(rsi_lookup)} values fetched")
+    print(f"  ✓ RSI: {len(rsi_lookup)} values fetched ({len(ledger_stocks)} ledger stocks)")
 
     # --- 5. Claude client ---
     api_key = os.environ.get("ANTHROPIC_API_KEY")

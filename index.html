@@ -14,10 +14,10 @@
   --electric: #00D4FF; --electric-dim: rgba(0,212,255,0.12); --electric-glow: rgba(0,212,255,0.4);
   --gold: #FFD700; --gold-dim: rgba(255,215,0,0.12); --gold-glow: rgba(255,215,0,0.5);
   --up: #00FF88; --down: #FF3860; --neutral: #7B8FAB;
-  --text: #E8F4FD; --text-dim: #7B8FAB; --text-faint: #3A4F6B;
+  --text: #E8F4FD; --text-dim: #7B8FAB; --text-faint: #6B7FA8;
   --border: rgba(0,212,255,0.18); --border-bright: rgba(0,212,255,0.55);
   --card-bg: rgba(10,22,40,0.95);
-  --ink: #E8F4FD; --ink-soft: #7B8FAB; --ink-mute: #7B8FAB; --ink-faint: #3A4F6B;
+  --ink: #E8F4FD; --ink-soft: #7B8FAB; --ink-mute: #7B8FAB; --ink-faint: #6B7FA8;
   --paper: #050A18; --paper-2: #0A1628; --paper-3: #0F1F3D;
   --rule: rgba(0,212,255,0.18); --rule-soft: rgba(0,212,255,0.1);
   --buy: #00FF88; --buy-soft: rgba(0,255,136,0.1);
@@ -26,6 +26,9 @@
   --indigo: #00D4FF; --plum: #B48EFF;
   --gold-deep: rgba(255,215,0,0.6);
   --up-soft: rgba(0,255,136,0.1); --down-soft: rgba(255,56,96,0.1);
+  --font-display: 'Orbitron',monospace;
+  --font-data: 'JetBrains Mono',monospace;
+  --font-prose: 'Fraunces',serif;
 }
 *,*::before,*::after{box-sizing:border-box;}
 html{scroll-behavior:smooth;}
@@ -776,7 +779,25 @@ body::after {
   );
   pointer-events:none;
   z-index:9998;
+  animation:none;
 }
+
+/* ===== COLOUR OVERRIDES (Fix 6) ===== */
+.brand { color: #E8F4FD !important; }
+.wire-label { background: #1A2A4A !important; color: #A0B4C8 !important; }
+.section-title { color: #A0B4C8 !important; }
+.tab-btn { color: #A0B4C8 !important; }
+.tab-btn.active { color: #E8F4FD !important; border-bottom-color: var(--electric) !important; }
+
+/* ===== BADGE CLASSES (Fix 4) ===== */
+.badge {
+  display:inline-block;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;
+  padding:4px 10px;border-radius:2px;font-weight:700;
+}
+.badge-conviction { background:var(--gold-dim);color:var(--gold);border:1px solid rgba(255,215,0,0.4); }
+.badge-buy { background:var(--buy-soft);color:var(--up);border:1px solid rgba(0,255,136,0.3); }
+.badge-avoid { background:var(--sell-soft);color:var(--down);border:1px solid rgba(255,56,96,0.3); }
+.badge-hold { background:var(--hold-soft);color:var(--gold);border:1px solid rgba(255,215,0,0.3); }
 </style>
 </head>
 <body>
@@ -1241,11 +1262,28 @@ function speakNarrative() {
   }, 100);
 }
 
-function renderRSIGauge(rsiValue) {
-  if (rsiValue == null) return '<span class="rsi-na">RSI —</span>';
-  const color = rsiValue < 30 ? 'var(--up)' : rsiValue > 70 ? '#FFB347' : 'var(--electric)';
-  const label = rsiValue < 30 ? ' OS' : rsiValue > 70 ? ' OB' : '';
-  return `<span class="rsi-gauge" title="RSI 14-day: ${rsiValue.toFixed(1)} — Technical only, not in AI verdict">RSI <span style="color:${color};font-weight:700">${rsiValue.toFixed(0)}</span><span style="color:${color};font-size:9px">${label}</span></span>`;
+function renderRSI(symbol, ticker) {
+  const rsi = DATA?.rsi;
+  if (!rsi) return '';
+
+  const val = rsi[symbol] ||
+    rsi[symbol + '.NS'] ||
+    rsi[(symbol||'').replace('.NS','').replace('.BO','')] ||
+    rsi[ticker] ||
+    rsi[ticker + '.NS'] ||
+    null;
+
+  if (val == null) return '<span class="metric-item" style="color:#6B7FA8">RSI —</span>';
+
+  const color = val < 30 ? 'var(--up)' : val > 70 ? '#FFB347' : 'var(--electric)';
+  const tag   = val < 30 ? ' OS' : val > 70 ? ' OB' : '';
+  const title = 'RSI 14-day: ' + val.toFixed(1) +
+    (val < 30 ? ' — Oversold' : val > 70 ? ' — Overbought' : '') +
+    ' | Technical only, not in AI verdict';
+
+  return '<span class="rsi-gauge metric-item" title="' + title + '" style="cursor:help">RSI <strong style="color:' + color +
+    ';font-weight:700">' + val.toFixed(0) + tag +
+    '</strong></span>';
 }
 
 function renderExitTargets(stock, currentPrice) {
@@ -1332,101 +1370,145 @@ function renderUniverse() {
     return;
   }
 
-  /* Build table using DOM API — avoids all string escaping issues */
-  var wrap = document.createElement('div');
-  wrap.style.overflowX = 'auto';
-
-  var tbl = document.createElement('table');
-  tbl.className = 'universe-table';
-  tbl.style.cssText = 'width:100%;border-collapse:collapse';
-
-  /* Header */
-  var thead = document.createElement('thead');
-  thead.innerHTML = '<tr><th>STOCK</th><th>TIER</th><th>STANCE</th><th>ROCE</th><th>P/E</th><th>ENTRY</th><th>T1</th></tr>';
-  tbl.appendChild(thead);
-
-  /* Body */
-  var tbody = document.createElement('tbody');
-  var stanceColor = { pos: 'var(--up)', neg: 'var(--down)', neu: 'var(--electric)' };
-
-  _universeAll.forEach(function(item) {
-    var s  = item.s;
-    var sd = s.screener_data || {};
-    var et = s.exit_targets  || {};
-    var stance = s.stance || 'neu';
-    var sym = sd.symbol || s.symbol || '';
-    var ticker = sd.ticker || s.ticker || '';
-
-    var tr = document.createElement('tr');
-    tr.style.cursor = 'pointer';
-    tr.addEventListener('click', (function(sym, nm) {
-      return function() { openStockModal(sym, nm); };
-    })(sym, s.name || ''));
-
-    /* STOCK cell */
-    var tdName = document.createElement('td');
-    var strong = document.createElement('strong');
-    strong.style.cssText = 'color:var(--text);font-family:\'Orbitron\',monospace;font-size:12px';
-    strong.textContent = s.name || '—';
-    var sub = document.createElement('div');
-    sub.style.cssText = 'font-size:10px;color:var(--text-faint)';
-    sub.textContent = ticker;
-    tdName.appendChild(strong);
-    tdName.appendChild(sub);
-
-    /* TIER cell */
-    var tdTier = document.createElement('td');
-    var badge = document.createElement('span');
-    badge.style.cssText = 'font-family:\'Orbitron\',monospace;font-size:8px;letter-spacing:0.08em;padding:2px 6px;border:1px solid var(--border);color:var(--electric)';
-    badge.textContent = item.tier;
-    tdTier.appendChild(badge);
-
-    /* STANCE cell */
-    var tdStance = document.createElement('td');
-    tdStance.style.cssText = 'color:' + (stanceColor[stance] || 'var(--electric)') + ';font-family:\'Orbitron\',monospace;font-size:10px';
-    tdStance.textContent = stance.toUpperCase();
-
-    /* ROCE cell */
-    var tdRoce = document.createElement('td');
-    tdRoce.style.cssText = 'font-family:\'JetBrains Mono\',monospace;font-size:12px';
-    var roceVal = sd.roce != null ? sd.roce : null;
-    tdRoce.textContent = roceVal != null ? Number(roceVal).toFixed(1) + '%' : '—';
-
-    /* P/E cell */
-    var tdPe = document.createElement('td');
-    tdPe.style.cssText = 'font-family:\'JetBrains Mono\',monospace;font-size:12px';
-    var peVal = sd.pe != null ? sd.pe : null;
-    tdPe.textContent = peVal != null ? Number(peVal).toFixed(1) + '×' : '—';
-
-    /* ENTRY cell */
-    var tdEntry = document.createElement('td');
-    tdEntry.style.cssText = 'font-family:\'JetBrains Mono\',monospace;font-size:12px';
-    tdEntry.textContent = et.entry_zone_max != null
-      ? '₹' + Number(et.entry_zone_max).toLocaleString('en-IN') : '—';
-
-    /* T1 cell */
-    var tdT1 = document.createElement('td');
-    tdT1.style.cssText = 'font-family:\'JetBrains Mono\',monospace;font-size:12px';
-    tdT1.textContent = et.target_1 != null
-      ? '₹' + Number(et.target_1).toLocaleString('en-IN') : '—';
-
-    tr.appendChild(tdName);
-    tr.appendChild(tdTier);
-    tr.appendChild(tdStance);
-    tr.appendChild(tdRoce);
-    tr.appendChild(tdPe);
-    tr.appendChild(tdEntry);
-    tr.appendChild(tdT1);
-    tbody.appendChild(tr);
+  const all = _universeAll.map(function(item) {
+    return Object.assign({}, item.s, { _tier: item.tier });
   });
 
-  tbl.appendChild(tbody);
-  wrap.appendChild(tbl);
-  container.innerHTML = '';
-  container.appendChild(wrap);
+  const rows = all.map(function(s) {
+    const sd = s.screener_data || {}, et = s.exit_targets || {},
+          f  = s.fundamentals  || {};
+    const stance = s.stance || 'neu';
+    const sc = stance === 'pos' ? 'var(--up)' :
+               stance === 'neg' ? 'var(--down)' : 'var(--electric)';
+    const sym = (sd.symbol || s.symbol || '').replace(/'/g, "\\'");
+    const nm  = (s.name || '').replace(/'/g, "\\'");
+    const roce = sd.roce || f.roe || '';
+    const pe   = sd.pe   || f.pe  || '';
+    return '<div style="display:grid;grid-template-columns:1fr auto;' +
+      'gap:12px;align-items:center;padding:12px 16px;' +
+      'border-bottom:1px solid rgba(0,212,255,0.08);' +
+      'cursor:pointer;transition:background 0.15s"' +
+      ' onmouseover="this.style.background=\'rgba(0,212,255,0.04)\'"' +
+      ' onmouseout="this.style.background=\'transparent\'"' +
+      ' onclick="openStockModal(\'' + sym + '\',\'' + nm + '\')">' +
+      '<div style="display:flex;align-items:center;gap:16px;min-width:0">' +
+        '<div style="min-width:0">' +
+          '<div style="font-family:var(--font-display);font-size:13px;' +
+            'font-weight:700;color:#E8F4FD;white-space:nowrap;' +
+            'overflow:hidden;text-overflow:ellipsis">' +
+            escHtml(s.name || '—') + '</div>' +
+          '<div style="font-family:var(--font-data);font-size:10px;' +
+            'color:#6B7FA8;margin-top:2px">' + escHtml(s.ticker || '') + '</div>' +
+        '</div>' +
+        '<span style="font-family:var(--font-display);font-size:8px;' +
+          'letter-spacing:0.1em;padding:2px 8px;border:1px solid ' +
+          'rgba(0,212,255,0.3);color:var(--electric);white-space:nowrap;' +
+          'flex-shrink:0">' + escHtml(s._tier) + '</span>' +
+        '<span style="color:' + sc + ';font-family:var(--font-display);' +
+          'font-size:10px;flex-shrink:0">' + stance.toUpperCase() + '</span>' +
+      '</div>' +
+      '<div style="display:flex;gap:20px;flex-shrink:0;' +
+        'font-family:var(--font-data);font-size:12px;color:#A0B4C8">' +
+        '<span>' + (roce ? Number(roce).toFixed(1) + '%' : '—') + '</span>' +
+        '<span>' + (pe   ? Number(pe).toFixed(1)   + '×' : '—') + '</span>' +
+        '<span style="color:' + (et.entry_zone_max ? '#E8F4FD' : '#6B7FA8') + '">' +
+          (et.entry_zone_max ?
+            '₹' + Number(et.entry_zone_max).toLocaleString('en-IN') : '—') +
+        '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  container.innerHTML =
+    '<div style="border:1px solid rgba(0,212,255,0.18)">' +
+    '<div style="display:grid;grid-template-columns:1fr auto;' +
+    'gap:12px;padding:8px 16px;border-bottom:1px solid ' +
+    'rgba(0,212,255,0.18);background:rgba(0,212,255,0.06)">' +
+    '<div style="font-family:var(--font-display);font-size:9px;' +
+    'letter-spacing:0.15em;color:#6B7FA8">STOCK / TIER / STANCE</div>' +
+    '<div style="font-family:var(--font-display);font-size:9px;' +
+    'letter-spacing:0.15em;color:#6B7FA8;display:flex;gap:20px">' +
+    '<span>ROCE</span><span>P/E</span><span>ENTRY</span></div></div>' +
+    rows + '</div>';
 }
 
 function setUniverseFilter(f) { universeFilter = f; renderUniverse(); }
+
+function enrichHoldings(holdings) {
+  const allLedger = [];
+  const stocks = DATA?.stocks || {};
+  Object.values(stocks).forEach(bucket => {
+    if (Array.isArray(bucket)) allLedger.push(...bucket);
+  });
+
+  return holdings.map(h => {
+    const nameLower = (h.name || '').toLowerCase();
+    const match = allLedger.find(s =>
+      (s.name||'').toLowerCase().includes(nameLower.slice(0, 6)) ||
+      (s.ticker||'').toLowerCase() === nameLower.replace(/\s/g, '')
+    );
+
+    const sym = match?.symbol || ((match?.ticker || '') + '.NS');
+    const rsi = DATA?.rsi || {};
+    const currentPrice = match?.currentPrice ||
+      match?.fundamentals?.price || null;
+    const avgPrice = h.avgPrice || h.avg_price || 0;
+    const pnl = currentPrice && avgPrice ?
+      ((currentPrice - avgPrice) / avgPrice * 100).toFixed(1) : null;
+    const et = match?.exit_targets || {};
+
+    let action = 'NOT IN LEDGER';
+    let actionColor = '#6B7FA8';
+    if (match) {
+      const verdict = (match.verdict || '').toLowerCase();
+      if (verdict.includes('conviction') || verdict.includes('buy')) {
+        action = 'HOLD / ADD'; actionColor = 'var(--up)';
+      } else if (verdict.includes('trim') || verdict.includes('avoid')) {
+        action = 'CONSIDER TRIM'; actionColor = 'var(--down)';
+      } else {
+        action = 'HOLD'; actionColor = 'var(--electric)';
+      }
+    }
+
+    return {
+      ...h,
+      avg_price: avgPrice,
+      current_price: currentPrice,
+      pnl_pct: pnl,
+      verdict: match?.verdict || null,
+      sector: match?.sector || null,
+      action,
+      actionColor,
+      entry_zone: et.entry_zone_max || null,
+      target_1: et.target_1 || null,
+      ledger: match || null,
+    };
+  });
+}
+
+function renderPortfolioTable(enriched) {
+  const rows = enriched.map(h => {
+    const pnlColor = h.pnl_pct > 0 ? 'var(--up)' :
+                     h.pnl_pct < 0 ? 'var(--down)' : '#6B7FA8';
+    return '<tr>' +
+      '<td style="color:#E8F4FD;font-family:var(--font-display);font-size:13px;font-weight:700">' + escHtml(h.name) + '</td>' +
+      '<td style="font-family:var(--font-data);color:#A0B4C8">' + h.qty + '</td>' +
+      '<td style="font-family:var(--font-data);color:#A0B4C8">₹' + fmtN(h.avg_price) + '</td>' +
+      '<td style="font-family:var(--font-data);color:#E8F4FD">' +
+        (h.current_price ? '₹' + fmtN(h.current_price) : '—') + '</td>' +
+      '<td style="font-family:var(--font-data);color:' + pnlColor + '">' +
+        (h.pnl_pct != null ? h.pnl_pct + '%' : '—') + '</td>' +
+      '<td style="font-family:var(--font-data);font-size:11px;color:#A0B4C8">' + escHtml(h.verdict || '—') + '</td>' +
+      '<td style="font-family:var(--font-display);font-size:10px;letter-spacing:0.08em;color:' + h.actionColor + '">' + h.action + '</td>' +
+      '</tr>';
+  }).join('');
+
+  return '<table class="universe-table" style="width:100%">' +
+    '<thead><tr>' +
+    '<th>STOCK</th><th>QTY</th><th>AVG</th><th>CUR</th>' +
+    '<th>P&L%</th><th>VERDICT</th><th>ACTION</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table>';
+}
 
 function initPortfolioUpload() {
   const dropzone = document.getElementById('portfolio-dropzone');
@@ -1518,13 +1600,40 @@ async function processPortfolioFile(file) {
     const text = await file.text();
     const holdings = parseCSVPortfolio(text);
     if (!holdings.length) { resultsEl.innerHTML = '<div class="portfolio-error">Could not parse file. Use CSV with columns: Name, Quantity, Avg Price.</div>'; return; }
-    const allLedger = ['conviction','longBets','highPromise','watchClose','trimAvoid'].flatMap(k => DATA?.stocks?.[k] || []);
-    const ledgerMap = new Map(allLedger.map(s => [s.name.toLowerCase(), s]));
-    const enriched = holdings.map(h => { const ledger = ledgerMap.get(h.name.toLowerCase()); return { ...h, ledger }; });
-    await Promise.all(enriched.slice(0, 10).map(async h => {
-      if (h.ledger) { const q = await fetchQuote(h.ledger.symbol); h.quote = q; }
-    }));
-    renderPortfolioResults(enriched);
+
+    // Enrich from ledger data immediately — no API call needed
+    const enriched = enrichHoldings(holdings);
+
+    // Build concentration panel
+    const sectorAlloc = {};
+    let total = enriched.reduce((sum, h) => sum + (h.qty * (h.avg_price || 0)), 0);
+    enriched.forEach(h => {
+      const sec = h.sector || 'Unknown';
+      sectorAlloc[sec] = (sectorAlloc[sec] || 0) + (h.qty * (h.avg_price || 0));
+    });
+    const concRows = Object.entries(sectorAlloc).sort((a,b) => b[1]-a[1]).map(([sec, val]) => {
+      const pct = total > 0 ? (val/total*100) : 0;
+      const warn = pct > 30 ? 'neg' : pct > 20 ? 'amber' : 'pos';
+      return `<div class="conc-row"><span class="conc-label">${escHtml(sec)}</span><div class="conc-bar-wrap"><div class="conc-bar ${warn}" style="width:${Math.min(pct,100)}%"></div></div><span class="conc-pct ${warn}">${pct.toFixed(1)}%</span></div>`;
+    }).join('');
+
+    resultsEl.innerHTML =
+      '<div class="portfolio-table-wrap">' + renderPortfolioTable(enriched) + '</div>' +
+      '<div class="conc-panel">' +
+        '<div class="conc-title">CONCENTRATION CHECK</div>' +
+        concRows +
+        `<div class="conc-row"><span class="conc-label">Total Holdings</span><span class="conc-pct ${enriched.length < 8 ? 'neg' : enriched.length > 25 ? 'amber' : 'pos'}">${enriched.length}</span></div>` +
+      '</div>' +
+      '<div class="sizing-guide">' +
+        '<div class="conc-title">TIER SIZING GUIDE</div>' +
+        '<div class="sizing-row"><span>Conviction Compounder</span><span class="mono">6–10%</span></div>' +
+        '<div class="sizing-row"><span>Multibagger</span><span class="mono">2–4%</span></div>' +
+        '<div class="sizing-row"><span>Special Situation</span><span class="mono">2–3%</span></div>' +
+        '<div class="sizing-row"><span>Early Quality / Inflection</span><span class="mono">1–2%</span></div>' +
+        '<div class="sizing-row warn"><span>MAX SINGLE STOCK</span><span class="mono">15%</span></div>' +
+        '<div class="sizing-row warn"><span>MAX SECTOR</span><span class="mono">30%</span></div>' +
+        '<div class="sizing-row"><span>CASH RESERVE</span><span class="mono">10–15%</span></div>' +
+      '</div>';
   } catch (e) {
     resultsEl.innerHTML = '<div class="portfolio-error">Error reading file: ' + escHtml(e.message) + '</div>';
   }
@@ -1682,6 +1791,37 @@ function renderWatchlistTab() {
 }
 
 /* =========================================================
+   BADGE HELPERS (Fix 4)
+   ========================================================= */
+function buildBadgeText(stock) {
+  const v = (stock.verdict || '').trim();
+  const conviction = (stock.conviction || '').trim();
+
+  if (v && !v.includes('undefined') && !v.includes('null')) {
+    const parts = v.split(/[\s·\-]+/).filter(Boolean);
+    const unique = [...new Set(parts)].slice(0, 2);
+    return unique.join(' · ');
+  }
+
+  const stance = stock.stance || 'neu';
+  const label = stance === 'pos' ? 'BUY' :
+                stance === 'neg' ? 'AVOID' : 'WATCH';
+  return conviction ? label + ' · ' + conviction.toUpperCase() : label;
+}
+
+function buildBadgeClass(stock) {
+  const v = (stock.verdict || '').toLowerCase();
+  const stance = stock.stance || 'neu';
+  if (v.includes('conviction') || (stance === 'pos' && v.includes('high')))
+    return 'badge-conviction';
+  if (stance === 'pos' || v.includes('buy') || v.includes('constructive'))
+    return 'badge-buy';
+  if (stance === 'neg' || v.includes('avoid') || v.includes('trim'))
+    return 'badge-avoid';
+  return 'badge-hold';
+}
+
+/* =========================================================
    RENDER: TABS + STOCKS
    ========================================================= */
 const TAB_DEFS_EXTRA = [
@@ -1740,12 +1880,20 @@ function renderStocks() {
   const def = TAB_DEFS.find(d => d.id === activeTab);
   if (!def) return;
   const list = (DATA?.stocks?.[activeTab]) || [];
-  const isConviction = def.id === 'conviction';
-  const isAvoid = def.id === 'trimAvoid';
   grid.innerHTML = list.map(s => {
     const f = s.fundamentals || {};
-    const rsiVal = DATA?.rsi?.[s.symbol] ?? null;
-    const cardClass = isConviction ? 'conviction-card' : isAvoid ? 'avoid-card' : '';
+    const sd = s.screener_data || {};
+    const isConviction =
+      (s.conviction||'').toUpperCase().includes('HIGH') &&
+      (s.stance === 'pos' ||
+       (s.verdict||'').toLowerCase().includes('buy') ||
+       (s.verdict||'').toLowerCase().includes('conviction'));
+    const isAvoid =
+      s.stance === 'neg' ||
+      (s.verdict||'').toLowerCase().includes('avoid') ||
+      (s.verdict||'').toLowerCase().includes('trim');
+    const cardClass = (isConviction ? 'conviction-card' : '') +
+                      (isAvoid ? ' avoid-card' : '');
     const initPrice = s.currentPrice ||
       (f.price || f.cmp || f.ltp) ||
       s.price || s.cmp || s.ltp || null;
@@ -1755,7 +1903,7 @@ function renderStocks() {
         <div class="card-line-1">
           <span class="card-sector-tag">${escHtml(s.sector)}</span>
           <span class="card-title">${escHtml(s.name)}</span>
-          <span class="verdict-tag ${def.tag}" style="margin:0;flex-shrink:0;">${def.accent} · ${escHtml(s.conviction)}</span>
+          <span class="badge ${buildBadgeClass(s)}" style="margin:0;flex-shrink:0;">${buildBadgeText(s)}</span>
         </div>
         <div class="card-line-2">
           <span class="card-price" id="px-${s.symbol}">${initPrice != null ? '₹' + fmtN(initPrice) : '—'}</span>
@@ -1777,13 +1925,14 @@ function renderStocks() {
           <div class="card-foot">
             <span class="foot-pill"><span class="dot"></span>Mcap · ${f.mcap || '—'}</span>
             <span class="foot-pill"><span class="dot"></span>Horizon · ${s.horizon || '—'}</span>
-            ${renderRSIGauge(rsiVal)}
+            ${renderRSI(s.symbol || sd.symbol, s.ticker || sd.ticker)}
           </div>
           <button class="expand-toggle" onclick="event.stopPropagation();toggleDeep('${s.symbol}')">▶ Full thesis</button>
           <div class="deep-dive" id="dd-${s.symbol}">
             <div class="dd-section"><h5>What could go right</h5><ul>${(s.catalysts||[]).map(c => `<li>${escHtml(c)}</li>`).join('')}</ul></div>
             <div class="dd-section"><h5>What could go wrong</h5><ul>${(s.risks||[]).map(r => `<li>${escHtml(r)}</li>`).join('')}</ul></div>
           </div>
+          ${s.selection_rationale ? `<div style="margin-top:12px;padding:12px;background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.15);border-left:3px solid var(--gold)"><div style="font-family:var(--font-display);font-size:9px;letter-spacing:0.15em;color:var(--gold);margin-bottom:8px">◈ WHY THIS VERDICT</div><div style="font-family:var(--font-prose);font-size:13px;color:#A0B4C8;line-height:1.6;font-style:italic">${escHtml(s.selection_rationale)}</div></div>` : ''}
           ${renderExitTargets(s, null)}
           <div id="card-ai-slot-${s.symbol}" style="margin-top:12px;">
             <div class="ai-section" style="text-align:left;">
