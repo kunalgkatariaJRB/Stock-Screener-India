@@ -788,12 +788,17 @@ def main():
           f"{len(emerging)} emerging | {len(inflection)} inflection")
     print(f"  ✓ Total: {len(all_stocks)} stocks")
 
-    # --- 4. Live prices — staggered, multi-source ---
-    print(f"\n[4/6] Fetching prices for {len(all_stocks)} stocks (Yahoo → NSE fallback)...")
+    # --- 4. Live prices — higher-priority tiers only (saves ~10 min) ---
+    # early_quality (191) + inflection_watch (91) = 282 low-priority stocks skipped.
+    # They still get tier analysis; prices just show as unavailable in the prompt.
+    # compounders + multibaggers + special_situations + emerging_compounders ≈ 114 stocks.
+    price_stocks = compounders + multibaggers + special + emerging
+    print(f"\n[4/6] Fetching prices for {len(price_stocks)} priority stocks "
+          f"(skipping early_quality={len(early_quality)} + inflection={len(inflection)})...")
     price_lookup = {}
     yahoo_ok = nse_ok = skipped = 0
 
-    for i, s in enumerate(all_stocks):
+    for i, s in enumerate(price_stocks):
         sym = s.get("symbol")
         if not sym or not s.get("symbol_resolved"):
             skipped += 1
@@ -805,14 +810,14 @@ def main():
                 nse_ok += 1
             else:
                 yahoo_ok += 1
-        # Stagger: pause 2s every 10 stocks, else 0.25s
+        # Stagger: pause 1.5s every 10 stocks, else 0.25s
         if (i + 1) % 10 == 0:
-            time.sleep(2.0)
+            time.sleep(1.5)
         else:
             time.sleep(0.25)
 
     total_fetched = yahoo_ok + nse_ok
-    print(f"  ✓ Prices: {total_fetched}/{len(all_stocks)} | Yahoo={yahoo_ok} NSE={nse_ok} skipped={skipped}")
+    print(f"  ✓ Prices: {total_fetched}/{len(price_stocks)} | Yahoo={yahoo_ok} NSE={nse_ok} skipped={skipped}")
 
     # --- 4b. RSI fetch — ledger stocks only (NEVER goes into Claude prompts) ---
     print(f"\n  Fetching RSI for ledger stocks only (faster)...")
