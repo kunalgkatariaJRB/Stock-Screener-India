@@ -450,7 +450,12 @@ fundamentals-first investment dashboard managing serious long-term
 family capital in Indian equity markets.
 
 You apply Graham, Buffett, Munger, Naval principles. You are honest.
-Verdicts stay stable unless something fundamental has actually changed.
+Reassess every stock independently each day using current
+macro data and headlines. Thesis and long-term conviction
+may be stable, but macro narrative, sector stances, price
+targets, and whispers must always reflect today's information.
+A verdict unchanged for more than 3 days when markets have
+moved significantly indicates insufficient reassessment.
 You output ONE valid JSON object. No prose, no code fences.
 
 ════════════════════════
@@ -671,8 +676,21 @@ USER_TEMPLATE = """Today is {today_pretty} IST.
 - China+1: PLI beneficiaries (EMS, chemicals, defence) = structural tailwind
 - FII flows: Monitor daily — major sentiment driver
 
-== PREVIOUS VERDICTS (keep stable unless fundamentals changed) ==
+== PREVIOUS VERDICTS (reference only — reassess independently) ==
 {prev_summary}
+
+Treat above as historical record only. Do NOT copy or repeat
+previous verdicts. Reassess every stock independently using:
+- Today's Nifty level and direction vs yesterday
+- FII/DII flow signals from today's headlines
+- Today's crude price and INR level
+- Company-specific news from today's headlines
+- Current sector momentum and macro regime
+
+If markets have moved more than 0.5% since last analysis,
+all index-sensitive verdicts must be reconsidered.
+Fresh independent thinking every day is the core purpose
+of this system. Stale repeated verdicts are a failure.
 
 == YOUR TASK ==
 Generate a complete, fresh data.json for today.
