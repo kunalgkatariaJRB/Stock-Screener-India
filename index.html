@@ -1302,74 +1302,128 @@ function initMobileSearch() {
   });
 }
 
-let universeFilter = 'ALL';
-function renderUniverse() {
-  const container = document.getElementById('universe-container');
-  if (!container) return;
-  const tiers = window.DATA?.tiers;
-  let all = [];
+/* Universe data store — rebuilt each render */
+let _universeAll = [];
+
+function buildUniverseData() {
+  const tiers = DATA && DATA.tiers;
+  _universeAll = [];
   if (tiers) {
     ['compounders','multibaggers','special_situations',
      'early_quality','emerging_compounders','inflection_watch']
-    .forEach(k => (tiers[k]||[]).forEach(s =>
-      all.push({...s, _tier: k.replace(/_/g,' ').toUpperCase()})
-    ));
+    .forEach(function(k) {
+      var arr = tiers[k];
+      if (!Array.isArray(arr)) return;
+      arr.forEach(function(s) {
+        _universeAll.push({ s: s, tier: k.replace(/_/g,' ').toUpperCase() });
+      });
+    });
   }
-  if (!all.length) {
-    const st = window.DATA?.stocks || {};
-    ['conviction','longBets','highPromise','watchClose']
-    .forEach(k => (st[k]||[]).forEach(s =>
-      all.push({...s, _tier:'LEDGER'})
-    ));
-  }
-  const el = document.getElementById('count-universe');
-  if (el) el.textContent = all.length || 0;
-  if (!all.length) {
-    container.innerHTML =
-      '<div style="padding:60px;text-align:center;font-family:' +
-      'var(--font-data,\'JetBrains Mono\',monospace);color:var(--text-faint);font-size:13px">' +
-      'Universe populates after next daily refresh at 7:30 AM IST.' +
-      '</div>';
+}
+
+function renderUniverse() {
+  var container = document.getElementById('universe-container');
+  if (!container) return;
+
+  buildUniverseData();
+
+  if (!_universeAll.length) {
+    container.innerHTML = '<div style="padding:60px;text-align:center;color:var(--text-faint);font-size:13px;">Universe populates after the next daily refresh at 7:30 AM IST.</div>';
     return;
   }
-  const rows = all.map(s => {
-    const sd = s.screener_data||{}, et = s.exit_targets||{},
-          f  = s.fundamentals||{};
-    const stance = s.stance||'neu';
-    const sc = stance==='pos'?'var(--up)':
-               stance==='neg'?'var(--down)':'var(--electric)';
-    const nm = (s.name||'').replace(/'/g,"\\'");
-    return '<tr style="cursor:pointer" onclick="openStockModal(\'' +
-      nm + '\')">' +
-      '<td><strong style="color:var(--text);font-family:\'Orbitron\',monospace;font-size:12px">'+(s.name||'—')+
-      '</strong><div style="font-size:10px;color:var(--text-faint)">'+
-      (s.ticker||'')+'</div></td>'+
-      '<td><span style="font-family:\'Orbitron\',monospace;font-size:8px;'+
-      'letter-spacing:0.08em;padding:2px 6px;border:1px solid '+
-      'var(--border);color:var(--electric)">'+s._tier+'</span></td>'+
-      '<td style="color:'+sc+';font-family:\'Orbitron\',monospace;'+
-      'font-size:10px">'+stance.toUpperCase()+'</td>'+
-      '<td style="font-family:\'JetBrains Mono\',monospace;font-size:12px">'+
-      ((sd.roce||f.roe)?Number(sd.roce||f.roe).toFixed(1)+'%':'—')+
-      '</td>'+
-      '<td style="font-family:\'JetBrains Mono\',monospace;font-size:12px">'+
-      ((sd.pe||f.pe)?Number(sd.pe||f.pe).toFixed(1)+'×':'—')+
-      '</td>'+
-      '<td style="font-family:\'JetBrains Mono\',monospace;font-size:12px">'+
-      (et.entry_zone_max?'₹'+
-        Number(et.entry_zone_max).toLocaleString('en-IN'):'—')+
-      '</td>'+
-      '<td style="font-family:\'JetBrains Mono\',monospace;font-size:12px">'+
-      (et.target_1?'₹'+
-        Number(et.target_1).toLocaleString('en-IN'):'—')+
-      '</td></tr>';
-  }).join('');
-  container.innerHTML =
-    '<div style="overflow-x:auto"><table class="universe-table" '+
-    'style="width:100%;border-collapse:collapse"><thead><tr>'+
-    '<th>STOCK</th><th>TIER</th><th>STANCE</th>'+
-    '<th>ROCE</th><th>P/E</th><th>ENTRY</th><th>T1</th>'+
-    '</tr></thead><tbody>'+rows+'</tbody></table></div>';
+
+  /* Build table using DOM API — avoids all string escaping issues */
+  var wrap = document.createElement('div');
+  wrap.style.overflowX = 'auto';
+
+  var tbl = document.createElement('table');
+  tbl.className = 'universe-table';
+  tbl.style.cssText = 'width:100%;border-collapse:collapse';
+
+  /* Header */
+  var thead = document.createElement('thead');
+  thead.innerHTML = '<tr><th>STOCK</th><th>TIER</th><th>STANCE</th><th>ROCE</th><th>P/E</th><th>ENTRY</th><th>T1</th></tr>';
+  tbl.appendChild(thead);
+
+  /* Body */
+  var tbody = document.createElement('tbody');
+  var stanceColor = { pos: 'var(--up)', neg: 'var(--down)', neu: 'var(--electric)' };
+
+  _universeAll.forEach(function(item) {
+    var s  = item.s;
+    var sd = s.screener_data || {};
+    var et = s.exit_targets  || {};
+    var stance = s.stance || 'neu';
+    var sym = sd.symbol || s.symbol || '';
+    var ticker = sd.ticker || s.ticker || '';
+
+    var tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    tr.addEventListener('click', (function(sym, nm) {
+      return function() { openStockModal(sym, nm); };
+    })(sym, s.name || ''));
+
+    /* STOCK cell */
+    var tdName = document.createElement('td');
+    var strong = document.createElement('strong');
+    strong.style.cssText = 'color:var(--text);font-family:\'Orbitron\',monospace;font-size:12px';
+    strong.textContent = s.name || '—';
+    var sub = document.createElement('div');
+    sub.style.cssText = 'font-size:10px;color:var(--text-faint)';
+    sub.textContent = ticker;
+    tdName.appendChild(strong);
+    tdName.appendChild(sub);
+
+    /* TIER cell */
+    var tdTier = document.createElement('td');
+    var badge = document.createElement('span');
+    badge.style.cssText = 'font-family:\'Orbitron\',monospace;font-size:8px;letter-spacing:0.08em;padding:2px 6px;border:1px solid var(--border);color:var(--electric)';
+    badge.textContent = item.tier;
+    tdTier.appendChild(badge);
+
+    /* STANCE cell */
+    var tdStance = document.createElement('td');
+    tdStance.style.cssText = 'color:' + (stanceColor[stance] || 'var(--electric)') + ';font-family:\'Orbitron\',monospace;font-size:10px';
+    tdStance.textContent = stance.toUpperCase();
+
+    /* ROCE cell */
+    var tdRoce = document.createElement('td');
+    tdRoce.style.cssText = 'font-family:\'JetBrains Mono\',monospace;font-size:12px';
+    var roceVal = sd.roce != null ? sd.roce : null;
+    tdRoce.textContent = roceVal != null ? Number(roceVal).toFixed(1) + '%' : '—';
+
+    /* P/E cell */
+    var tdPe = document.createElement('td');
+    tdPe.style.cssText = 'font-family:\'JetBrains Mono\',monospace;font-size:12px';
+    var peVal = sd.pe != null ? sd.pe : null;
+    tdPe.textContent = peVal != null ? Number(peVal).toFixed(1) + '×' : '—';
+
+    /* ENTRY cell */
+    var tdEntry = document.createElement('td');
+    tdEntry.style.cssText = 'font-family:\'JetBrains Mono\',monospace;font-size:12px';
+    tdEntry.textContent = et.entry_zone_max != null
+      ? '₹' + Number(et.entry_zone_max).toLocaleString('en-IN') : '—';
+
+    /* T1 cell */
+    var tdT1 = document.createElement('td');
+    tdT1.style.cssText = 'font-family:\'JetBrains Mono\',monospace;font-size:12px';
+    tdT1.textContent = et.target_1 != null
+      ? '₹' + Number(et.target_1).toLocaleString('en-IN') : '—';
+
+    tr.appendChild(tdName);
+    tr.appendChild(tdTier);
+    tr.appendChild(tdStance);
+    tr.appendChild(tdRoce);
+    tr.appendChild(tdPe);
+    tr.appendChild(tdEntry);
+    tr.appendChild(tdT1);
+    tbody.appendChild(tr);
+  });
+
+  tbl.appendChild(tbody);
+  wrap.appendChild(tbl);
+  container.innerHTML = '';
+  container.appendChild(wrap);
 }
 
 function setUniverseFilter(f) { universeFilter = f; renderUniverse(); }
@@ -1385,31 +1439,48 @@ function initPortfolioUpload() {
   fileInput.addEventListener('change', (e) => { const f = e.target.files[0]; if (f) processPortfolioFile(f); });
 }
 
+function splitCSVLine(line) {
+  /* Proper CSV split — handles "1,23,456.78" quoted numeric fields (Zerodha format) */
+  const fields = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQ = !inQ; }
+    else if (ch === ',' && !inQ) { fields.push(cur.trim()); cur = ''; }
+    else { cur += ch; }
+  }
+  fields.push(cur.trim());
+  return fields;
+}
+
 function parseHoldingsCSV(text) {
-  const lines = text.trim().split(/\r?\n/).filter(l=>l.trim());
+  const lines = text.trim().split(/\r?\n/).filter(l => l.trim());
   if (lines.length < 2) return [];
-  const cols = lines[0].replace(/"/g,'')
-    .split(',').map(c=>c.trim().toLowerCase());
-  let ni=-1,qi=-1,pi=-1;
-  cols.forEach((c,i)=>{
-    if(ni<0&&(c.includes('name')||c.includes('stock')||
-      c.includes('scrip')||c.includes('instrument')||
-      c.includes('symbol'))) ni=i;
-    if(qi<0&&(c.includes('qty')||c.includes('quantity')||
-      c.includes('shares')||c.includes('units'))) qi=i;
-    if(pi<0&&(c.includes('avg')||c.includes('price')||
-      c.includes('cost')||c.includes('rate')||
-      c.includes('purchase'))) pi=i;
+  const headerFields = splitCSVLine(lines[0]).map(c => c.toLowerCase());
+  let ni = -1, qi = -1, pi = -1;
+  headerFields.forEach((c, i) => {
+    if (ni < 0 && (c.includes('name') || c.includes('stock') ||
+      c.includes('scrip') || c.includes('instrument') || c.includes('symbol'))) ni = i;
+    if (qi < 0 && (c.includes('qty') || c.includes('quantity') ||
+      c.includes('shares') || c.includes('units'))) qi = i;
+    if (pi < 0 && (c.includes('avg') || c.includes('cost') ||
+      c.includes('rate') || c.includes('purchase'))) pi = i;
+    /* fallback: "price" header only if avg/cost not found */
   });
-  if(ni<0) ni=0; if(qi<0) qi=1; if(pi<0) pi=2;
-  return lines.slice(1).map(line=>{
-    const p=line.replace(/"/g,'').split(',').map(s=>s.trim());
-    return {
-      name: p[ni]||'',
-      qty: parseFloat((p[qi]||'0').replace(/[^0-9.]/g,''))||0,
-      avgPrice: parseFloat((p[pi]||'0').replace(/[^0-9.]/g,''))||0
-    };
-  }).filter(h=>h.name&&h.name.length>1&&h.qty>0);
+  /* second pass for 'price' if pi still not found */
+  if (pi < 0) headerFields.forEach((c, i) => {
+    if (pi < 0 && c.includes('price')) pi = i;
+  });
+  if (ni < 0) ni = 0;
+  if (qi < 0) qi = 1;
+  if (pi < 0) pi = 2;
+  return lines.slice(1).map(line => {
+    const p = splitCSVLine(line);
+    const name = (p[ni] || '').replace(/"/g, '').trim();
+    const qty  = parseFloat((p[qi] || '0').replace(/[^0-9.]/g, '')) || 0;
+    const avg  = parseFloat((p[pi] || '0').replace(/[^0-9.]/g, '')) || 0;
+    return { name, qty, avgPrice: avg };
+  }).filter(h => h.name && h.name.length > 1 && h.qty > 0);
 }
 function parseCSVPortfolio(text) { return parseHoldingsCSV(text); }
 
@@ -1527,30 +1598,51 @@ function renderWatchlistTab() {
   const grid = document.getElementById('stock-grid');
   const wl = getWatchlist();
   if (!wl.length) {
-    grid.innerHTML = '<div class="watchlist-empty">No stocks saved yet.<br>Search any stock, get AI analysis, and save HIGH conviction picks here.</div>';
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:60px;text-align:center;font-family:\'Fraunces\',serif;font-style:italic;color:var(--text-dim);font-size:14px;">No stocks saved yet.<br><br>Search any stock → get AI analysis → click <strong style="color:var(--gold);font-style:normal;">SAVE TO WATCHLIST</strong></div>';
     return;
   }
-  grid.innerHTML = wl.map(item => {
-    const tagClass = (item.verdict || '').toLowerCase().includes('buy') || (item.verdict || '').toLowerCase().includes('long') ? 'tag-buy' :
-      (item.verdict || '').toLowerCase().includes('avoid') || (item.verdict || '').toLowerCase().includes('trim') ? 'tag-sell' : 'tag-watch';
-    return `<div class="watchlist-card stock-card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px;">
-        <div>
-          <div style="font-family:'Orbitron',monospace;font-weight:700;font-size:14px;color:var(--text);">${escHtml(item.name)}</div>
-          <div style="font-size:10px;color:var(--text-faint);letter-spacing:0.08em;margin-top:2px;">${escHtml(item.ticker)}</div>
+  grid.innerHTML = wl.map((item, idx) => {
+    const v = (item.verdict || '').toLowerCase();
+    const isBuy  = v.includes('buy') || v.includes('long') || v.includes('high');
+    const isSell = v.includes('avoid') || v.includes('trim') || v.includes('neg');
+    const tagClass  = isBuy ? 'tag-buy' : isSell ? 'tag-sell' : 'tag-watch';
+    const stripe    = isBuy ? 'stripe-buy' : isSell ? 'stripe-sell' : 'stripe-watch';
+    const cardClass = isBuy ? 'conviction-card' : '';
+    const et = item.exit_targets || {};
+    const savedAt = item.analysed_at || item.saved_at || '';
+    const ageStr = savedAt ? (() => {
+      const h = (Date.now() - new Date(savedAt).getTime()) / 3600000;
+      return h < 24 ? Math.round(h) + 'h ago' : Math.round(h/24) + 'd ago';
+    })() : '';
+    const sym = escHtml(item.ticker || '');
+    const nm  = escHtml(item.name  || '');
+    return `<article class="stock-card ${cardClass}">
+      <div class="card-stripe ${stripe}"></div>
+      <div class="stock-card-collapsed" onclick="openStockModal('${sym}','${nm}')">
+        <div class="card-line-1">
+          <span class="card-sector-tag">${escHtml(item.sector||'WATCHLIST')}</span>
+          <span class="card-title">${nm}</span>
+          <span class="verdict-tag ${tagClass}" style="margin:0;flex-shrink:0;">${escHtml(item.verdict||'WATCH')}</span>
         </div>
-        <span class="verdict-tag ${tagClass}" style="margin:0;flex-shrink:0;">${escHtml(item.verdict || '—')}</span>
+        <div class="card-line-2">
+          <span class="card-price">${item.current_price != null ? '₹'+fmtN(item.current_price) : '—'}</span>
+          <span style="font-size:10px;color:var(--text-faint);letter-spacing:0.06em;">saved price${ageStr?' · '+ageStr:''}</span>
+        </div>
       </div>
-      <div style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--text);">
-        ${item.current_price != null ? '₹ ' + fmtN(item.current_price) : '—'}
-        <span class="watchlist-stale">price at time of analysis</span>
+      <button class="card-expand-btn" onclick="openStockModal('${sym}','${nm}')">▶ MORE</button>
+      <div class="card-detail" style="display:block;padding:0 16px 14px;">
+        <p class="thesis" style="margin:10px 0 10px;">${escHtml((item.thesis_snippet||'').slice(0,200))}${(item.thesis_snippet||'').length>=200?'…':''}</p>
+        ${et.entry_zone_max ? `<div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-faint);margin-bottom:12px;">
+          ENTRY ₹${Number(et.entry_zone_max).toLocaleString('en-IN')}
+          ${et.target_1?' · T1 ₹'+Number(et.target_1).toLocaleString('en-IN'):''}
+          ${et.target_2?' · T2 ₹'+Number(et.target_2).toLocaleString('en-IN'):''}
+        </div>` : ''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="hud-btn" style="border-color:var(--electric);color:var(--electric);" onclick="openStockModal('${sym}','${nm}')">⚡ Re-analyse</button>
+          <button class="hud-btn" style="border-color:rgba(255,56,96,0.4);color:var(--down);" onclick="removeFromWatchlist('${sym}');renderWatchlistTab();">✕ Remove</button>
+        </div>
       </div>
-      <p class="watchlist-snippet">${escHtml((item.thesis_snippet || '').slice(0, 150))}…</p>
-      <div class="watchlist-actions">
-        <button class="hud-btn" onclick="openStockModal('${escHtml(item.ticker)}','${escHtml(item.name)}')">⚡ Re-analyse</button>
-        <button class="hud-btn" style="border-color:rgba(255,56,96,0.4);color:var(--down);" onclick="removeFromWatchlist('${escHtml(item.ticker)}')">✕ Remove</button>
-      </div>
-    </div>`;
+    </article>`;
   }).join('');
 }
 
