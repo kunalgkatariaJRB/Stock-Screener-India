@@ -782,6 +782,11 @@ body::after {
   animation:none;
 }
 
+@keyframes pulse-dot {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.6; transform:scale(1.3); }
+}
+
 /* ===== COLOUR OVERRIDES (Fix 6) ===== */
 .brand { color: #E8F4FD !important; }
 .wire-label { background: #1A2A4A !important; color: #A0B4C8 !important; }
@@ -815,10 +820,7 @@ body::after {
   <div class="topbar-actions">
     <button id="voice-btn" class="hud-btn" onclick="speakNarrative()">🔊</button>
     <button id="mobile-search-btn" class="hud-btn" onclick="">⌕</button>
-    <div class="market-status">
-      <span class="pulse-dot" id="market-dot"></span>
-      <span id="market-state">—</span>
-    </div>
+    <div class="market-status" id="sys-status" style="display:flex;align-items:center;gap:4px;"></div>
     <span id="last-updated"></span>
     <button id="refresh-btn" class="hud-btn" onclick="refreshAll()">
       <span class="ico">↻</span><span>Refresh</span>
@@ -856,6 +858,38 @@ body::after {
     <div id="universe-container"></div>
   </div>
 </section>
+
+<!-- MARKET BRIEF -->
+<div class="market-brief-section" id="market-brief-section"
+  style="padding:24px 32px;border-top:1px solid rgba(0,212,255,0.18)">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div>
+      <div style="font-family:var(--font-display);font-size:11px;
+        letter-spacing:0.2em;color:#A0B4C8;text-transform:uppercase">
+        ◈ MARKET BRIEF</div>
+      <div style="font-family:var(--font-data);font-size:11px;
+        color:#6B7FA8;margin-top:2px">WHY DID THE MARKET MOVE TODAY</div>
+    </div>
+    <button id="brief-refresh-btn" onclick="loadMarketBrief()"
+      style="font-family:var(--font-display);font-size:10px;
+      letter-spacing:0.1em;padding:6px 14px;background:transparent;
+      border:1px solid rgba(0,212,255,0.3);color:#A0B4C8;
+      cursor:pointer;transition:all 0.2s"
+      onmouseover="this.style.borderColor='var(--electric)';this.style.color='var(--electric)'"
+      onmouseout="this.style.borderColor='rgba(0,212,255,0.3)';this.style.color='#A0B4C8'">
+      ↻ REFRESH BRIEF</button>
+  </div>
+  <div id="market-brief-content"
+    style="font-family:var(--font-prose);font-size:15px;
+    line-height:1.8;color:#A0B4C8;font-style:italic;
+    min-height:80px;display:flex;align-items:center">
+    <span style="color:#6B7FA8">Loading today's market brief...</span>
+  </div>
+  <div id="market-brief-points" style="margin-top:16px;display:none"></div>
+  <div id="market-brief-footer"
+    style="margin-top:12px;font-family:var(--font-data);font-size:10px;color:#6B7FA8;display:none">
+  </div>
+</div>
 
 <!-- PORTFOLIO UPLOAD -->
 <section id="portfolio">
@@ -1084,6 +1118,7 @@ async function loadTicker() {
     seen.add(k); filtered.push(it);
   }
   filtered.sort(() => Math.random() - 0.5);
+  window._wireHeadlines = filtered.slice(0, 30); // stash for Market Brief
   const items = filtered.slice(0, 24);
   const track = document.getElementById('ticker-track');
   if (!items.length) {
@@ -1217,21 +1252,61 @@ async function refreshMacro() {
     const cell = valEl.closest('.macro-cell');
     if (cell) { cell.classList.toggle('positive', q.change > 0); cell.classList.toggle('negative', q.change < 0); }
   }));
-  const nifty = PRICE_CACHE.get('^NSEI');
-  const dot = document.getElementById('market-dot');
-  const stateEl = document.getElementById('market-state');
-  if (nifty && nifty.marketState) {
-    const s = nifty.marketState;
-    if (s === 'REGULAR') { dot.className = 'pulse-dot'; stateEl.textContent = 'Markets Open'; }
-    else if (s === 'PRE') { dot.className = 'pulse-dot'; stateEl.textContent = 'Pre-Open'; }
-    else if (s === 'POST' || s === 'POSTPOST') { dot.className = 'pulse-dot closed'; stateEl.textContent = 'Post-Close'; }
-    else { dot.className = 'pulse-dot closed'; stateEl.textContent = 'Closed'; }
-  }
+  updateMarketStatus();
 }
 
 /* =========================================================
    NEW FUNCTIONS
    ========================================================= */
+
+function updateMarketStatus() {
+  const el = document.getElementById('sys-status')
+    || document.querySelector('.topbar-status');
+  if (!el) return;
+
+  const now  = new Date();
+  const ist  = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  const day  = ist.getUTCDay();
+  const h    = ist.getUTCHours();
+  const m    = ist.getUTCMinutes();
+  const mins = h * 60 + m;
+
+  const OPEN  = 9 * 60 + 15;
+  const CLOSE = 15 * 60 + 40;
+  const isWeekday    = day >= 1 && day <= 5;
+  const isMarketHours = mins >= OPEN && mins < CLOSE;
+  const isLive = isWeekday && isMarketHours;
+
+  const timeStr =
+    ist.getUTCHours().toString().padStart(2,'0') + ':' +
+    ist.getUTCMinutes().toString().padStart(2,'0') + ' IST';
+
+  const dateStr = ist.toLocaleDateString('en-IN', {
+    day:'2-digit', month:'short', year:'numeric', timeZone:'UTC'
+  });
+
+  if (isLive) {
+    el.innerHTML =
+      '<span style="display:inline-block;width:8px;height:8px;'+
+      'border-radius:50%;background:#00FF88;margin-right:6px;'+
+      'box-shadow:0 0 8px #00FF88;'+
+      'animation:pulse-dot 1.5s ease-in-out infinite"></span>'+
+      '<span style="color:#00FF88;font-family:var(--font-display);'+
+      'font-size:11px;letter-spacing:0.08em">LIVE</span>'+
+      '<span style="color:#6B7FA8;font-family:var(--font-data);'+
+      'font-size:11px;margin-left:8px">'+timeStr+'</span>';
+  } else {
+    el.innerHTML =
+      '<span style="display:inline-block;width:8px;height:8px;'+
+      'border-radius:50%;background:#FF3860;margin-right:6px;'+
+      'box-shadow:0 0 6px rgba(255,56,96,0.5)"></span>'+
+      '<span style="color:#FF3860;font-family:var(--font-display);'+
+      'font-size:11px;letter-spacing:0.08em">CLOSED</span>'+
+      '<span style="color:#6B7FA8;font-family:var(--font-data);'+
+      'font-size:11px;margin-left:8px">'+dateStr+'</span>';
+  }
+}
+
 function speakNarrative() {
   if (!window.speechSynthesis) return;
   const btn = document.getElementById('voice-btn');
@@ -1993,6 +2068,35 @@ function renderTabs() {
   }
 }
 
+function getVerdictChange(stock) {
+  const prev = window._prevData;
+  if (!prev) return null;
+  const prevStocks = prev.stocks || {};
+  const buckets = ['conviction','longBets','highPromise','watchClose','trimAvoid'];
+  const ticker = stock.ticker || stock.symbol;
+  const labels = {
+    conviction:  'CONVICTION BUYS',
+    longBets:    'INDIA TOMORROW',
+    highPromise: 'HIGH PROMISE',
+    watchClose:  'HOLD & WATCH',
+    trimAvoid:   'TRIM / AVOID'
+  };
+  let prevBucket = null;
+  buckets.forEach(b => {
+    if ((prevStocks[b] || []).find(s => s.ticker === ticker || s.symbol === ticker))
+      prevBucket = b;
+  });
+  let curBucket = null;
+  buckets.forEach(b => {
+    if ((window.DATA?.stocks?.[b] || []).find(s => s.ticker === ticker || s.symbol === ticker))
+      curBucket = b;
+  });
+  if (!prevBucket && curBucket) return { type:'NEW', label:'NEW TODAY' };
+  if (prevBucket && curBucket && prevBucket !== curBucket)
+    return { type:'MOVED', label:'FROM ' + (labels[prevBucket] || prevBucket) };
+  return null;
+}
+
 function findStockInTiers(stockName, stockTicker) {
   const tiers = DATA?.tiers || {};
   const nameLow   = (stockName   || '').toLowerCase().trim();
@@ -2064,6 +2168,11 @@ function renderStocks() {
         <div class="card-line-1">
           <span class="card-sector-tag">${escHtml(s.sector)}</span>
           <span class="card-title">${escHtml(s.name)}</span>
+          ${(() => { const ch = getVerdictChange(s); return ch ?
+            '<span style="font-family:var(--font-display);font-size:8px;letter-spacing:0.1em;'+
+            'padding:2px 6px;flex-shrink:0;background:'+(ch.type==='NEW'?'rgba(0,255,136,0.1)':'rgba(255,215,0,0.1)')+';'+
+            'border:1px solid '+(ch.type==='NEW'?'rgba(0,255,136,0.3)':'rgba(255,215,0,0.3)')+';'+
+            'color:'+(ch.type==='NEW'?'var(--up)':'var(--gold)')+'">'+ch.label+'</span>' : ''; })()}
           <span class="badge ${buildBadgeClass(s, activeTab)}" style="margin:0;flex-shrink:0;">${buildBadgeText(s, activeTab)}</span>
         </div>
         <div class="card-line-2">
@@ -2289,7 +2398,131 @@ function stamp() {
   if (footEl) footEl.textContent = `Edition ${editionLabel} · Page refreshed ${s}` + (DATA?.lastUpdated ? ` · Verdicts last regenerated ${new Date(DATA.lastUpdated).toLocaleString('en-IN', opts)} IST` : '');
 }
 
+/* =========================================================
+   MARKET BRIEF
+   ========================================================= */
+async function loadMarketBrief() {
+  const content = document.getElementById('market-brief-content');
+  const points  = document.getElementById('market-brief-points');
+  const footer  = document.getElementById('market-brief-footer');
+  const btn     = document.getElementById('brief-refresh-btn');
+  if (!content) return;
+
+  const cacheKey = 'heritage_brief_' + new Date().toISOString().slice(0, 13);
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    try { renderBrief(JSON.parse(cached), content, points, footer); return; } catch(e) {}
+  }
+
+  content.innerHTML =
+    '<span style="color:#6B7FA8;font-family:var(--font-data);font-size:12px;letter-spacing:0.1em">' +
+    'ANALYSING MARKET MOVEMENT...</span>';
+  if (btn) btn.textContent = '...';
+
+  const headlines = window._wireHeadlines || window._lastHeadlines || [];
+  const macro = window.DATA || {};
+
+  const macroSummary = [
+    'Nifty: '     + (macro.nifty     || '—'),
+    'Sensex: '    + (macro.sensex    || '—'),
+    'BankNifty: ' + (macro.bankNifty || '—'),
+    'Crude: '     + (macro.crude     || '—'),
+    'INR/USD: '   + (macro.inr       || '—'),
+  ].join(' | ');
+
+  const headlineText = headlines.slice(0, 15)
+    .map(h => '• ' + (h.title || h)).join('\n') || 'No headlines cached';
+
+  const today = new Date().toLocaleDateString('en-IN', {
+    weekday:'long', day:'numeric', month:'long', year:'numeric'
+  });
+
+  const prompt =
+    'Today is ' + today + '.\n\n' +
+    'MACRO: ' + macroSummary + '\n\n' +
+    'HEADLINES:\n' + headlineText + '\n\n' +
+    'Explain in plain English WHY the Indian market moved today. ' +
+    'Write for a serious long-term investor. Structure as:\n' +
+    '1. THE MAIN REASON (1 sentence)\n' +
+    '2. THE EXPLANATION (2-3 sentences — the chain of events)\n' +
+    '3. WHAT IT MEANS FOR YOUR PORTFOLIO (2 sentences — which sectors/positions are affected)\n' +
+    '4. NOISE VS SIGNAL (1 sentence — is this move meaningful or noise long-term investors should ignore)\n\n' +
+    'Be specific. Reference actual numbers. Never be generic. ' +
+    'If you cannot determine why, say so honestly.';
+
+  try {
+    const resp = await fetch(AI_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: '__MARKET_BRIEF__', customPrompt: prompt })
+    });
+    const data = await resp.json();
+    const text = data.analysis || data.verdict || data.content || data.text || '';
+    if (!text) throw new Error('Empty response');
+    const result = parseMarketBrief(text);
+    localStorage.setItem(cacheKey, JSON.stringify(result));
+    renderBrief(result, content, points, footer);
+    if (btn) btn.textContent = '↻ REFRESH BRIEF';
+  } catch(err) {
+    content.innerHTML =
+      '<span style="color:#6B7FA8">Brief unavailable — check the wire ticker above for today\'s market context. ' +
+      'Full brief activates after Worker update.</span>';
+    if (btn) btn.textContent = '↻ REFRESH BRIEF';
+  }
+}
+
+function parseMarketBrief(text) {
+  const labels = [
+    'THE MAIN REASON',
+    'THE EXPLANATION',
+    'WHAT IT MEANS FOR YOUR PORTFOLIO',
+    'NOISE VS SIGNAL'
+  ];
+  const colors = ['#E8F4FD', '#A0B4C8', 'var(--gold)', '#6B7FA8'];
+  const sections = [];
+  labels.forEach((label, i) => {
+    const rx = new RegExp(
+      '(?:' + (i+1) + '\\.|' + label + ')[:\\s]+([^\\n]+(?:\\n(?![1-4]\\.|' +
+      labels.map(l => l.slice(0,6)).join('|') + ')[^\\n]+)*)', 'i'
+    );
+    const m = text.match(rx);
+    if (m) sections.push({ label, text: m[1].trim(), color: colors[i] });
+  });
+  return sections.length >= 2 ? { sections, raw: text } : { sections: [], raw: text };
+}
+
+function renderBrief(result, content, points, footer) {
+  if (result.sections && result.sections.length >= 2) {
+    content.innerHTML =
+      '<div style="font-family:var(--font-prose);font-size:16px;line-height:1.7;' +
+      'color:#E8F4FD;font-style:italic">' + escHtml(result.sections[0].text) + '</div>';
+    if (points) {
+      points.innerHTML = result.sections.slice(1).map(s =>
+        '<div style="margin-bottom:14px">' +
+        '<div style="font-family:var(--font-display);font-size:9px;letter-spacing:0.15em;' +
+        'color:var(--electric);margin-bottom:6px">' + s.label + '</div>' +
+        '<div style="font-family:var(--font-prose);font-size:14px;line-height:1.6;' +
+        'color:' + s.color + ';font-style:italic">' + escHtml(s.text) + '</div></div>'
+      ).join('');
+      points.style.display = 'block';
+    }
+  } else {
+    content.innerHTML =
+      '<div style="font-family:var(--font-prose);font-size:15px;line-height:1.8;' +
+      'color:#A0B4C8;font-style:italic">' +
+      escHtml(result.raw || '').replace(/\n/g, '<br>') + '</div>';
+    if (points) points.style.display = 'none';
+  }
+  if (footer) {
+    footer.textContent = 'Generated ' +
+      new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' }) +
+      ' IST · For context only, not trading advice';
+    footer.style.display = 'block';
+  }
+}
+
 async function loadData() {
+  window._prevData = window.DATA || null; // snapshot before overwrite (Fix 3)
   try {
     const r = await fetch('data.json?ts=' + Date.now(), { cache: 'no-cache' });
     if (!r.ok) throw new Error('fetch failed');
@@ -2301,6 +2534,7 @@ async function loadData() {
     const narr = document.getElementById('macro-narrative');
     if (narr) narr.textContent = 'Could not load the latest editorial data. Live prices below should still work.';
   }
+  loadMarketBrief(); // load after data is available for macroNarrative context
 }
 
 async function refreshAll() {
@@ -2323,6 +2557,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   initStockModal();
   initMobileSearch();
   initPortfolioUpload();
+  updateMarketStatus();
+  setInterval(updateMarketStatus, 60000);
   setInterval(stamp, 60000);
   setInterval(() => {
     if (document.visibilityState === 'visible') refreshAll();
