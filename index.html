@@ -1610,6 +1610,86 @@ function parseHoldingsCSV(text) {
 }
 function parseCSVPortfolio(text) { return parseHoldingsCSV(text); }
 
+function buildPortfolioLocalHTML(enriched) {
+  const sectorAlloc = {};
+  const total = enriched.reduce((sum, h) => sum + (h.qty * (h.avg_price || 0)), 0);
+  enriched.forEach(h => {
+    const sec = h.sector || 'Unknown';
+    sectorAlloc[sec] = (sectorAlloc[sec] || 0) + (h.qty * (h.avg_price || 0));
+  });
+  const concRows = Object.entries(sectorAlloc).sort((a,b) => b[1]-a[1]).map(([sec, val]) => {
+    const pct = total > 0 ? (val/total*100) : 0;
+    const warn = pct > 30 ? 'neg' : pct > 20 ? 'amber' : 'pos';
+    return `<div class="conc-row"><span class="conc-label">${escHtml(sec)}</span><div class="conc-bar-wrap"><div class="conc-bar ${warn}" style="width:${Math.min(pct,100)}%"></div></div><span class="conc-pct ${warn}">${pct.toFixed(1)}%</span></div>`;
+  }).join('');
+  return '<div class="portfolio-table-wrap">' + renderPortfolioTable(enriched) + '</div>' +
+    '<div class="conc-panel"><div class="conc-title">CONCENTRATION CHECK</div>' + concRows +
+    `<div class="conc-row"><span class="conc-label">Total Holdings</span><span class="conc-pct ${enriched.length < 8 ? 'neg' : enriched.length > 25 ? 'amber' : 'pos'}">${enriched.length}</span></div></div>` +
+    '<div class="sizing-guide"><div class="conc-title">TIER SIZING GUIDE</div>' +
+    '<div class="sizing-row"><span>Conviction Compounder</span><span class="mono">6–10%</span></div>' +
+    '<div class="sizing-row"><span>Multibagger</span><span class="mono">2–4%</span></div>' +
+    '<div class="sizing-row"><span>Special Situation</span><span class="mono">2–3%</span></div>' +
+    '<div class="sizing-row"><span>Early Quality / Inflection</span><span class="mono">1–2%</span></div>' +
+    '<div class="sizing-row warn"><span>MAX SINGLE STOCK</span><span class="mono">15%</span></div>' +
+    '<div class="sizing-row warn"><span>MAX SECTOR</span><span class="mono">30%</span></div>' +
+    '<div class="sizing-row"><span>CASH RESERVE</span><span class="mono">10–15%</span></div></div>' +
+    '<div id="pf-ai-slot"><div class="ai-section" style="margin-top:20px;">' +
+    '<div class="ai-section-icon">⚡</div>' +
+    '<div class="ai-section-title">Get AI Portfolio Review</div>' +
+    '<div class="ai-section-desc">Claude will look at your portfolio as a whole — concentration risk, actions per position, and a 30-day priority.</div>' +
+    '<button class="ai-button" id="pf-ai-btn">Analyse My Portfolio</button>' +
+    '</div></div>';
+}
+
+function renderPortfolioAIAnalysis(analysis) {
+  if (!analysis) return '';
+  const hr = analysis.holdings_review || [];
+  const stanceMap = {
+    'WELL_POSITIONED': { color: 'var(--up)', label: 'WELL POSITIONED' },
+    'NEEDS_REBALANCING': { color: 'var(--gold)', label: 'NEEDS REBALANCING' },
+    'OVERWEIGHT_RISK': { color: 'var(--down)', label: 'OVERWEIGHT RISK' },
+    'UNDERWEIGHT_QUALITY': { color: '#FFB347', label: 'UNDERWEIGHT QUALITY' },
+  };
+  const stance = stanceMap[analysis.overall_stance] || { color: 'var(--electric)', label: analysis.overall_stance || 'ASSESSED' };
+  const actionColors = { 'HOLD': 'var(--electric)', 'ADD_ON_DIP': 'var(--up)', 'TRIM_25': '#FFB347', 'TRIM_50': 'var(--down)', 'EXIT': 'var(--down)' };
+  const priorityColors = { 'HIGH': 'var(--down)', 'MEDIUM': 'var(--gold)', 'LOW': 'var(--electric)' };
+
+  const rows = hr.map(h => {
+    const ac = actionColors[h.action] || 'var(--electric)';
+    const pc = priorityColors[h.priority] || '#6B7FA8';
+    return '<tr>' +
+      '<td style="color:#E8F4FD;font-family:var(--font-display);font-size:12px;font-weight:700">' + escHtml(h.name) + '</td>' +
+      '<td><span style="color:' + ac + ';font-family:var(--font-display);font-size:9px;letter-spacing:0.1em;font-weight:700">' + escHtml(h.action || '—') + '</span></td>' +
+      '<td style="color:#A0B4C8;font-size:12px;font-family:var(--font-prose);font-style:italic">' + escHtml(h.reason || '') + '</td>' +
+      '<td><span style="color:' + pc + ';font-size:9px;letter-spacing:0.1em">' + escHtml(h.priority || '') + '</span></td>' +
+      '</tr>';
+  }).join('');
+
+  return '<div style="margin-top:20px;border:1px solid rgba(255,215,0,0.25);background:rgba(255,215,0,0.03)">' +
+    '<div style="padding:12px 16px;border-bottom:1px solid rgba(255,215,0,0.15);display:flex;align-items:center;justify-content:space-between">' +
+      '<div style="font-family:var(--font-display);font-size:10px;letter-spacing:0.2em;color:var(--gold)">⚡ AI PORTFOLIO REVIEW</div>' +
+      '<span style="font-family:var(--font-display);font-size:9px;letter-spacing:0.12em;color:' + stance.color + ';border:1px solid ' + stance.color + ';padding:2px 8px">' + stance.label + '</span>' +
+    '</div>' +
+    '<div style="padding:12px 16px;overflow-x:auto">' +
+      '<table style="width:100%;border-collapse:collapse">' +
+        '<thead><tr>' +
+          '<th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:0.16em;color:#6B7FA8;border-bottom:1px solid rgba(0,212,255,0.15)">STOCK</th>' +
+          '<th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:0.16em;color:#6B7FA8;border-bottom:1px solid rgba(0,212,255,0.15)">ACTION</th>' +
+          '<th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:0.16em;color:#6B7FA8;border-bottom:1px solid rgba(0,212,255,0.15)">REASON</th>' +
+          '<th style="text-align:left;padding:6px 10px;font-size:9px;letter-spacing:0.16em;color:#6B7FA8;border-bottom:1px solid rgba(0,212,255,0.15)">PRIORITY</th>' +
+        '</tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table>' +
+    '</div>' +
+    (analysis.portfolio_assessment ? (
+      '<div style="padding:12px 16px;border-top:1px solid rgba(255,215,0,0.15)">' +
+        '<div style="font-family:var(--font-display);font-size:9px;letter-spacing:0.18em;color:var(--gold);margin-bottom:8px">PORTFOLIO ASSESSMENT</div>' +
+        '<div style="font-family:var(--font-prose);font-size:13px;line-height:1.65;color:#A0B4C8;font-style:italic">' + escHtml(analysis.portfolio_assessment) + '</div>' +
+      '</div>'
+    ) : '') +
+  '</div>';
+}
+
 async function processPortfolioFile(file) {
   const resultsEl = document.getElementById('portfolio-results');
   resultsEl.innerHTML = '<div class="scanning-anim">SCANNING<span class="scan-dots">...</span></div>';
@@ -1618,39 +1698,46 @@ async function processPortfolioFile(file) {
     const holdings = parseCSVPortfolio(text);
     if (!holdings.length) { resultsEl.innerHTML = '<div class="portfolio-error">Could not parse file. Use CSV with columns: Name, Quantity, Avg Price.</div>'; return; }
 
-    // Enrich from ledger data immediately — no API call needed
+    // Step 1: Enrich from ledger data and show immediately — zero latency
     const enriched = enrichHoldings(holdings);
+    resultsEl.innerHTML = buildPortfolioLocalHTML(enriched);
 
-    // Build concentration panel
-    const sectorAlloc = {};
-    let total = enriched.reduce((sum, h) => sum + (h.qty * (h.avg_price || 0)), 0);
-    enriched.forEach(h => {
-      const sec = h.sector || 'Unknown';
-      sectorAlloc[sec] = (sectorAlloc[sec] || 0) + (h.qty * (h.avg_price || 0));
-    });
-    const concRows = Object.entries(sectorAlloc).sort((a,b) => b[1]-a[1]).map(([sec, val]) => {
-      const pct = total > 0 ? (val/total*100) : 0;
-      const warn = pct > 30 ? 'neg' : pct > 20 ? 'amber' : 'pos';
-      return `<div class="conc-row"><span class="conc-label">${escHtml(sec)}</span><div class="conc-bar-wrap"><div class="conc-bar ${warn}" style="width:${Math.min(pct,100)}%"></div></div><span class="conc-pct ${warn}">${pct.toFixed(1)}%</span></div>`;
-    }).join('');
-
-    resultsEl.innerHTML =
-      '<div class="portfolio-table-wrap">' + renderPortfolioTable(enriched) + '</div>' +
-      '<div class="conc-panel">' +
-        '<div class="conc-title">CONCENTRATION CHECK</div>' +
-        concRows +
-        `<div class="conc-row"><span class="conc-label">Total Holdings</span><span class="conc-pct ${enriched.length < 8 ? 'neg' : enriched.length > 25 ? 'amber' : 'pos'}">${enriched.length}</span></div>` +
-      '</div>' +
-      '<div class="sizing-guide">' +
-        '<div class="conc-title">TIER SIZING GUIDE</div>' +
-        '<div class="sizing-row"><span>Conviction Compounder</span><span class="mono">6–10%</span></div>' +
-        '<div class="sizing-row"><span>Multibagger</span><span class="mono">2–4%</span></div>' +
-        '<div class="sizing-row"><span>Special Situation</span><span class="mono">2–3%</span></div>' +
-        '<div class="sizing-row"><span>Early Quality / Inflection</span><span class="mono">1–2%</span></div>' +
-        '<div class="sizing-row warn"><span>MAX SINGLE STOCK</span><span class="mono">15%</span></div>' +
-        '<div class="sizing-row warn"><span>MAX SECTOR</span><span class="mono">30%</span></div>' +
-        '<div class="sizing-row"><span>CASH RESERVE</span><span class="mono">10–15%</span></div>' +
-      '</div>';
+    // Wire AI button
+    const aiBtn = document.getElementById('pf-ai-btn');
+    if (aiBtn) {
+      aiBtn.addEventListener('click', async () => {
+        const slot = document.getElementById('pf-ai-slot');
+        if (!slot) return;
+        slot.innerHTML = '<div class="ai-section ai-section-loading" style="margin-top:20px;"><div class="ai-loader"><div class="ai-loader-dot"></div><div class="ai-loader-dot"></div><div class="ai-loader-dot"></div></div><div class="ai-section-title">Reading your portfolio…</div><div class="ai-section-desc">~15 seconds</div></div>';
+        try {
+          // Step 2: Call Cloudflare /portfolio for AI-powered holistic analysis
+          const ledgerSummary = DATA?.macroNarrative || '';
+          const payload = {
+            holdings: enriched.map(h => ({
+              name: h.name,
+              quantity: h.qty,
+              avg_price: h.avg_price || 0,
+              current_price: h.current_price || null,
+              verdict: h.verdict || null,
+              fair_value: h.entry_zone ? h.entry_zone * (1/0.75) : null,
+              target_1: h.target_1 || null,
+            })),
+            ledger_summary: ledgerSummary,
+          };
+          const res = await fetch(AI_WORKER_URL + '/portfolio', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) throw new Error('Worker ' + res.status);
+          const data = await res.json();
+          if (!data.success || !data.analysis) throw new Error(data.error || 'Invalid response');
+          slot.innerHTML = renderPortfolioAIAnalysis(data.analysis);
+        } catch (err) {
+          slot.innerHTML = '<div class="portfolio-error" style="margin-top:12px;">AI review failed: ' + escHtml(err.message) + ' <button class="expand-toggle" style="margin-left:12px;" onclick="document.getElementById(\'pf-ai-btn\') && document.getElementById(\'pf-ai-btn\').click()">↻ Retry</button></div>';
+        }
+      });
+    }
   } catch (e) {
     resultsEl.innerHTML = '<div class="portfolio-error">Error reading file: ' + escHtml(e.message) + '</div>';
   }
