@@ -2,8 +2,8 @@ name: Heritage Ledger — Daily Refresh
 
 on:
   schedule:
-    # 7:30 AM IST = 02:00 UTC daily
-    - cron: '0 2 * * *'
+    # 08:00 IST Sunday = 02:30 UTC Sunday
+    - cron: '30 2 * * 0'
   workflow_dispatch:
 
 permissions:
@@ -68,7 +68,7 @@ jobs:
       - name: Run Heritage Ledger refresh
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          HERITAGE_MODEL: claude-sonnet-4-6
+          HERITAGE_MODEL: claude-sonnet-5
         run: python refresh.py
 
       - name: Commit updated data.json

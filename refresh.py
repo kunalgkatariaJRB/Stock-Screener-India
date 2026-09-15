@@ -1,15 +1,18 @@
 """
-The Heritage Ledger — Daily Refresh Script (v4)
+The Heritage Ledger — Weekly Refresh Script (v5)
 ================================================
-Changes from v3:
-  - Multi-source price fetching: Yahoo (query1) → Yahoo (query2) → NSE Direct API
-  - Staggered timing to avoid rate limits (group pause every 10 stocks)
-  - Sector balance rule in SYSTEM_PROMPT (prevents all-cautious bias)
-  - Uses compress_prev_data to reduce input tokens (keeps MAX_TOKENS_LEDGER at 32000)
+Changes from v4:
+  - Model updated to claude-sonnet-5 (claude-sonnet-4-6 is legacy/being phased out)
+  - Self-healing: any failure (price/news/API) is logged as a warning and the
+    run degrades gracefully instead of aborting. If a valid new data.json
+    cannot be produced, the existing data.json is left untouched and the
+    script still exits 0 — only a genuine code/syntax error in this file
+    should ever produce a non-zero exit.
+  - Retry (2 attempts, 5s apart) around every Claude API call.
 
-Run daily via GitHub Actions. See .github/workflows/refresh.yml.
+Run weekly via GitHub Actions (Sunday 08:00 IST). See .github/workflows/refresh.yml.
 Required secrets: ANTHROPIC_API_KEY
-Optional env var: HERITAGE_MODEL (default: claude-sonnet-4-6)
+Optional env var: HERITAGE_MODEL (default: claude-sonnet-5)
 """
 
 import os
@@ -31,7 +34,7 @@ import anthropic
 # CONFIG
 # -----------------------------------------------------------------------
 
-MODEL              = os.environ.get("HERITAGE_MODEL", "claude-sonnet-4-6")
+MODEL              = os.environ.get("HERITAGE_MODEL", "claude-sonnet-5")
 DATA_PATH          = "data.json"
 UNIVERSE_PATH      = Path("data/processed/master_universe.json")
 MAX_TOKENS_LEDGER  = 32000
@@ -55,6 +58,25 @@ NEWS_FEEDS = [
     ("ET Markets",   "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms"),
     ("Mint Markets", "https://www.livemint.com/rss/markets"),
 ]
+
+# -----------------------------------------------------------------------
+# RETRY HELPER
+# -----------------------------------------------------------------------
+
+def call_with_retry(fn, *, attempts: int = 2, delay: float = 5.0, label: str = ""):
+    """Run fn() with up to `attempts` tries, sleeping `delay`s between them.
+    Re-raises the last exception if every attempt fails."""
+    last_exc = None
+    for attempt in range(1, attempts + 1):
+        try:
+            return fn()
+        except Exception as e:
+            last_exc = e
+            print(f"  ! {label} attempt {attempt}/{attempts} failed: {e}", file=sys.stderr)
+            if attempt < attempts:
+                time.sleep(delay)
+    raise last_exc
+
 
 # -----------------------------------------------------------------------
 # HTTP HELPERS
@@ -806,8 +828,11 @@ Never invent data. Output clean JSON only. No prose, no code fences."""
 # MAIN
 # -----------------------------------------------------------------------
 
-def main():
-    print(f"[{dt.datetime.utcnow().isoformat()}Z] Heritage Ledger v4 refresh starting...")
+def run():
+    """Full refresh. Any failure that prevents producing a valid new
+    data.json is handled by returning early (existing data.json is left
+    untouched); the caller treats that as a soft, non-fatal outcome."""
+    print(f"[{dt.datetime.utcnow().isoformat()}Z] Heritage Ledger v5 refresh starting...")
     print(f"  model: {MODEL}")
 
     ist = dt.timezone(dt.timedelta(hours=5, minutes=30))
@@ -922,8 +947,9 @@ def main():
     # --- 5. Claude client ---
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
-        print("  ✗ ANTHROPIC_API_KEY not set", file=sys.stderr)
-        sys.exit(1)
+        print("  ✗ WARNING: ANTHROPIC_API_KEY not set — cannot refresh. "
+              "Leaving existing data.json untouched.", file=sys.stderr)
+        return
     client = anthropic.Anthropic(api_key=api_key)
 
     # --- 6a. Main ledger ---
@@ -934,8 +960,8 @@ def main():
         news_block=news_block,
         prev_summary=prev_summary,
     )
-    try:
-        ledger_text = ""
+    def call_ledger():
+        text = ""
         with client.messages.stream(
             model=MODEL,
             max_tokens=MAX_TOKENS_LEDGER,
@@ -943,19 +969,24 @@ def main():
             messages=[{"role": "user", "content": ledger_msg}],
         ) as stream:
             for chunk in stream.text_stream:
-                ledger_text += chunk
+                text += chunk
             final = stream.get_final_message()
-            stop_reason = final.stop_reason
-            in_tok = final.usage.input_tokens
-            out_tok = final.usage.output_tokens
-        print(f"  ✓ {len(ledger_text)} chars | stop={stop_reason} | in={in_tok} out={out_tok}")
-        if stop_reason == "max_tokens":
-            print("  ✗ Response truncated — hit max_tokens limit.", file=sys.stderr)
-            sys.exit(1)
+        return text, final.stop_reason, final.usage.input_tokens, final.usage.output_tokens
+
+    try:
+        ledger_text, stop_reason, in_tok, out_tok = call_with_retry(
+            call_ledger, label="Claude ledger call"
+        )
     except Exception as e:
-        print(f"  ✗ Claude API call failed: {e}", file=sys.stderr)
-        import traceback; traceback.print_exc()
-        sys.exit(1)
+        print(f"  ✗ WARNING: Claude ledger call failed after retries: {e}", file=sys.stderr)
+        print("  ✗ WARNING: Leaving existing data.json untouched this run.", file=sys.stderr)
+        return
+
+    print(f"  ✓ {len(ledger_text)} chars | stop={stop_reason} | in={in_tok} out={out_tok}")
+    if stop_reason == "max_tokens":
+        print("  ✗ WARNING: Response truncated — hit max_tokens limit. "
+              "Leaving existing data.json untouched this run.", file=sys.stderr)
+        return
 
     # Always log head+tail so we can diagnose structure issues
     print(f"  DEBUG response head: {ledger_text[:300]}", file=sys.stderr)
@@ -964,29 +995,19 @@ def main():
     try:
         new_data = extract_json_block(ledger_text)
     except Exception as e:
-        print(f"  ✗ JSON parse failed: {e} — falling back to previous data", file=sys.stderr)
-        new_data = prev if prev else {}
+        print(f"  ✗ WARNING: JSON parse failed: {e}. "
+              "Leaving existing data.json untouched this run.", file=sys.stderr)
+        return
 
     required_top   = ["edition", "lastUpdated", "macroNarrative", "stocks", "sectors", "earnings", "whispers"]
     required_lists = ["conviction", "longBets", "highPromise", "watchClose", "trimAvoid"]
     missing = [k for k in required_top if k not in new_data]
     missing_lists = [k for k in required_lists if k not in new_data.get("stocks", {})]
     if missing or missing_lists:
-        print(f"  ✗ Missing keys: {missing + missing_lists} — falling back to previous data", file=sys.stderr)
+        print(f"  ✗ WARNING: Missing keys: {missing + missing_lists}. "
+              "Leaving existing data.json untouched this run.", file=sys.stderr)
         print(f"  ✗ Top-level keys returned: {list(new_data.keys())}", file=sys.stderr)
-        new_data = prev if prev else {}
-        # If prev also has no valid structure, build a minimal shell
-        if not new_data or any(k not in new_data for k in required_top):
-            print("  ! No valid previous data either — building minimal shell", file=sys.stderr)
-            new_data = {
-                "edition": today.strftime("Edition %d %b %Y"),
-                "lastUpdated": today.isoformat(),
-                "macroNarrative": "Data refresh in progress — Claude ledger call failed this run.",
-                "stocks": {"conviction": [], "longBets": [], "highPromise": [], "watchClose": [], "trimAvoid": [], "extendedUniverse": []},
-                "sectors": [],
-                "earnings": [],
-                "whispers": [],
-            }
+        return
 
     # --- 6b. Tier analysis — all 6 tiers run in parallel ---
     print(f"\n[6/6] Claude — Tier Analysis ({len(all_stocks)} stocks, batches of {BATCH_SIZE}, 6 tiers in parallel)...")
@@ -1008,7 +1029,8 @@ def main():
         tier_results = []
         for batch_num, batch in enumerate(batches):
             prompt = build_tier_prompt(tier_key, tier_label, batch, price_lookup, macro_block, today_pretty)
-            try:
+
+            def call_tier_batch():
                 text = ""
                 with client.messages.stream(
                     model=MODEL,
@@ -1019,8 +1041,12 @@ def main():
                     for chunk in stream.text_stream:
                         text += chunk
                     final = stream.get_final_message()
-                    in_tok = final.usage.input_tokens
-                    out_tok = final.usage.output_tokens
+                return text, final.usage.input_tokens, final.usage.output_tokens
+
+            try:
+                text, in_tok, out_tok = call_with_retry(
+                    call_tier_batch, label=f"{tier_label} batch {batch_num+1}"
+                )
                 parsed = extract_json_block(text)
                 batch_stocks = parsed.get("stocks", [])
                 # Enrich with Screener data
@@ -1084,14 +1110,24 @@ def main():
     print(f"    Edition: {new_data.get('edition')}")
     print(f"    Ledger: {ledger_counts}")
     print(f"    Tiers:  {tier_counts}")
-    print(f"[done] Heritage Ledger v4 complete.\n")
+    print(f"[done] Heritage Ledger v5 complete.\n")
+
+
+def main():
+    """Entry point. Any runtime failure inside run() is caught here and
+    downgraded to a warning so transient failures (bad API responses,
+    network issues, rate limits, etc.) never fail the GitHub Actions job —
+    the existing data.json is simply left in place. A real code/syntax
+    error in this file will still fail the job, since that would prevent
+    this code from running at all."""
+    try:
+        run()
+    except Exception as e:
+        import traceback
+        print(f"\n  ✗ WARNING: Unexpected error during refresh: {e}", file=sys.stderr)
+        traceback.print_exc()
+        print("  ✗ WARNING: Leaving existing data.json untouched (transient-failure safety net).\n", file=sys.stderr)
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        import traceback
-        print(f"\n✗ Fatal unhandled error: {e}", file=sys.stderr)
-        traceback.print_exc()
-        sys.exit(1)
+    main()
