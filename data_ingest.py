@@ -11,6 +11,7 @@ Output: data/processed/master_universe.json
 """
 
 import os
+import re
 import json
 import csv
 import time
@@ -70,6 +71,48 @@ def http_get(url: str, timeout: int = 15) -> str:
 
 
 
+
+def _slug(s: str) -> str:
+    """Reduce a filename stem to bare alphanumerics for tolerant matching."""
+    return re.sub(r"[^a-z0-9]", "", s.lower())
+
+
+def resolve_screen(screens_dir: Path, wanted: str) -> Path | None:
+    """Find a screen CSV regardless of filename case or separator style.
+
+    Screener.in names each export after the screen title, so
+    'Screen_3_special-situations.csv' and 'screen_3_special_situations.csv'
+    are both legitimate arrivals. macOS (case-insensitive) hides the
+    difference; Linux CI does not -- which silently zeroed this pipeline
+    from 2026-09-18. Match on an alphanumeric slug, never the literal name.
+    """
+    want = _slug(wanted)
+    files = sorted(screens_dir.glob("*.csv"))
+    exact = [p for p in files if _slug(p.stem) == want]
+    if len(exact) > 1:
+        # e.g. both 'Screen_1_compounders.csv' and 'screen_1_compounders.csv'
+        # present: which one is current is unknowable. Refuse to guess.
+        raise SystemExit(
+            f"FATAL: {len(exact)} files collide for screen '{wanted}': "
+            f"{[p.name for p in exact]}. Delete the stale one — keep exactly "
+            f"one CSV per screen."
+        )
+    if exact:
+        return exact[0]
+    # Relaxed pass: match on the 'screen_<id>' prefix only, but refuse
+    # to guess when it is ambiguous.
+    toks = wanted.split("_")
+    if len(toks) >= 2:
+        key = _slug(toks[0] + toks[1])
+        cands = [p for p in files if _slug(p.stem).startswith(key)]
+        if len(cands) == 1:
+            return cands[0]
+    return None
+
+
+MISSING_SCREENS: list[str] = []
+
+
 def parse_float(val: str) -> float | None:
     """Safely parse a numeric string from CSV."""
     if not val or val.strip() in ("", "-", "N/A", "NA", "#N/A"):
@@ -80,10 +123,14 @@ def parse_float(val: str) -> float | None:
         return None
 
 
-def read_csv_screen(filepath: Path) -> list[dict]:
-    """Read a Screener.in CSV export. Returns list of raw row dicts."""
-    if not filepath.exists():
-        print(f"  ! CSV not found: {filepath.name} — skipping")
+def read_csv_screen(name: str) -> list[dict]:
+    """Read a Screener.in CSV export by logical name (case/separator tolerant)."""
+    filepath = resolve_screen(SCREENS_DIR, name)
+    if filepath is None or not filepath.exists():
+        have = ", ".join(p.name for p in sorted(SCREENS_DIR.glob("*.csv"))) or "(none)"
+        print(f"  ! CSV NOT FOUND: {name}")
+        print(f"    no case/separator variant present. Have: {have}")
+        MISSING_SCREENS.append(name)
         return []
 
     rows = []
@@ -189,15 +236,13 @@ def normalize_stock(row: dict, tier: str) -> dict:
 def build_red_flag_names(screens_dir: Path) -> set[str]:
     """Return set of company names appearing on any Red Flag screen."""
     names = set()
-    red_flag_files = [
-        screens_dir / "screen_4a_pledging.csv",
-        screens_dir / "screen_4b_leverage.csv",
-        screens_dir / "screen_4c_declining.csv",
-        screens_dir / "screen_4d_promoter.csv",
-    ]
-    for f in red_flag_files:
-        if not f.exists():
-            print(f"  ! Red flag CSV missing: {f.name}")
+    wanted = ["screen_4a_pledging", "screen_4b_leverage",
+              "screen_4c_declining", "screen_4d_promoter"]
+    for w in wanted:
+        f = resolve_screen(screens_dir, w)
+        if f is None or not f.exists():
+            print(f"  ! RED FLAG CSV MISSING: {w} — red-flag protection DEGRADED")
+            MISSING_SCREENS.append(w)
             continue
         with open(f, "r", encoding="utf-8-sig") as fh:
             reader = csv.DictReader(fh)
@@ -226,12 +271,12 @@ def main():
 
     # 2. Read positive screens
     print("\n--- Reading Screens ---")
-    raw_compounders      = read_csv_screen(SCREENS_DIR / "screen_1_compounders.csv")
-    raw_multibaggers     = read_csv_screen(SCREENS_DIR / "screen_2_multibaggers.csv")
-    raw_special          = read_csv_screen(SCREENS_DIR / "screen_3_special_situations.csv")
-    raw_early_quality    = read_csv_screen(SCREENS_DIR / "screen_5_early_quality.csv")
-    raw_emerging         = read_csv_screen(SCREENS_DIR / "screen_6_emerging_compounders.csv")
-    raw_inflection       = read_csv_screen(SCREENS_DIR / "screen_7_inflection_watch.csv")
+    raw_compounders      = read_csv_screen("screen_1_compounders")
+    raw_multibaggers     = read_csv_screen("screen_2_multibaggers")
+    raw_special          = read_csv_screen("screen_3_special_situations")
+    raw_early_quality    = read_csv_screen("screen_5_early_quality")
+    raw_emerging         = read_csv_screen("screen_6_emerging_compounders")
+    raw_inflection       = read_csv_screen("screen_7_inflection_watch")
 
     # 3. Normalize each stock
     print("\n--- Normalizing ---")
@@ -353,14 +398,31 @@ def main():
         json.dump(output, f, indent=2, ensure_ascii=False, default=str)
 
     print(f"\n  ✓ Written: {OUTPUT_FILE}")
+
+    # ---- Integrity gates. A silent zero-stock universe is the failure
+    # ---- mode that froze this pipeline for three weeks undetected.
+    problems = []
+    if MISSING_SCREENS:
+        problems.append(f"{len(MISSING_SCREENS)} screen CSV(s) unresolved: {sorted(set(MISSING_SCREENS))}")
+    if total == 0:
+        problems.append("universe is empty (0 stocks) — refusing to publish")
+    empty_tiers = [n for n, lst in [
+        ("compounders", compounders), ("multibaggers", multibaggers),
+        ("special_situations", special), ("early_quality", early_quality),
+        ("emerging_compounders", emerging), ("inflection_watch", inflection),
+    ] if not lst]
+    if empty_tiers:
+        problems.append(f"tier(s) produced zero stocks: {empty_tiers}")
+    if problems:
+        print("\n  ✗ INGEST FAILED:", file=sys.stderr)
+        for p in problems:
+            print(f"    - {p}", file=sys.stderr)
+        raise SystemExit(1)
+
     print(f"[done] Data ingest complete.\n")
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        print(f"  ! Unexpected error: {e}")
-        print("  ! Exiting with code 0 to allow workflow to continue")
-        import sys
-        sys.exit(0)
+    # Deliberately NOT wrapped in a catch-all. A failed ingest must fail
+    # the job: the previous exit(0) turned every breakage into a green tick.
+    main()

@@ -11,7 +11,7 @@ To get your session cookie:
 5. Refresh this every 30-45 days when downloads stop working
 """
 
-import os, time, datetime, urllib.request
+import os, re, sys, time, datetime, urllib.request
 from pathlib import Path
 
 SESSION = os.environ.get("SCREENER_SESSION", "")
@@ -32,6 +32,25 @@ SCREEN_MAP = {
 }
 
 
+def _slug(s: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", s.lower())
+
+
+def purge_collisions(filename: str) -> None:
+    """Remove any existing CSV for this screen under a different spelling.
+
+    Screener exports and manual uploads arrive with inconsistent case and
+    separators ('Screen_3_special-situations.csv'). Leaving two files for one
+    screen makes which-is-current unknowable, so this sync is the single
+    writer: it deletes every variant before writing the canonical name.
+    """
+    target = _slug(Path(filename).stem)
+    for p in sorted(SCREENS_DIR.glob("*.csv")):
+        if p.name != filename and _slug(p.stem) == target:
+            print(f"    - removing stale variant: {p.name}")
+            p.unlink()
+
+
 def download(screen_id, filename):
     if "REPLACE" in screen_id:
         print(f"  ! {filename}: ID not configured")
@@ -47,8 +66,14 @@ def download(screen_id, filename):
         with urllib.request.urlopen(req, timeout=30) as r:
             content = r.read()
         if len(content) < 200:
-            print(f"  ! {filename}: too small — session may have expired")
+            print(f"  ! {filename}: too small ({len(content)}B) — session likely expired")
             return False
+        head = content[:400].decode("utf-8", errors="replace")
+        if "Name" not in head.split("\n")[0]:
+            print(f"  ! {filename}: no 'Name' column in header — got a login page, "
+                  f"not a CSV. Session expired.")
+            return False
+        purge_collisions(filename)
         (SCREENS_DIR / filename).write_bytes(content)
         print(f"  ✓ {filename}: {len(content):,} bytes")
         return True
@@ -58,7 +83,7 @@ def download(screen_id, filename):
 
 
 def main():
-    print(f"[{datetime.datetime.utcnow().isoformat()}Z] Screener sync...")
+    print(f"[{datetime.datetime.now(datetime.timezone.utc).isoformat()}] Screener sync...")
     if not SESSION:
         print("  ✗ SCREENER_SESSION secret not set")
         raise SystemExit(1)
@@ -68,8 +93,13 @@ def main():
         time.sleep(2)
     ok = sum(results)
     print(f"\n  Done: {ok}/{len(SCREEN_MAP)}")
-    if ok < len(SCREEN_MAP) // 2:
-        print("  ⚠ Over half failed — check SCREENER_SESSION in Secrets")
+    if ok < len(SCREEN_MAP):
+        failed = [fn for fn, r in zip(SCREEN_MAP, results) if not r]
+        print(f"\n  ✗ SYNC FAILED — {len(SCREEN_MAP) - ok} screen(s) did not "
+              f"download: {failed}", file=sys.stderr)
+        print("  ✗ Rotate SCREENER_SESSION in repo Secrets "
+              "(Settings → Secrets → Actions).", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

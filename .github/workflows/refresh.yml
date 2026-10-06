@@ -1,54 +1,36 @@
-name: Heritage Ledger — Daily Refresh
+name: Heritage Ledger — Weekly Refresh
+
+# Runs 08:00 IST Sunday. The whole pipeline is ONE job so that ingest and
+# refresh cannot disagree about which universe is current, and so there is
+# exactly one push per run (the old two-job layout raced on main and
+# swallowed non-fast-forward rejections with `|| echo "Push skipped"`).
+#
+# To move back to daily, swap the cron below for '30 2 * * *'.
 
 on:
   schedule:
-    # 08:00 IST Sunday = 02:30 UTC Sunday
-    - cron: '30 2 * * 0'
+    - cron: '30 2 * * 0'   # 02:30 UTC Sunday = 08:00 IST Sunday
   workflow_dispatch:
+    inputs:
+      skip_sync:
+        description: 'Skip the Screener CSV download (use committed CSVs)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
+  issues: write            # needed to raise a failure issue
+
+# Never let two runs fight over data.json.
+concurrency:
+  group: heritage-refresh
+  cancel-in-progress: false
 
 jobs:
-
-  # -----------------------------------------------------------------------
-  # JOB 1: Process Screener CSVs → build master_universe.json
-  # -----------------------------------------------------------------------
-  data_ingest:
-    name: Process Screener CSVs
+  pipeline:
+    name: Sync → Ingest → Analyse → Publish
     runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4.2.2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5.3.0
-        with:
-          python-version: '3.11'
-
-      - name: Run data ingest
-        run: |
-          mkdir -p data/processed
-          python data_ingest.py
-
-      - name: Commit processed universe
-        run: |
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "Heritage Bot"
-          git add data/processed/ || true
-          git diff --staged --quiet && echo "No changes to commit" || git commit -m "📊 Universe updated [skip ci]"
-          git push origin main || echo "Push skipped"
-
-  # -----------------------------------------------------------------------
-  # JOB 2: Daily Claude Analysis
-  # -----------------------------------------------------------------------
-  daily_refresh:
-    name: Daily Claude Refresh
-    runs-on: ubuntu-latest
-    needs: data_ingest
+    timeout-minutes: 90     # refresh.py makes ~180 HTTP calls + ~30 Claude calls
 
     steps:
       - name: Checkout repo
@@ -61,20 +43,147 @@ jobs:
         uses: actions/setup-python@v5.3.0
         with:
           python-version: '3.11'
+          cache: pip
 
       - name: Install dependencies
-        run: pip install anthropic
+        run: pip install -r requirements.txt
 
-      - name: Run Heritage Ledger refresh
+      # ---------------------------------------------------------------
+      # 1. Screener CSVs. Optional: if the session cookie has expired we
+      #    still run on the committed CSVs, but the run must SAY SO.
+      # ---------------------------------------------------------------
+      - name: Sync Screener CSVs
+        id: sync
+        if: ${{ !inputs.skip_sync }}
+        continue-on-error: true
+        env:
+          SCREENER_SESSION: ${{ secrets.SCREENER_SESSION }}
+        run: python screener_sync.py
+
+      - name: Flag stale CSVs
+        if: ${{ steps.sync.outcome == 'failure' }}
+        run: |
+          echo "::warning title=Screener sync failed::Running on committed CSVs. Rotate SCREENER_SESSION in Settings → Secrets → Actions."
+
+      # ---------------------------------------------------------------
+      # 2. Build the universe. Hard-fails on a missing screen, a zero-stock
+      #    universe, an empty tier, or two CSVs colliding on one screen.
+      # ---------------------------------------------------------------
+      - name: Build universe
+        run: |
+          mkdir -p data/processed
+          python data_ingest.py
+
+      - name: Verify universe integrity
+        run: |
+          python - <<'PY'
+          import json, sys
+          u = json.load(open('data/processed/master_universe.json'))
+          stats = u['stats']
+          total = stats['total']
+          print(f"universe total = {total}")
+          print(json.dumps(stats, indent=2))
+          if total < 50:
+              sys.exit(f"FATAL: universe has only {total} stocks — expected 300+. "
+                       "Screens are missing or malformed.")
+          empty = [k for k, v in u['universe'].items() if not v]
+          if empty:
+              sys.exit(f"FATAL: empty tier(s): {empty}")
+          if stats['unresolved_symbols'] > total * 0.1:
+              sys.exit(f"FATAL: {stats['unresolved_symbols']}/{total} symbols "
+                       "unresolved — NSE/BSE codes missing from the exports.")
+          print("universe OK")
+          PY
+
+      # ---------------------------------------------------------------
+      # 3. Claude analysis. Exits non-zero on any dropped tier batch.
+      # ---------------------------------------------------------------
+      - name: Generate verdicts
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           HERITAGE_MODEL: claude-sonnet-5
         run: python refresh.py
 
-      - name: Commit updated data.json
+      - name: Verify published data is fresh
         run: |
+          python - <<'PY'
+          import json, sys, datetime as dt
+          d = json.load(open('data.json'))
+          ts = dt.datetime.fromisoformat(d['lastUpdated'])
+          age_h = (dt.datetime.now(ts.tzinfo) - ts).total_seconds() / 3600
+          print(f"data.json lastUpdated = {d['lastUpdated']} ({age_h:.1f}h old)")
+          if age_h > 24:
+              sys.exit(f"FATAL: data.json is {age_h:.0f}h old — refresh did not "
+                       "write. This is the failure that went unnoticed for months.")
+          vetted = sum(len(v) for k, v in d.get('tiers', {}).items()
+                       if isinstance(v, list))
+          print(f"universe stocks vetted = {vetted}")
+          if vetted < 200:
+              sys.exit(f"FATAL: only {vetted} verdicts — expected 300+. "
+                       "Tier batches were dropped.")
+          ledger = {k: len(v) for k, v in d.get('stocks', {}).items()}
+          print("ledger buckets =", ledger)
+          if not ledger.get('conviction'):
+              sys.exit("FATAL: conviction bucket is empty.")
+          print("data.json OK")
+          PY
+
+      # ---------------------------------------------------------------
+      # 4. Publish. Rebase-and-retry instead of swallowing a rejected push.
+      # ---------------------------------------------------------------
+      - name: Commit and push
+        run: |
+          set -euo pipefail
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config user.name "Heritage Bot"
-          git add data.json
-          git diff --staged --quiet && echo "No changes to commit" || git commit -m "🤖 Daily refresh: $(date -u +'%Y-%m-%d') [skip ci]"
-          git push origin main || echo "Push skipped"
+          git config user.name  "Heritage Bot"
+          git add data.json data/processed/ data/screens/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Weekly refresh: $(date -u +'%Y-%m-%d') [skip ci]"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "pushed on attempt $attempt"
+              exit 0
+            fi
+            echo "push rejected — rebasing (attempt $attempt)"
+            git pull --rebase origin main
+          done
+          echo "::error title=Push failed::Could not push after 3 attempts."
+          exit 1
+
+      # ---------------------------------------------------------------
+      # 5. Tell a human. Scheduled-workflow failures are easy to miss.
+      # ---------------------------------------------------------------
+      - name: Raise failure issue
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const title = 'Heritage Ledger refresh failed';
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'pipeline-failure',
+            });
+            const body = [
+              'The weekly refresh failed.',
+              '',
+              `Run: ${url}`,
+              `Commit: ${context.sha}`,
+              '',
+              'The dashboard is now serving **stale verdicts**.',
+              'Check the failing step before trusting data.json.',
+            ].join('\n');
+            if (existing.data.length) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: existing.data[0].number, body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body, labels: ['pipeline-failure'],
+              });
+            }

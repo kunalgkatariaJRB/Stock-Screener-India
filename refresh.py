@@ -38,8 +38,11 @@ MODEL              = os.environ.get("HERITAGE_MODEL", "claude-sonnet-5")
 DATA_PATH          = "data.json"
 UNIVERSE_PATH      = Path("data/processed/master_universe.json")
 MAX_TOKENS_LEDGER  = 32000
-MAX_TOKENS_TIER    = 16000
-BATCH_SIZE         = 40
+# A tier verdict measures ~400 output tokens (measured from live data.json).
+# 40/batch needed ~16.5k and silently truncated against the old 16k cap.
+# 15/batch needs ~6k, leaving generous headroom.
+MAX_TOKENS_TIER    = 24000
+BATCH_SIZE         = 15
 
 MACRO_TICKERS = {
     "^NSEI":    "Nifty 50",
@@ -63,7 +66,16 @@ NEWS_FEEDS = [
 # RETRY HELPER
 # -----------------------------------------------------------------------
 
-def call_with_retry(fn, *, attempts: int = 2, delay: float = 5.0, label: str = ""):
+FAILURES: list[str] = []
+
+
+def fail(msg: str) -> None:
+    """Record a hard failure. Checked at the end of run(); forces exit 1."""
+    FAILURES.append(msg)
+    print(f"  \u2717 FAILURE: {msg}", file=sys.stderr)
+
+
+def call_with_retry(fn, *, attempts: int = 3, delay: float = 5.0, label: str = ""):
     """Run fn() with up to `attempts` tries, sleeping `delay`s between them.
     Re-raises the last exception if every attempt fails."""
     last_exc = None
@@ -832,7 +844,7 @@ def run():
     """Full refresh. Any failure that prevents producing a valid new
     data.json is handled by returning early (existing data.json is left
     untouched); the caller treats that as a soft, non-fatal outcome."""
-    print(f"[{dt.datetime.utcnow().isoformat()}Z] Heritage Ledger v5 refresh starting...")
+    print(f"[{dt.datetime.now(dt.timezone.utc).isoformat()}] Heritage Ledger v5 refresh starting...")
     print(f"  model: {MODEL}")
 
     ist = dt.timezone(dt.timedelta(hours=5, minutes=30))
@@ -883,6 +895,11 @@ def run():
           f"{len(special)} special | {len(early_quality)} early-quality | "
           f"{len(emerging)} emerging | {len(inflection)} inflection")
     print(f"  ✓ Total: {len(all_stocks)} stocks")
+
+    if not all_stocks:
+        fail("universe is empty — run data_ingest.py; refusing to burn API spend "
+             "generating verdicts from zero stocks")
+        return
 
     # --- 4. Live prices — higher-priority tiers only (saves ~10 min) ---
     # early_quality (191) + inflection_watch (91) = 282 low-priority stocks skipped.
@@ -947,8 +964,7 @@ def run():
     # --- 5. Claude client ---
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
-        print("  ✗ WARNING: ANTHROPIC_API_KEY not set — cannot refresh. "
-              "Leaving existing data.json untouched.", file=sys.stderr)
+        fail("ANTHROPIC_API_KEY not set — cannot refresh")
         return
     client = anthropic.Anthropic(api_key=api_key)
 
@@ -978,14 +994,12 @@ def run():
             call_ledger, label="Claude ledger call"
         )
     except Exception as e:
-        print(f"  ✗ WARNING: Claude ledger call failed after retries: {e}", file=sys.stderr)
-        print("  ✗ WARNING: Leaving existing data.json untouched this run.", file=sys.stderr)
+        fail(f"Claude ledger call failed after retries: {e}")
         return
 
     print(f"  ✓ {len(ledger_text)} chars | stop={stop_reason} | in={in_tok} out={out_tok}")
     if stop_reason == "max_tokens":
-        print("  ✗ WARNING: Response truncated — hit max_tokens limit. "
-              "Leaving existing data.json untouched this run.", file=sys.stderr)
+        fail(f"ledger response truncated at max_tokens={MAX_TOKENS_LEDGER} — raise the cap")
         return
 
     # Always log head+tail so we can diagnose structure issues
@@ -995,18 +1009,19 @@ def run():
     try:
         new_data = extract_json_block(ledger_text)
     except Exception as e:
-        print(f"  ✗ WARNING: JSON parse failed: {e}. "
-              "Leaving existing data.json untouched this run.", file=sys.stderr)
+        fail(f"ledger JSON parse failed: {e}")
         return
 
-    required_top   = ["edition", "lastUpdated", "macroNarrative", "stocks", "sectors", "earnings", "whispers"]
+    # NOTE: "earnings" is deliberately NOT required. SYSTEM_PROMPT instructs the
+    # model to keep earnings as internal context only and surface it via whispers.
+    # Requiring it here contradicted the prompt and failed every compliant run.
+    required_top   = ["edition", "lastUpdated", "macroNarrative", "stocks", "sectors", "whispers"]
     required_lists = ["conviction", "longBets", "highPromise", "watchClose", "trimAvoid"]
     missing = [k for k in required_top if k not in new_data]
     missing_lists = [k for k in required_lists if k not in new_data.get("stocks", {})]
     if missing or missing_lists:
-        print(f"  ✗ WARNING: Missing keys: {missing + missing_lists}. "
-              "Leaving existing data.json untouched this run.", file=sys.stderr)
-        print(f"  ✗ Top-level keys returned: {list(new_data.keys())}", file=sys.stderr)
+        fail(f"ledger JSON missing keys: {missing + missing_lists} "
+             f"(returned: {list(new_data.keys())})")
         return
 
     # --- 6b. Tier analysis — all 6 tiers run in parallel ---
@@ -1031,6 +1046,7 @@ def run():
             prompt = build_tier_prompt(tier_key, tier_label, batch, price_lookup, macro_block, today_pretty)
 
             def call_tier_batch():
+                """Call + parse together so truncation and bad JSON are retried."""
                 text = ""
                 with client.messages.stream(
                     model=MODEL,
@@ -1041,14 +1057,25 @@ def run():
                     for chunk in stream.text_stream:
                         text += chunk
                     final = stream.get_final_message()
-                return text, final.usage.input_tokens, final.usage.output_tokens
+                if final.stop_reason == "max_tokens":
+                    raise RuntimeError(
+                        f"truncated at max_tokens={MAX_TOKENS_TIER} "
+                        f"({len(batch)} stocks in batch) — lower BATCH_SIZE"
+                    )
+                parsed = extract_json_block(text)
+                return (parsed, text,
+                        final.usage.input_tokens, final.usage.output_tokens)
 
             try:
-                text, in_tok, out_tok = call_with_retry(
+                parsed, text, in_tok, out_tok = call_with_retry(
                     call_tier_batch, label=f"{tier_label} batch {batch_num+1}"
                 )
-                parsed = extract_json_block(text)
                 batch_stocks = parsed.get("stocks", [])
+                if len(batch_stocks) < len(batch):
+                    print(f"    ! {tier_label} batch {batch_num+1}: model returned "
+                          f"{len(batch_stocks)} verdicts for {len(batch)} stocks "
+                          f"— {len(batch) - len(batch_stocks)} dropped",
+                          file=sys.stderr)
                 # Enrich with Screener data
                 stock_map = {s["name"]: s for s in batch}
                 for result in batch_stocks:
@@ -1064,7 +1091,8 @@ def run():
                 tier_results.extend(batch_stocks)
                 print(f"    ✓ {tier_label} batch {batch_num+1}/{len(batches)}: {len(batch_stocks)} verdicts | in={in_tok} out={out_tok}")
             except Exception as e:
-                print(f"    ! {tier_label} batch {batch_num+1} failed: {e}", file=sys.stderr)
+                fail(f"{tier_label} batch {batch_num+1}/{len(batches)} "
+                     f"({len(batch)} stocks) failed after retries: {e}")
         return tier_key, tier_results
 
     tiers_output = {}
@@ -1077,6 +1105,16 @@ def run():
             tier_key, results = future.result()
             tiers_output[tier_key] = results
             print(f"  ✓ {tier_key}: {len(results)} total")
+
+    # Coverage gate — this is what let 308 of 394 stocks disappear unnoticed.
+    tier_inputs = {k: len(v) for k, _, v in tier_configs}
+    for tier_key, n_in in tier_inputs.items():
+        n_out = len(tiers_output.get(tier_key, []))
+        if n_in and not n_out:
+            fail(f"tier '{tier_key}' had {n_in} stocks in but produced ZERO verdicts")
+        elif n_in and n_out < n_in * 0.8:
+            print(f"  ! LOW COVERAGE {tier_key}: {n_out}/{n_in} verdicts "
+                  f"({n_out / n_in:.0%})", file=sys.stderr)
 
     # --- 7. Write ---
     new_data["lastUpdated"] = today.isoformat()
@@ -1110,6 +1148,9 @@ def run():
     print(f"    Edition: {new_data.get('edition')}")
     print(f"    Ledger: {ledger_counts}")
     print(f"    Tiers:  {tier_counts}")
+    total_verdicts = sum(len(v) for v in tiers_output.values())
+    total_input = sum(len(v) for _, _, v in tier_configs)
+    print(f"    Coverage: {total_verdicts}/{total_input} universe stocks vetted")
     print(f"[done] Heritage Ledger v5 complete.\n")
 
 
@@ -1124,9 +1165,17 @@ def main():
         run()
     except Exception as e:
         import traceback
-        print(f"\n  ✗ WARNING: Unexpected error during refresh: {e}", file=sys.stderr)
         traceback.print_exc()
-        print("  ✗ WARNING: Leaving existing data.json untouched (transient-failure safety net).\n", file=sys.stderr)
+        fail(f"unexpected error during refresh: {e}")
+
+    if FAILURES:
+        print(f"\n{'=' * 60}", file=sys.stderr)
+        print(f"REFRESH FAILED — {len(FAILURES)} problem(s):", file=sys.stderr)
+        for f in FAILURES:
+            print(f"  - {f}", file=sys.stderr)
+        print("Existing data.json left untouched where applicable.", file=sys.stderr)
+        print(f"{'=' * 60}\n", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
