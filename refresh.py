@@ -37,7 +37,14 @@ import anthropic
 MODEL              = os.environ.get("HERITAGE_MODEL", "claude-sonnet-5")
 DATA_PATH          = "data.json"
 UNIVERSE_PATH      = Path("data/processed/master_universe.json")
-MAX_TOKENS_LEDGER  = 32000
+# The ledger call must emit up to 41 stocks (conviction 8-12, longBets 6-10,
+# highPromise 3-6, watchClose 4-7, trimAvoid 3-6), each with exit_targets,
+# position_size, selection_rationale, catalysts, risks and trigger_alert,
+# plus 12 sectors and whispers. Measured need is ~35-40k output tokens.
+# At 32000 it truncated every run from 2026-07-03 onward, and the old code
+# silently returned, which is why data.json froze for three months.
+# Sonnet 5 supports 128k output tokens; 96k leaves real headroom.
+MAX_TOKENS_LEDGER  = 96000
 # A tier verdict measures ~400 output tokens (measured from live data.json).
 # 40/batch needed ~16.5k and silently truncated against the old 16k cap.
 # 15/batch needs ~6k, leaving generous headroom.
@@ -999,6 +1006,10 @@ def run():
         return
 
     print(f"  ✓ {len(ledger_text)} chars | stop={stop_reason} | in={in_tok} out={out_tok}")
+    if out_tok > MAX_TOKENS_LEDGER * 0.7:
+        print(f"  ! WARNING: ledger used {out_tok}/{MAX_TOKENS_LEDGER} output tokens "
+              f"({out_tok / MAX_TOKENS_LEDGER:.0%}) — approaching the cap. "
+              f"Raise MAX_TOKENS_LEDGER before it truncates.", file=sys.stderr)
     if stop_reason == "max_tokens":
         fail(f"ledger response truncated at max_tokens={MAX_TOKENS_LEDGER} — raise the cap")
         return

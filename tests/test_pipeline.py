@@ -194,6 +194,42 @@ class TestRefreshConfigIsSelfConsistent(unittest.TestCase):
             f"MAX_TOKENS_TIER={cap}. Batches will truncate and be dropped.",
         )
 
+    def test_ledger_fits_in_token_budget(self):
+        """The 2026-07-03 freeze: the main ledger call truncated at 32000.
+
+        Proven from the run log:
+            ✓ 36104 chars | stop=max_tokens | in=10239 out=32000
+
+        The ledger emits up to 41 stocks (the maxima of the five bucket ranges
+        in SYSTEM_PROMPT), each carrying exit_targets, position_size,
+        selection_rationale, catalysts, risks and trigger_alert — roughly
+        850 output tokens apiece — plus 12 sectors and whispers.
+        """
+        cap = self._const("MAX_TOKENS_LEDGER")
+
+        # Derive the stock count from the prompt itself so this test tracks
+        # the prompt rather than a number copied into the test.
+        m = re.search(
+            r"conviction \((\d+)-(\d+)\), longBets \((\d+)-(\d+)\), "
+            r"highPromise \((\d+)-(\d+)\),\s*watchClose \((\d+)-(\d+)\), "
+            r"trimAvoid \((\d+)-(\d+)\)",
+            self.src,
+        )
+        self.assertIsNotNone(
+            m, "could not find the bucket size ranges in SYSTEM_PROMPT"
+        )
+        assert m is not None
+        maxima = [int(g) for g in m.groups()[1::2]]
+        max_stocks = sum(maxima)
+
+        needed = max_stocks * 850 + 3000   # stocks + sectors/whispers/narrative
+        self.assertLess(
+            needed, cap,
+            f"the ledger can be asked for up to {max_stocks} stocks "
+            f"(~{needed} output tokens) but MAX_TOKENS_LEDGER={cap}. "
+            "The response will truncate and data.json will silently freeze.",
+        )
+
     def test_validator_does_not_require_what_the_prompt_forbids(self):
         """The 2026-06-01 landmine: prompt says omit `earnings`, gate demanded it."""
         m = re.search(r"required_top\s*=\s*\[([^\]]*)\]", self.src)
