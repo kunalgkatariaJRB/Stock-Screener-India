@@ -1,0 +1,12 @@
+# master_universe.json is a generated artifact rewritten by data_ingest.py on
+# every run. Marking it generated keeps it collapsed in PR diffs (it was adding
+# ~12,000 lines of noise) and stops it being counted as authored code.
+# If it ever conflicts with main, do not hand-merge it — just re-run
+# `python data_ingest.py` and commit the result.
+data/processed/master_universe.json linguist-generated=true -diff
+
+# Screener exports: generated data, not authored content.
+data/screens/*.csv linguist-generated=true -diff
+
+# The published verdicts file, likewise rewritten on every run by refresh.py.
+data.json linguist-generated=true -diff
