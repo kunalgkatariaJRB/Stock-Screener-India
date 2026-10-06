@@ -45,11 +45,14 @@ UNIVERSE_PATH      = Path("data/processed/master_universe.json")
 # silently returned, which is why data.json froze for three months.
 # Sonnet 5 supports 128k output tokens; 96k leaves real headroom.
 MAX_TOKENS_LEDGER  = 96000
-# A tier verdict measures ~400 output tokens (measured from live data.json).
-# 40/batch needed ~16.5k and silently truncated against the old 16k cap.
-# 15/batch needs ~6k, leaving generous headroom.
-MAX_TOKENS_TIER    = 24000
-BATCH_SIZE         = 15
+# Sizing from OBSERVED behaviour, not from the stale July data.json.
+# Run 37439578339: 15 stocks truncated against max_tokens=24000, so a tier
+# verdict costs >1600 output tokens — 4x the ~400 measured from the old
+# data.json, because the current prompt demands exit_targets with three
+# thesis_break_triggers, catalyst, risk and a numbers-specific thesis.
+# 10 stocks x ~1600 = ~16k, against a 48k cap: 3x headroom.
+MAX_TOKENS_TIER    = 48000
+BATCH_SIZE         = 10
 
 MACRO_TICKERS = {
     "^NSEI":    "Nifty 50",
@@ -1024,7 +1027,9 @@ def run():
     if not api_key:
         fail("ANTHROPIC_API_KEY not set — cannot refresh")
         return
-    client = anthropic.Anthropic(api_key=api_key)
+    # Default SDK timeouts are too tight for 16k-token streamed responses:
+    # run 37439578339 lost a tier batch to "The read operation timed out".
+    client = anthropic.Anthropic(api_key=api_key, timeout=900.0, max_retries=2)
 
     # --- 6a. Main ledger ---
     print(f"\n[5/6] Claude — Main Ledger...")
