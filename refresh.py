@@ -857,20 +857,20 @@ Return ONE JSON object with exactly these top-level keys, spelled exactly
 as shown. The five stock lists go INSIDE "stocks", not at the top level,
 and the timestamp key is "lastUpdated" in camelCase:
 
-{
+{{
   "edition": "<e.g. October 2026 - Weekly Refresh - 6 Oct>",
   "lastUpdated": "<ISO 8601 timestamp>",
   "macroNarrative": "<3 sentences>",
-  "stocks": {
+  "stocks": {{
     "conviction":  [...],
     "longBets":    [...],
     "highPromise": [...],
     "watchClose":  [...],
     "trimAvoid":   [...]
-  },
+  }},
   "sectors":  [ ... exactly 12 ... ],
   "whispers": [ ... 5-7 ... ]
-}
+}}
 
 == YOUR TASK ==
 Generate a complete, fresh data.json for today.

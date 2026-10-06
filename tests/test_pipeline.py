@@ -270,6 +270,39 @@ class TestRefreshConfigIsSelfConsistent(unittest.TestCase):
         self.assertIn("REQUIRED TOP-LEVEL SHAPE", self.src)
         self.assertIn('"lastUpdated"', self.src)
 
+    def test_user_template_formats_without_exploding(self):
+        """USER_TEMPLATE goes through .format(); literal braces must be doubled.
+
+        Adding the JSON skeleton to the prompt broke a whole run with
+        KeyError: '\\n  "edition"' — str.format read the skeleton's `{` as a
+        replacement field. This renders the template for real.
+        """
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "refresh_fmt", ROOT / "refresh.py")
+        assert spec is not None and spec.loader is not None
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+
+        out = mod.USER_TEMPLATE.format(
+            today_pretty="Mon, 06 Oct 2026",
+            macro_block="macro", news_block="news", prev_summary="prev",
+        )
+        # And the skeleton must survive with SINGLE braces for the model.
+        self.assertIn('"stocks": {', out)
+        self.assertIn('"lastUpdated"', out)
+        self.assertNotIn("{{", out)
+
+    def test_session_cookie_goes_in_the_jar_not_a_header(self):
+        """A static Cookie header suppresses the jar, so CSRF fails with 403."""
+        sync_src = (ROOT / "screener_sync.py").read_text(encoding="utf-8")
+        self.assertNotIn(
+            '("Cookie", f"sessionid={session}")', sync_src,
+            "a static Cookie header stops the csrftoken cookie being sent, "
+            "and Django rejects the export POST with 403",
+        )
+        self.assertIn("jar.set_cookie", sync_src)
+
     def test_validator_does_not_require_what_the_prompt_forbids(self):
         """The 2026-06-01 landmine: prompt says omit `earnings`, gate demanded it."""
         m = re.search(r"required_top\s*=\s*\[([^\]]*)\]", self.src)
