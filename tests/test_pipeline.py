@@ -186,8 +186,10 @@ class TestRefreshConfigIsSelfConsistent(unittest.TestCase):
         """BATCH_SIZE x ~400 tok/verdict must leave headroom under the cap."""
         batch = self._const("BATCH_SIZE")
         cap = self._const("MAX_TOKENS_TIER")
-        # 400 tok/verdict measured from live data.json verdicts; 1.5x safety.
-        needed = batch * 400 * 1.5
+        # 1600 tok/verdict OBSERVED: run 37439578339 truncated a 15-stock
+        # batch against a 24000 cap. The earlier 400 figure came from the
+        # July data.json and was 4x too low, which cost a 45-minute run.
+        needed = batch * 1600 * 1.5
         self.assertLess(
             needed, cap,
             f"BATCH_SIZE={batch} needs ~{needed:.0f} output tokens but "
