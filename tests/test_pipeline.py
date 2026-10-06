@@ -356,13 +356,43 @@ class TestScreenerSyncAuth(unittest.TestCase):
         import importlib
         mod = importlib.import_module("screener_sync")
         importlib.reload(mod)
-        for filename, sid in mod.SCREEN_MAP.items():
+        for filename, entry in mod.SCREEN_MAP.items():
+            self.assertIsInstance(
+                entry, tuple,
+                f"{filename}: SCREEN_MAP entries must be (screen_id, slug) — "
+                "the export endpoint requires the slug as well as the id",
+            )
+            sid, slug = entry
             self.assertRegex(sid, r"^\d+$", f"{filename} has a non-numeric id")
+            self.assertRegex(
+                slug, r"^[a-z0-9][a-z0-9-]*$",
+                f"{filename} has a malformed slug {slug!r}",
+            )
         # The sync must cover exactly the screens the ingest expects.
         synced = {Path(f).stem for f in mod.SCREEN_MAP}
         self.assertEqual(
             synced, set(EXPECTED_SCREENS),
             "screener_sync and data_ingest disagree about which screens exist",
+        )
+
+    def test_export_uses_the_real_endpoint(self):
+        """Guards the 404 that made this script useless from day one.
+
+        /screen/<id>/export/ has never existed on Screener. The working export
+        is a POST to /api/export/screen/ with screen_id, slug_name and a CSRF
+        token — verified live on 2026-10-06 returning text/csv.
+        """
+        self.assertIn(
+            "/api/export/screen/", self.src,
+            "export must POST to /api/export/screen/",
+        )
+        self.assertNotRegex(
+            self.src, r"/screen/\{?screen_id\}?/export/",
+            "the /screen/<id>/export/ path is a 404 — it never existed",
+        )
+        self.assertIn(
+            "csrfmiddlewaretoken", self.src,
+            "the export POST requires a CSRF token",
         )
 
     def test_sync_writes_canonical_lowercase_names(self):

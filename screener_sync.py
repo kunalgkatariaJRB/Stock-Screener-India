@@ -42,17 +42,19 @@ UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
 SCREENS_DIR = Path("data/screens")
 SCREENS_DIR.mkdir(parents=True, exist_ok=True)
 
+# screen_id AND slug_name — the export endpoint requires both.
+# Verified against the live site on 2026-10-06 from /explore/.
 SCREEN_MAP = {
-    "screen_1_compounders.csv":          "3695211",
-    "screen_2_multibaggers.csv":         "3695216",
-    "screen_3_special_situations.csv":   "3695219",
-    "screen_4a_pledging.csv":            "3695220",
-    "screen_4b_leverage.csv":            "3695223",
-    "screen_4c_declining.csv":           "3695224",
-    "screen_4d_promoter.csv":            "3695226",
-    "screen_5_early_quality.csv":        "3696139",
-    "screen_6_emerging_compounders.csv": "3696145",
-    "screen_7_inflection_watch.csv":     "3696147",
+    "screen_1_compounders.csv":          ("3695211", "1-compounders"),
+    "screen_2_multibaggers.csv":         ("3695216", "2-multibaggers"),
+    "screen_3_special_situations.csv":   ("3695219", "3-special-situations"),
+    "screen_4a_pledging.csv":            ("3695220", "4a-red-flag-pledging"),
+    "screen_4b_leverage.csv":            ("3695223", "4b-red-flag-leverage"),
+    "screen_4c_declining.csv":           ("3695224", "4c-red-flag-declining"),
+    "screen_4d_promoter.csv":            ("3695226", "4d-red-flag-promoter"),
+    "screen_5_early_quality.csv":        ("3696139", "early-quality"),
+    "screen_6_emerging_compounders.csv": ("3696145", "emerging-compounders"),
+    "screen_7_inflection_watch.csv":     ("3696147", "inflection-watch"),
 }
 
 
@@ -184,27 +186,77 @@ def authenticate():
 # DOWNLOAD
 # ---------------------------------------------------------------------------
 
-def download(opener, screen_id: str, filename: str) -> bool:
-    url = f"{BASE}/screen/{screen_id}/export/"
-    req = urllib.request.Request(url, headers={
+def download(opener, screen: tuple[str, str], filename: str) -> bool:
+    """Export one screen to CSV.
+
+    Screener does NOT serve exports from /screen/<id>/export/ — that path has
+    never existed and returned 404 on every run since this script was written.
+    The real export is a POST to /api/export/screen/ carrying the screen id,
+    the slug, and a CSRF token lifted from the screen page, exactly as the
+    site's own Export button does. Verified against the live site 2026-10-06:
+    returns text/csv with Content-Disposition attachment.
+    """
+    screen_id, slug = screen
+    page_url = f"{BASE}/screens/{screen_id}/{slug}/"
+
+    # Step 1 — load the screen page to mint a CSRF token for this session.
+    try:
+        req = urllib.request.Request(page_url, headers={
+            "User-Agent": UA, "Accept": "text/html,*/*",
+        })
+        with opener.open(req, timeout=60) as r:
+            html = r.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            print(f"  ! {filename}: screen page 404 — screen {screen_id}/{slug} "
+                  f"does not exist or is not visible to this account")
+        else:
+            print(f"  ! {filename}: screen page HTTP {e.code}")
+        return False
+    except Exception as e:
+        print(f"  ! {filename}: screen page error: {e}")
+        return False
+
+    m = re.search(r'name="csrfmiddlewaretoken"\s+value="([^"]+)"', html)
+    if not m:
+        print(f"  ! {filename}: no CSRF token on the screen page — "
+              f"not logged in, or Screener changed its markup")
+        return False
+    csrf = m.group(1)
+
+    # Step 2 — POST the export request.
+    export_url = (f"{BASE}/api/export/screen/?url_name=screen"
+                  f"&screen_id={urllib.parse.quote(screen_id)}"
+                  f"&slug_name={urllib.parse.quote(slug)}")
+    data = urllib.parse.urlencode({"csrfmiddlewaretoken": csrf}).encode()
+    req = urllib.request.Request(export_url, data=data, headers={
         "User-Agent": UA,
-        "Referer": f"{BASE}/screens/",
+        "Referer": page_url,          # Django rejects cross-origin POSTs
+        "Origin": BASE,
+        "X-CSRFToken": csrf,
+        "Content-Type": "application/x-www-form-urlencoded",
         "Accept": "text/csv,*/*",
     })
     try:
         with opener.open(req, timeout=60) as r:
             content = r.read()
+            ctype = r.headers.get("Content-Type", "")
     except urllib.error.HTTPError as e:
-        if e.code == 404:
-            print(f"  ! {filename}: HTTP 404 — screen {screen_id} not visible "
-                  f"to this account (wrong ID, or not your screen)")
-        elif e.code in (401, 403):
-            print(f"  ! {filename}: HTTP {e.code} — not authenticated")
+        if e.code == 403:
+            print(f"  ! {filename}: HTTP 403 on export — CSRF rejected, or "
+                  f"Premium not active on this account")
+        elif e.code == 404:
+            print(f"  ! {filename}: HTTP 404 on export endpoint")
         else:
-            print(f"  ! {filename}: HTTP {e.code}")
+            print(f"  ! {filename}: export HTTP {e.code}")
         return False
     except Exception as e:
-        print(f"  ! {filename}: {e}")
+        print(f"  ! {filename}: export error: {e}")
+        return False
+
+    if "csv" not in ctype.lower() and not content[:5] == b"Name,":
+        print(f"  ! {filename}: expected CSV, got Content-Type '{ctype}' "
+              f"({len(content)}B) — export did not produce a file")
         return False
 
     if len(content) < 200:
@@ -235,8 +287,8 @@ def main() -> None:
         sys.exit(1)
 
     results = {}
-    for filename, screen_id in SCREEN_MAP.items():
-        results[filename] = download(opener, screen_id, filename)
+    for filename, screen in SCREEN_MAP.items():
+        results[filename] = download(opener, screen, filename)
         time.sleep(2)   # be a polite client
 
     ok = sum(results.values())
