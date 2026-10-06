@@ -163,7 +163,18 @@ def authenticate():
 
     if user and pwd:
         print("  auth mode: credentials (fresh session per run)")
-        return login_with_credentials(user, pwd), "credentials"
+        try:
+            return login_with_credentials(user, pwd), "credentials"
+        except RuntimeError as e:
+            # Do not lose the run over a bad password when a cookie is
+            # available. Screener also rejects some datacenter logins, so a
+            # credential failure here is not always a wrong password.
+            print(f"  ! credential login failed: {e}", file=sys.stderr)
+            if session:
+                print("  ! falling back to SCREENER_SESSION cookie",
+                      file=sys.stderr)
+            else:
+                raise
 
     if session:
         print("  auth mode: session cookie (expires every 30-45 days)")

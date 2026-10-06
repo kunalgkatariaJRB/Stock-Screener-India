@@ -230,6 +230,46 @@ class TestRefreshConfigIsSelfConsistent(unittest.TestCase):
             "The response will truncate and data.json will silently freeze.",
         )
 
+    def test_ledger_shape_variants_are_normalised(self):
+        """The exact payload that failed run 37437454293 must now validate.
+
+        The model returned 'last_updated' and put the five buckets at the top
+        level instead of under 'stocks'. Both are fair readings of the old
+        prompt, and rejecting one cost a full run and ~42k output tokens.
+        """
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "refresh_mod", ROOT / "refresh.py")
+        assert spec is not None and spec.loader is not None
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+
+        buckets = ["conviction", "longBets", "highPromise",
+                   "watchClose", "trimAvoid"]
+        actual = {"edition": "x", "last_updated": "t", "macroNarrative": "m",
+                  "whispers": [], "sectors": []}
+        for b in buckets:
+            actual[b] = []
+
+        fixed = mod.normalize_ledger(dict(actual))
+        for key in ["edition", "lastUpdated", "macroNarrative",
+                    "stocks", "sectors", "whispers"]:
+            self.assertIn(key, fixed, f"{key} missing after normalisation")
+        for b in buckets:
+            self.assertIn(b, fixed["stocks"], f"{b} not moved under stocks")
+
+        # The already-correct shape must survive untouched.
+        nested = {"edition": "x", "lastUpdated": "t", "macroNarrative": "m",
+                  "sectors": [], "whispers": [],
+                  "stocks": {b: [] for b in buckets}}
+        again = mod.normalize_ledger(dict(nested))
+        self.assertEqual(sorted(again["stocks"]), sorted(buckets))
+
+    def test_prompt_states_the_top_level_shape(self):
+        """Leaving the skeleton to inference is what caused the mismatch."""
+        self.assertIn("REQUIRED TOP-LEVEL SHAPE", self.src)
+        self.assertIn('"lastUpdated"', self.src)
+
     def test_validator_does_not_require_what_the_prompt_forbids(self):
         """The 2026-06-01 landmine: prompt says omit `earnings`, gate demanded it."""
         m = re.search(r"required_top\s*=\s*\[([^\]]*)\]", self.src)
@@ -394,6 +434,30 @@ class TestScreenerSyncAuth(unittest.TestCase):
             "csrfmiddlewaretoken", self.src,
             "the export POST requires a CSRF token",
         )
+
+    def test_credential_failure_falls_back_to_cookie(self):
+        """A bad password must not lose the run when a cookie is available."""
+        with self._with_env(
+            SCREENER_USERNAME="u", SCREENER_PASSWORD="wrong",
+            SCREENER_SESSION="cookie",
+        ) as mod:
+            def boom(username, password):
+                raise RuntimeError("login failed — credentials rejected")
+
+            setattr(mod, "login_with_credentials", boom)
+            opener, mode = mod.authenticate()
+            self.assertEqual(mode, "session")
+
+    def test_credential_failure_raises_when_no_cookie(self):
+        with self._with_env(
+            SCREENER_USERNAME="u", SCREENER_PASSWORD="wrong",
+        ) as mod:
+            def boom(username, password):
+                raise RuntimeError("login failed — credentials rejected")
+
+            setattr(mod, "login_with_credentials", boom)
+            with self.assertRaises(RuntimeError):
+                mod.authenticate()
 
     def test_sync_writes_canonical_lowercase_names(self):
         """Prevents re-creating the 2026-09-18 duplicate-spelling trap."""

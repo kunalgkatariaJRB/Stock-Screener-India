@@ -367,6 +367,36 @@ def extract_json_block(text: str) -> dict:
     raise ValueError("Could not extract JSON from model output")
 
 
+LEDGER_BUCKETS = ["conviction", "longBets", "highPromise",
+                  "watchClose", "trimAvoid"]
+
+
+def normalize_ledger(d: dict) -> dict:
+    """Accept the shape variants the model reasonably emits.
+
+    The prompt never showed an explicit top-level skeleton, so the model
+    alternates between snake_case/camelCase for the timestamp and between
+    nesting the five buckets under "stocks" or placing them at the top
+    level. Both are valid readings of the instructions; rejecting one of
+    them wasted a full run and ~42k output tokens.
+    """
+    if "lastUpdated" not in d and "last_updated" in d:
+        d["lastUpdated"] = d.pop("last_updated")
+
+    if "stocks" not in d and any(b in d for b in LEDGER_BUCKETS):
+        d["stocks"] = {b: d.pop(b) for b in LEDGER_BUCKETS if b in d}
+
+    # Buckets split across both locations: merge, preferring the nested copy.
+    if isinstance(d.get("stocks"), dict):
+        for b in LEDGER_BUCKETS:
+            if b in d and b not in d["stocks"]:
+                d["stocks"][b] = d.pop(b)
+            elif b in d:
+                d.pop(b)
+
+    return d
+
+
 def compress_prev_data(prev: dict) -> str:
     """Compact summary of previous data.json — saves ~13k input tokens."""
     if not prev:
@@ -822,6 +852,26 @@ all index-sensitive verdicts must be reconsidered.
 Fresh independent thinking on every run is the core purpose
 of this system. Stale repeated verdicts are a failure.
 
+== REQUIRED TOP-LEVEL SHAPE ==
+Return ONE JSON object with exactly these top-level keys, spelled exactly
+as shown. The five stock lists go INSIDE "stocks", not at the top level,
+and the timestamp key is "lastUpdated" in camelCase:
+
+{
+  "edition": "<e.g. October 2026 - Weekly Refresh - 6 Oct>",
+  "lastUpdated": "<ISO 8601 timestamp>",
+  "macroNarrative": "<3 sentences>",
+  "stocks": {
+    "conviction":  [...],
+    "longBets":    [...],
+    "highPromise": [...],
+    "watchClose":  [...],
+    "trimAvoid":   [...]
+  },
+  "sectors":  [ ... exactly 12 ... ],
+  "whispers": [ ... 5-7 ... ]
+}
+
 == YOUR TASK ==
 Generate a complete, fresh data.json for today.
 
@@ -1019,7 +1069,7 @@ def run():
     print(f"  DEBUG response tail: {ledger_text[-300:]}", file=sys.stderr)
 
     try:
-        new_data = extract_json_block(ledger_text)
+        new_data = normalize_ledger(extract_json_block(ledger_text))
     except Exception as e:
         fail(f"ledger JSON parse failed: {e}")
         return
