@@ -194,6 +194,42 @@ class TestRefreshConfigIsSelfConsistent(unittest.TestCase):
             f"MAX_TOKENS_TIER={cap}. Batches will truncate and be dropped.",
         )
 
+    def test_ledger_fits_in_token_budget(self):
+        """The 2026-07-03 freeze: the main ledger call truncated at 32000.
+
+        Proven from the run log:
+            ✓ 36104 chars | stop=max_tokens | in=10239 out=32000
+
+        The ledger emits up to 41 stocks (the maxima of the five bucket ranges
+        in SYSTEM_PROMPT), each carrying exit_targets, position_size,
+        selection_rationale, catalysts, risks and trigger_alert — roughly
+        850 output tokens apiece — plus 12 sectors and whispers.
+        """
+        cap = self._const("MAX_TOKENS_LEDGER")
+
+        # Derive the stock count from the prompt itself so this test tracks
+        # the prompt rather than a number copied into the test.
+        m = re.search(
+            r"conviction \((\d+)-(\d+)\), longBets \((\d+)-(\d+)\), "
+            r"highPromise \((\d+)-(\d+)\),\s*watchClose \((\d+)-(\d+)\), "
+            r"trimAvoid \((\d+)-(\d+)\)",
+            self.src,
+        )
+        self.assertIsNotNone(
+            m, "could not find the bucket size ranges in SYSTEM_PROMPT"
+        )
+        assert m is not None
+        maxima = [int(g) for g in m.groups()[1::2]]
+        max_stocks = sum(maxima)
+
+        needed = max_stocks * 850 + 3000   # stocks + sectors/whispers/narrative
+        self.assertLess(
+            needed, cap,
+            f"the ledger can be asked for up to {max_stocks} stocks "
+            f"(~{needed} output tokens) but MAX_TOKENS_LEDGER={cap}. "
+            "The response will truncate and data.json will silently freeze.",
+        )
+
     def test_validator_does_not_require_what_the_prompt_forbids(self):
         """The 2026-06-01 landmine: prompt says omit `earnings`, gate demanded it."""
         m = re.search(r"required_top\s*=\s*\[([^\]]*)\]", self.src)
@@ -320,13 +356,43 @@ class TestScreenerSyncAuth(unittest.TestCase):
         import importlib
         mod = importlib.import_module("screener_sync")
         importlib.reload(mod)
-        for filename, sid in mod.SCREEN_MAP.items():
+        for filename, entry in mod.SCREEN_MAP.items():
+            self.assertIsInstance(
+                entry, tuple,
+                f"{filename}: SCREEN_MAP entries must be (screen_id, slug) — "
+                "the export endpoint requires the slug as well as the id",
+            )
+            sid, slug = entry
             self.assertRegex(sid, r"^\d+$", f"{filename} has a non-numeric id")
+            self.assertRegex(
+                slug, r"^[a-z0-9][a-z0-9-]*$",
+                f"{filename} has a malformed slug {slug!r}",
+            )
         # The sync must cover exactly the screens the ingest expects.
         synced = {Path(f).stem for f in mod.SCREEN_MAP}
         self.assertEqual(
             synced, set(EXPECTED_SCREENS),
             "screener_sync and data_ingest disagree about which screens exist",
+        )
+
+    def test_export_uses_the_real_endpoint(self):
+        """Guards the 404 that made this script useless from day one.
+
+        /screen/<id>/export/ has never existed on Screener. The working export
+        is a POST to /api/export/screen/ with screen_id, slug_name and a CSRF
+        token — verified live on 2026-10-06 returning text/csv.
+        """
+        self.assertIn(
+            "/api/export/screen/", self.src,
+            "export must POST to /api/export/screen/",
+        )
+        self.assertNotRegex(
+            self.src, r"/screen/\{?screen_id\}?/export/",
+            "the /screen/<id>/export/ path is a 404 — it never existed",
+        )
+        self.assertIn(
+            "csrfmiddlewaretoken", self.src,
+            "the export POST requires a CSRF token",
         )
 
     def test_sync_writes_canonical_lowercase_names(self):
