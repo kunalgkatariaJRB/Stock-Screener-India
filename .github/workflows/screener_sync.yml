@@ -35,35 +35,31 @@ jobs:
       - name: Probe one screen export
         id: probe
         env:
+          SCREENER_USERNAME: ${{ secrets.SCREENER_USERNAME }}
+          SCREENER_PASSWORD: ${{ secrets.SCREENER_PASSWORD }}
           SCREENER_SESSION: ${{ secrets.SCREENER_SESSION }}
         run: |
           python - <<'PY'
-          import os, sys, urllib.request
+          import sys
+          import screener_sync as s
 
-          session = os.environ.get("SCREENER_SESSION", "")
-          if not session:
-              sys.exit("SCREENER_SESSION secret is not set")
+          # Uses whichever auth mode is configured, exactly as the real sync does.
+          opener, mode = s.authenticate()
+          print(f"auth mode in use: {mode}")
 
           # Screen 1 (compounders) is the cheapest representative probe.
-          url = "https://www.screener.in/screen/3695211/export/"
-          req = urllib.request.Request(url, headers={
-              "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
-              "Cookie": f"sessionid={session}",
-              "Referer": "https://www.screener.in/screens/",
-              "Accept": "text/csv,*/*",
-          })
-          try:
-              with urllib.request.urlopen(req, timeout=30) as r:
-                  body = r.read()
-          except Exception as e:
-              sys.exit(f"probe request failed: {e}")
+          # Download to a scratch dir so the repo is never touched here.
+          import tempfile, pathlib
+          s.SCREENS_DIR = pathlib.Path(tempfile.mkdtemp())
+          if not s.download(opener, s.SCREEN_MAP["screen_1_compounders.csv"],
+                            "screen_1_compounders.csv"):
+              sys.exit("probe download failed")
 
-          if len(body) < 200:
-              sys.exit(f"response only {len(body)}B — session expired")
-          header = body[:400].decode("utf-8", errors="replace").split("\n")[0]
-          if "Name" not in header:
-              sys.exit("no 'Name' column — got a login page, session expired")
-          print(f"session OK — {len(body):,}B, header: {header[:80]}")
+          if mode == "session":
+              print("::warning title=Using session cookie::This expires every "
+                    "30-45 days. Setting SCREENER_USERNAME + SCREENER_PASSWORD "
+                    "removes the rotation entirely.")
+          print("Screener access OK")
           PY
 
       - name: Raise rotation issue

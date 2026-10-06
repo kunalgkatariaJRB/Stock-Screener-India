@@ -235,5 +235,111 @@ class TestRefreshConfigIsSelfConsistent(unittest.TestCase):
             )
 
 
+class TestScreenerSyncAuth(unittest.TestCase):
+    """The sync is what removes the manual download step — guard its auth logic."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.src = (ROOT / "screener_sync.py").read_text(encoding="utf-8")
+
+    def _with_env(self, **env):
+        """Context manager: run with ONLY the given Screener vars set.
+
+        Must stay open across the call under test — an earlier version
+        restored the environment before authenticate() ran, which made the
+        test fail for the wrong reason.
+        """
+        import contextlib
+        import importlib
+        import os
+
+        keys = ("SCREENER_USERNAME", "SCREENER_PASSWORD", "SCREENER_SESSION")
+
+        @contextlib.contextmanager
+        def _ctx():
+            saved = {k: os.environ.get(k) for k in keys}
+            try:
+                for k in keys:
+                    os.environ.pop(k, None)
+                for k, v in env.items():
+                    os.environ[k] = v
+                mod = importlib.import_module("screener_sync")
+                importlib.reload(mod)
+                yield mod
+            finally:
+                for k, v in saved.items():
+                    if v is None:
+                        os.environ.pop(k, None)
+                    else:
+                        os.environ[k] = v
+
+        return _ctx()
+
+    def test_no_credentials_exits_nonzero(self):
+        with self._with_env() as mod:
+            with self.assertRaises(SystemExit) as ctx:
+                mod.authenticate()
+            self.assertNotEqual(ctx.exception.code, 0)
+
+    def test_session_mode_needs_no_network(self):
+        with self._with_env(SCREENER_SESSION="dummy-session-value") as mod:
+            opener, mode = mod.authenticate()
+            self.assertEqual(mode, "session")
+            self.assertIsNotNone(opener)
+
+    def test_credentials_take_precedence_over_cookie(self):
+        """If both are set, the non-expiring mode must win."""
+        with self._with_env(
+            SCREENER_USERNAME="u", SCREENER_PASSWORD="p",
+            SCREENER_SESSION="cookie",
+        ) as mod:
+            called = {}
+
+            def fake_login(username, password):
+                called["username"] = username
+                return "OPENER"
+
+            setattr(mod, "login_with_credentials", fake_login)
+            opener, mode = mod.authenticate()
+            self.assertEqual(mode, "credentials")
+            self.assertEqual(called.get("username"), "u")
+
+    def test_password_is_never_printed(self):
+        """A leaked password in an Actions log is a credential disclosure."""
+        for line in self.src.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("#"):
+                continue
+            if "print(" in stripped or "::warning" in stripped:
+                self.assertNotIn(
+                    "password", stripped.lower().replace("screener_password", ""),
+                    f"possible password in log output: {stripped!r}",
+                )
+
+    def test_every_screen_has_an_id(self):
+        import importlib
+        mod = importlib.import_module("screener_sync")
+        importlib.reload(mod)
+        for filename, sid in mod.SCREEN_MAP.items():
+            self.assertRegex(sid, r"^\d+$", f"{filename} has a non-numeric id")
+        # The sync must cover exactly the screens the ingest expects.
+        synced = {Path(f).stem for f in mod.SCREEN_MAP}
+        self.assertEqual(
+            synced, set(EXPECTED_SCREENS),
+            "screener_sync and data_ingest disagree about which screens exist",
+        )
+
+    def test_sync_writes_canonical_lowercase_names(self):
+        """Prevents re-creating the 2026-09-18 duplicate-spelling trap."""
+        import importlib
+        mod = importlib.import_module("screener_sync")
+        importlib.reload(mod)
+        for filename in mod.SCREEN_MAP:
+            self.assertEqual(
+                filename, filename.lower(),
+                f"{filename} is not lowercase — will collide with manual uploads",
+            )
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

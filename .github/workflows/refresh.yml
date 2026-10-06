@@ -57,6 +57,10 @@ jobs:
         if: ${{ !inputs.skip_sync }}
         continue-on-error: true
         env:
+          # Preferred: fully unattended, nothing expires.
+          SCREENER_USERNAME: ${{ secrets.SCREENER_USERNAME }}
+          SCREENER_PASSWORD: ${{ secrets.SCREENER_PASSWORD }}
+          # Fallback: used only if the two above are unset.
           SCREENER_SESSION: ${{ secrets.SCREENER_SESSION }}
         run: python screener_sync.py
 
