@@ -146,13 +146,24 @@ def login_with_credentials(username: str, password: str):
 
 
 def opener_from_session(session: str):
-    """Build an opener that presents a pre-existing sessionid cookie."""
-    opener = build_opener()
-    opener.addheaders = [
-        ("User-Agent", UA),
-        ("Cookie", f"sessionid={session}"),
-    ]
-    return opener
+    """Build an opener carrying a pre-existing sessionid cookie.
+
+    The cookie goes into the CookieJar, NOT into a static Cookie header. A
+    static header overrides the jar, so the csrftoken cookie Django sets when
+    we load the screen page is never sent back — and the export POST is
+    rejected with HTTP 403 every time.
+    """
+    jar = http.cookiejar.CookieJar()
+    jar.set_cookie(http.cookiejar.Cookie(
+        version=0, name="sessionid", value=session,
+        port=None, port_specified=False,
+        domain=".screener.in", domain_specified=True, domain_initial_dot=True,
+        path="/", path_specified=True,
+        secure=True, expires=None, discard=False,
+        comment=None, comment_url=None, rest={}, rfc2109=False,
+    ))
+    return urllib.request.build_opener(
+        urllib.request.HTTPCookieProcessor(jar))
 
 
 def authenticate():
