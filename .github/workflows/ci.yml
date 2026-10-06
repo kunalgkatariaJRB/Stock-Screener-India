@@ -32,6 +32,13 @@ jobs:
       - uses: actions/setup-python@v7.0.0
         with:
           python-version: '3.11'
+          cache: pip
+
+      # refresh.py imports anthropic at module level, and the regression tests
+      # import refresh.py to exercise normalize_ledger. Without this the suite
+      # passes locally (where the dep happens to be installed) and fails on CI.
+      - name: Install dependencies
+        run: pip install -r requirements.txt
 
       - name: Run tests
         run: python tests/test_pipeline.py
