@@ -828,6 +828,11 @@ body::after {
   </div>
 </div>
 
+<!-- STALE DATA WARNING — verdicts are only as good as their date.
+     Without this, a three-month-old verdict rendered identically to a
+     fresh one, which is how this dashboard served July data in October. -->
+<div id="stale-banner" style="display:none;"></div>
+
 <!-- WIRE TICKER -->
 <div class="ticker" id="ticker">
   <div class="ticker-track" id="ticker-track">
@@ -1164,7 +1169,7 @@ async function searchYahoo(query) {
 
 function renderSearchResults(results, queryStr) {
   if (!results.length) {
-    searchResults.innerHTML = `<div class="sr-empty">No NSE/BSE matches for "${queryStr}".</div>`;
+    searchResults.innerHTML = `<div class="sr-empty">No NSE/BSE matches for "${escHtml(queryStr)}".</div>`;
     searchResults.style.display = 'block';
     return;
   }
@@ -2378,8 +2383,8 @@ function renderSectors() {
 function renderEarnings() {
   const eb = document.getElementById('earnings-body');
   const rl = document.getElementById('rumors-list');
-  if (eb) eb.innerHTML = (DATA?.earnings || []).map(e => `<tr><td>${e.date}</td><td>${e.name}</td><td>${e.watch}</td></tr>`).join('');
-  if (rl) rl.innerHTML = (DATA?.whispers || []).map(w => `<li><span>${w.tag}</span><p>${w.text}</p><div>via ${w.src}</div></li>`).join('');
+  if (eb) eb.innerHTML = (DATA?.earnings || []).map(e => `<tr><td>${escHtml(e.date)}</td><td>${escHtml(e.name)}</td><td>${escHtml(e.watch)}</td></tr>`).join('');
+  if (rl) rl.innerHTML = (DATA?.whispers || []).map(w => `<li><span>${escHtml(w.tag)}</span><p>${escHtml(w.text)}</p><div>via ${escHtml(w.src)}</div></li>`).join('');
 }
 
 /* =========================================================
@@ -2396,6 +2401,44 @@ function stamp() {
   if (edEl) edEl.textContent = editionLabel;
   const footEl = document.getElementById('footer-stamp');
   if (footEl) footEl.textContent = `Edition ${editionLabel} · Page refreshed ${s}` + (DATA?.lastUpdated ? ` · Verdicts last regenerated ${new Date(DATA.lastUpdated).toLocaleString('en-IN', opts)} IST` : '');
+  renderStaleBanner();
+}
+
+/* Verdict freshness. The refresh runs weekly, so 8 days is the first
+   missed cycle; 21 days means at least three cycles have failed. These
+   verdicts drive capital allocation — silent staleness is unacceptable. */
+const STALE_WARN_DAYS = 8;
+const STALE_CRIT_DAYS = 21;
+
+function renderStaleBanner() {
+  const el = document.getElementById('stale-banner');
+  if (!el) return;
+
+  if (!DATA || !DATA.lastUpdated) {
+    el.style.display = 'block';
+    el.setAttribute('style', 'display:block;padding:10px 16px;text-align:center;' +
+      'font-size:12px;letter-spacing:0.04em;background:#3a1212;color:#ffb4b4;' +
+      'border-bottom:1px solid #7a2626;');
+    el.textContent = 'Verdict data could not be loaded. Nothing below is current.';
+    return;
+  }
+
+  const ts = new Date(DATA.lastUpdated);
+  const days = (Date.now() - ts.getTime()) / 86400000;
+  if (days < STALE_WARN_DAYS) { el.style.display = 'none'; return; }
+
+  const critical = days >= STALE_CRIT_DAYS;
+  const when = ts.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  el.setAttribute('style', 'display:block;padding:10px 16px;text-align:center;' +
+    'font-size:12px;letter-spacing:0.04em;border-bottom:1px solid ' +
+    (critical ? '#7a2626' : '#7a5a26') + ';background:' +
+    (critical ? '#3a1212' : '#3a2e12') + ';color:' +
+    (critical ? '#ffb4b4' : '#ffe0a3') + ';');
+  el.textContent = (critical ? 'STALE — ' : 'Ageing — ') +
+    `verdicts were last regenerated on ${when}, ${Math.floor(days)} days ago. ` +
+    (critical
+      ? 'The refresh pipeline has missed several cycles. Treat every verdict, price target and exit level below as out of date.'
+      : 'The weekly refresh appears to have been missed. Re-check before acting.');
 }
 
 /* =========================================================

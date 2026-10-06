@@ -1,0 +1,53 @@
+name: CI
+
+# Runs the pipeline regression suite on every push and PR. These tests are
+# static + offline (no API key, no Claude spend) and finish in under a second.
+#
+# Critically, this runs on ubuntu-latest — a CASE-SENSITIVE filesystem. The
+# 2026-09-18 outage was invisible precisely because it only reproduced on
+# Linux, and nothing ever exercised the ingest there before the Sunday run.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Pipeline regression tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - uses: actions/setup-python@v5.3.0
+        with:
+          python-version: '3.11'
+
+      - name: Run tests
+        run: python tests/test_pipeline.py
+
+      - name: Byte-compile all scripts
+        run: python -m compileall -q data_ingest.py refresh.py screener_sync.py extended_universe.py
+
+      - name: Validate workflow YAML
+        run: |
+          python - <<'PY'
+          import sys, pathlib
+          try:
+              import yaml
+          except ImportError:
+              sys.exit(0)   # pyyaml not guaranteed; skip rather than fail
+          for p in pathlib.Path('.github/workflows').glob('*.yml'):
+              yaml.safe_load(p.read_text())
+              print(f"ok {p}")
+          PY
